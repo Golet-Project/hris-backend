@@ -10,7 +10,7 @@ func (m *Migrate) CreateUserTable(ctx context.Context) error {
 	CREATE TABLE IF NOT EXISTS public.user (
 		pk_id			BIGSERIAL NOT NULL,
 		id				CHAR(36) NOT NULL,
-		email			VARCHAR(255) NOT NULL,
+		email			VARCHAR(50) NOT NULL,
 		full_name		VARCHAR(255) NOT NULL,
 		birth_date		DATE NOT NULL,
 		profile_picture	TEXT NOT NULL,

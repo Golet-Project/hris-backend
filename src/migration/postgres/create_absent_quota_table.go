@@ -6,7 +6,7 @@ import (
 )
 
 func (m *Migrate) CreateAbsentQuotaTable(ctx context.Context) error {
-	var sql = `
+		var sql = `
 	CREATE TABLE IF NOT EXISTS absent_quota (
 		pk_id			BIGSERIAL NOT NULL,
 		id				CHAR(36) NOT NULL,

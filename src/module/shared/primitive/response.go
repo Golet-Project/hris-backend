@@ -12,30 +12,23 @@ import (
 type CommonResult struct {
 	code    int    `json:"-"`
 	message string `json:"-"`
+	err     error  `json:"-"`
 }
 
 // SetResponse set the response code, and error if exists
-func (c *CommonResult) SetResponse(code int, err error, message ...string) {
+func (c *CommonResult) SetResponse(code int, responseMessage string, err ...error) {
 	c.code = code
+	c.message = responseMessage
 
-	if code >= 400 && code < 500 { // client error
-		if err != nil {
-			c.message = err.Error()
-		} else {
-			c.message = "client error"
+	if len(err) > 0 {
+		c.err = err[0]
+
+		if code >= 500 { // server error
+			// send to logger
+			log.Println("ERROR", errors.WithStack(err[0]))
 		}
-		return
 	}
 
-	if len(message) > 0 {
-		c.message = message[0]
-	}
-
-	if code >= 500 { // server error
-		// send to logger
-		log.Println("ERROR", errors.WithStack(err))
-		c.message = "internal server error"
-	}
 }
 
 // GetCode return response status code
@@ -48,18 +41,23 @@ func (c CommonResult) GetMessage() string {
 	return c.message
 }
 
+// GetError return error of response
+func (c CommonResult) GetError() error {
+	return c.err
+}
+
 // BaseResponse is a template for
 // how the response data structure
 // should be returned
-type BaseResponse[T interface{}] struct {
-	Message string `json:"message"`
-	Data    *T
+type BaseResponse struct {
+	Message string      `json:"message"`
+	Data    interface{} `json:"data,omitempty"`
 }
 
 // BaseResponseArray is a template for
 // how the response array data structure
 // should be returned
-type BaseResponseArray[T interface{}] struct {
-	Message string
-	Data    []T
+type BaseResponseArray struct {
+	Message string        `json:"message"`
+	Data    []interface{} `json:"data,omitempty"`
 }

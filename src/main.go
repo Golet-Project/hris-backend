@@ -14,13 +14,16 @@ func main() {
 	// parse config
 	cfg := parseConfig()
 
-	// create the http server
-	app := cmd.NewHttpServer(fiber.Config{
-		AppName: cfg.appName,
-	})
-
 	// initialize database
-	pgPool, err := pgxpool.New(context.Background(), cfg.pgUrl)
+	connConfig, err := pgxpool.ParseConfig(cfg.pgUrl)
+	if err != nil {
+		fmt.Println("[x] Failed to connect PostgreSQL")
+		log.Fatal(err)
+	}
+	connConfig.MinConns = 3
+	connConfig.MaxConns = 5
+
+	pgPool, err := pgxpool.NewWithConfig(context.Background(), connConfig)
 	if err != nil {
 		fmt.Println("[x] Failed to connect PostgreSQL")
 		log.Fatal(err)
@@ -33,6 +36,15 @@ func main() {
 	} else {
 		fmt.Println("[v] PostgreSQL connected...")
 	}
+
+	// create the http server
+	app := cmd.NewApp(cmd.AppConfig{
+		DB: pgPool,
+
+		FiberCfg: fiber.Config{
+			AppName: cfg.appName,
+		},
+	})
 
 	// start the app
 	var errChan = make(chan error, 1)

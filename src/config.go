@@ -1,6 +1,12 @@
 package main
 
-import "os"
+import (
+	"fmt"
+	"log"
+	"os"
+
+	"github.com/joho/godotenv"
+)
 
 type config struct {
 	httpPort string
@@ -26,10 +32,15 @@ func defaultConfig() config {
 // parseConfig read from the os env and then overwrite the
 // existing default config
 func parseConfig() config {
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
 	cfg := defaultConfig()
 
 	if val, ok := os.LookupEnv("HTTP_PORT"); ok {
-		cfg.httpPort = val
+		cfg.httpPort = fmt.Sprintf(":%s", val)
 	}
 
 	if val, ok := os.LookupEnv("PG_URL"); ok {
@@ -42,6 +53,30 @@ func parseConfig() config {
 
 	if val, ok := os.LookupEnv("ACCESS_TOKEN_SECRET"); ok {
 		cfg.accessTokenSecret = val
+	}
+
+	if val, ok := os.LookupEnv("OAUTH_CLIENT_ID"); ok {
+		cfg.accessTokenSecret = val
+	} else {
+		log.Fatal("OAUTH_CLIENT_ID is not set")
+	}
+
+	if val, ok := os.LookupEnv("OAUTH_CLIENT_SECRET"); ok {
+		cfg.accessTokenSecret = val
+	} else {
+		log.Fatal("OAUTH_CLIENT_SECRET is not set")
+	}
+
+	if val, ok := os.LookupEnv("OAUTH_REDIRECT_URL"); ok {
+		cfg.accessTokenSecret = val
+	} else {
+		log.Fatal("OAUTH_REDIRECT_URL is not set")
+	}
+
+	if val, ok := os.LookupEnv("OAUTH_STATE"); ok {
+		cfg.accessTokenSecret = val
+	} else {
+		log.Fatal("OAUTH_STATE is not set")
 	}
 
 	return cfg
