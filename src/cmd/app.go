@@ -3,7 +3,7 @@ package cmd
 import (
 	auth "hris/module/auth"
 	authPresentation "hris/module/auth/presentation/rest"
-	authRepo "hris/module/auth/repo"
+	authRepo "hris/module/auth/repo/auth"
 	authService "hris/module/auth/service"
 	"reflect"
 
@@ -33,7 +33,7 @@ func NewApp(config AppConfig) *fiber.App {
 	app.Use(logger.New())
 	//===== AUTH =====
 	// initialize auth repo
-	authRepo := &authRepo.AuthRepo{
+	authRepo := &authRepo.Repository{
 		DB: config.DB,
 	}
 
@@ -52,6 +52,10 @@ func NewApp(config AppConfig) *fiber.App {
 
 	// intialize mobile route
 	mobile := mobile.Dependency{}
+
+	app.Get("/", func(c *fiber.Ctx) error {
+		return c.JSON("oke")
+	})
 
 	auth.Route(app)
 	mobile.Route(app.Group("/m"))

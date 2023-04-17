@@ -58,7 +58,7 @@ type LoginOut struct {
 }
 
 // Handle login using email and password
-func (s *AuthService) Login(ctx context.Context, reqBody LoginIn) (out LoginOut) {
+func (s *AuthService) BasicAuthLogin(ctx context.Context, reqBody LoginIn) (out LoginOut) {
 	// validate the request body
 	if err := ValidateLoginBody(reqBody); err != nil {
 		out.SetResponse(http.StatusBadRequest, "request validation failed", err)

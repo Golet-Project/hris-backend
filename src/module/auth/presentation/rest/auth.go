@@ -9,7 +9,7 @@ import (
 )
 
 // Handle login request for mobile and web
-func (p AuthPresenter) Login(c *fiber.Ctx) error {
+func (p AuthPresenter) BasicAuthLogin(c *fiber.Ctx) error {
 	var res primitive.BaseResponse
 
 	var body service.LoginIn
@@ -19,7 +19,7 @@ func (p AuthPresenter) Login(c *fiber.Ctx) error {
 		return c.JSON(res)
 	}
 
-	var loginOut = p.AuthService.Login(c.Context(), body)
+	var loginOut = p.AuthService.BasicAuthLogin(c.Context(), body)
 
 	res.Message = loginOut.GetMessage()
 
@@ -34,7 +34,7 @@ func (p AuthPresenter) Login(c *fiber.Ctx) error {
 }
 
 // Handle incomin request for auth callback when using one-tap-sign
-func (p AuthPresenter) AuthCallback(c *fiber.Ctx) error {
+func (p AuthPresenter) OneTapCallback(c *fiber.Ctx) error {
 	var response primitive.BaseResponse
 	var in service.AuthCallbackIn
 
@@ -48,7 +48,7 @@ func (p AuthPresenter) AuthCallback(c *fiber.Ctx) error {
 	}
 
 	// call the service
-	out := p.AuthService.AuthCallback(c.Context(), in)
+	out := p.AuthService.OneTapCallback(c.Context(), in)
 	response.Message = out.GetMessage()
 
 	if out.GetCode() >= 200 && out.GetCode() < 400 {

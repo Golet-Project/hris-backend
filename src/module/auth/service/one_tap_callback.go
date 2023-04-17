@@ -25,7 +25,7 @@ type AuthCallbackOut struct {
 }
 
 // Handle request callback if login using google one-tap-sign
-func (s *AuthService) AuthCallback(ctx context.Context, in AuthCallbackIn) (out AuthCallbackOut) {
+func (s *AuthService) OneTapCallback(ctx context.Context, in AuthCallbackIn) (out AuthCallbackOut) {
 	if !csrfTokenValid(in.CookieToken, in.GCSRFToken) {
 		out.SetResponse(http.StatusBadRequest, "Invalid CSRF token")
 		return

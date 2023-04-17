@@ -1,7 +1,7 @@
 package service
 
 import (
-	"hris/module/auth/repo"
+	"hris/module/auth/repo/auth"
 	"os"
 
 	"golang.org/x/oauth2"
@@ -9,14 +9,14 @@ import (
 )
 
 type AuthService struct {
-	AuthRepo *repo.AuthRepo
+	AuthRepo *auth.Repository
 
 	oauth2Cfg *oauth2.Config
 }
 
 var oauthState = os.Getenv("OAUTH_STATE")
 
-func NewAuthService(authRepo *repo.AuthRepo) *AuthService {
+func NewAuthService(authRepo *auth.Repository) *AuthService {
 	return &AuthService{
 		AuthRepo: authRepo,
 
