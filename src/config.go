@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 
 	"github.com/joho/godotenv"
 )
@@ -14,7 +15,8 @@ type config struct {
 
 	appName string
 
-	accessTokenSecret string
+	accessTokenExpireTime int64
+	accessTokenSecret     string
 }
 
 // defaultConfig create the app config with the its default value
@@ -25,7 +27,8 @@ func defaultConfig() config {
 
 		appName: "HRIS v1.0.0",
 
-		accessTokenSecret: "supersecrettoken",
+		accessTokenExpireTime: 86400,
+		accessTokenSecret:     "supersecrettoken",
 	}
 }
 
@@ -51,8 +54,19 @@ func parseConfig() config {
 		cfg.appName = val
 	}
 
+	if val, ok := os.LookupEnv("ACCESS_TOKEN_EXPIRE_TIME"); ok {
+		cfg.accessTokenExpireTime, err = strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			log.Fatal("invalid ACCESS_TOKEN_EXPIRE_TIME value")
+		}
+	} else {
+		log.Fatal("ACCESS_TOKEN_EXPIRE_TIME is not set")
+	}
+
 	if val, ok := os.LookupEnv("ACCESS_TOKEN_SECRET"); ok {
 		cfg.accessTokenSecret = val
+	} else {
+		log.Fatal("ACCESS_TOKEN_SECRET is not set")
 	}
 
 	if val, ok := os.LookupEnv("OAUTH_CLIENT_ID"); ok {

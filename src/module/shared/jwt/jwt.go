@@ -9,7 +9,13 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
-type customClaims struct {
+// AccessTokenMalformed occurs when the given access token is not valid JWT token
+var ErrAccessTokenMalformed = fmt.Errorf("inavlid access token")
+
+// AccessTokenExpired occurs when the given access token is expired
+var ErrAccessTokenExpired = fmt.Errorf("inactive or expired token")
+
+type CustomClaims struct {
 	UserUID string `json:"user_uid"`
 	jwt.RegisteredClaims
 }
@@ -21,7 +27,7 @@ func GenerateAccessToken(userUID string) string {
 	now := time.Now()
 	ttl := time.Duration(ACCESS_TOKEN_EXPIRE_TIME) * time.Second
 
-	claims := customClaims{
+	claims := CustomClaims{
 		UserUID: userUID,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: &jwt.NumericDate{
@@ -38,25 +44,26 @@ func GenerateAccessToken(userUID string) string {
 	return ss
 }
 
-func DecodeAccessToken(accessToken string) (customClaims, error) {
+// DecodeAccessToken decode the given token string into the token claims.
+func DecodeAccessToken(accessToken string) (CustomClaims, error) {
 	var ACCESS_TOKEN_SECRET = os.Getenv("ACCESS_TOKEN_SECRET")
-	token, err := jwt.ParseWithClaims(accessToken, &customClaims{}, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(accessToken, &CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(ACCESS_TOKEN_SECRET), nil
 	})
 
 	if !token.Valid {
 		if ve, ok := err.(*jwt.ValidationError); ok {
 			if ve.Errors&jwt.ValidationErrorMalformed != 0 {
-				return customClaims{}, fmt.Errorf("token tidak valid")
+				return CustomClaims{}, ErrAccessTokenMalformed
 			} else if ve.Errors&(jwt.ValidationErrorExpired|jwt.ValidationErrorNotValidYet) != 0 {
-				return customClaims{}, fmt.Errorf("inactive or expired token")
+				return CustomClaims{}, ErrAccessTokenExpired
 			} else {
-				return customClaims{}, fmt.Errorf("error when decoding token")
+				return CustomClaims{}, fmt.Errorf("error when decoding token")
 			}
 		}
 	}
 
-	if claims, ok := token.Claims.(*customClaims); ok {
+	if claims, ok := token.Claims.(*CustomClaims); ok {
 		// manually verify issuer
 		// if !claims.VerifyIssuer(issuer, true) {
 		// 	return nil, fmt.Errorf("invalid token issuer")
@@ -64,5 +71,5 @@ func DecodeAccessToken(accessToken string) (customClaims, error) {
 
 		return *claims, nil
 	}
-	return customClaims{}, fmt.Errorf("error when parsing into claims")
+	return CustomClaims{}, fmt.Errorf("error when parsing into claims")
 }

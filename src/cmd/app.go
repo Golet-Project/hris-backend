@@ -2,13 +2,11 @@ package cmd
 
 import (
 	auth "hris/module/auth"
-	authPresentation "hris/module/auth/presentation/rest"
-	authRepo "hris/module/auth/repo/auth"
-	authService "hris/module/auth/service"
 	"reflect"
 
+	employeeWeb "hris/module/web/employee"
+
 	"hris/module/mobile"
-	"hris/module/web"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -32,23 +30,15 @@ func NewApp(config AppConfig) *fiber.App {
 
 	app.Use(logger.New())
 	//===== AUTH =====
-	// initialize auth repo
-	authRepo := &authRepo.Repository{
+	auth := auth.InitAuth(&auth.Dependency{
 		DB: config.DB,
-	}
+	})
 
-	// initialize auth service
-	authService := authService.NewAuthService(authRepo)
-
-	// initialize auth route
-	auth := auth.Dependency{
-		AuthPresenter: &authPresentation.AuthPresenter{
-			AuthService: authService,
-		},
-	}
-
-	// initialize web route
-	web := web.Dependency{}
+	// initialize web's modules
+	//===== EMPLOYEE =====
+	employeeWeb := employeeWeb.InitEmployee(&employeeWeb.Dependency{
+		DB: config.DB,
+	})
 
 	// intialize mobile route
 	mobile := mobile.Dependency{}
@@ -59,7 +49,7 @@ func NewApp(config AppConfig) *fiber.App {
 
 	auth.Route(app)
 	mobile.Route(app.Group("/m"))
-	web.Route(app.Group("/w"))
+	employeeWeb.Route(app.Group("/w"))
 
 	return app
 }
