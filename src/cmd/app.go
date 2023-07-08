@@ -9,6 +9,7 @@ import (
 	"hris/module/mobile"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -42,6 +43,12 @@ func NewApp(config AppConfig) *fiber.App {
 
 	// intialize mobile route
 	mobile := mobile.Dependency{}
+
+	app.Use(cors.New(cors.Config{
+		// AllowOrigins: "*",
+		// AllowOrigins: "http://localhost:3000,https://google.com",
+		// AllowHeaders: "Origin, Content-Type, Accept",
+	}))
 
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.JSON("oke")
