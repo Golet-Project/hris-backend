@@ -5,8 +5,6 @@ import (
 	"log"
 	"os"
 	"strconv"
-
-	"github.com/joho/godotenv"
 )
 
 type config struct {
@@ -35,12 +33,8 @@ func defaultConfig() config {
 // parseConfig read from the os env and then overwrite the
 // existing default config
 func parseConfig() config {
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
 	cfg := defaultConfig()
+	var err error
 
 	if val, ok := os.LookupEnv("HTTP_PORT"); ok {
 		cfg.httpPort = fmt.Sprintf(":%s", val)
@@ -92,6 +86,11 @@ func parseConfig() config {
 	} else {
 		log.Fatal("OAUTH_STATE is not set")
 	}
+
+	// TODO: validate redis env
+	// TODO: validate smtp env
+	// TODO: validate web base url
+	// TODO: validate internal web base url
 
 	return cfg
 }

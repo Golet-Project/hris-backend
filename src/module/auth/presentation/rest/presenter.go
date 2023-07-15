@@ -5,5 +5,7 @@ import (
 )
 
 type AuthPresenter struct {
-	AuthService *service.AuthService
+	InternalAuthService *service.InternalAuthService
+	WebAuthService *service.WebAuthService
+	MobileAuthService *service.MobileAuthService
 }

@@ -1,4 +1,10 @@
+# build
 tmp
+
+# credentials
 .env
-__debug_bin
 *credential.json
+*docker-compose.yaml
+
+# debug
+__debug_bin

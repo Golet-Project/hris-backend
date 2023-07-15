@@ -12,7 +12,18 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func ValidateLoginBody(body LoginIn) *primitive.RequestValidationError {
+type InternalBasicAuthLoginIn struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type InternalBasicAuthLoginOut struct {
+	primitive.CommonResult
+
+	AccessToken string `json:"access_token"`
+}
+
+func ValidateInternalBasicAuthLoginBody(body InternalBasicAuthLoginIn) *primitive.RequestValidationError {
 	var allIssues []primitive.RequestValidationIssue
 
 	// validate email
@@ -46,27 +57,16 @@ func ValidateLoginBody(body LoginIn) *primitive.RequestValidationError {
 	return nil
 }
 
-type LoginIn struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
-type LoginOut struct {
-	primitive.CommonResult
-
-	AccessToken string `json:"access_token"`
-}
-
 // Handle login using email and password
-func (s *AuthService) BasicAuthLogin(ctx context.Context, reqBody LoginIn) (out LoginOut) {
+func (s *InternalAuthService) BasicAuthLogin(ctx context.Context, reqBody InternalBasicAuthLoginIn) (out InternalBasicAuthLoginOut) {
 	// validate the request body
-	if err := ValidateLoginBody(reqBody); err != nil {
+	if err := ValidateInternalBasicAuthLoginBody(reqBody); err != nil {
 		out.SetResponse(http.StatusBadRequest, "request validation failed", err)
 		return
 	}
 
 	// get the login data
-	loginData, err := s.AuthRepo.GetLoginCredential(ctx, reqBody.Email)
+	loginData, err := s.AuthRepo.InternalGetLoginCredential(ctx, reqBody.Email)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			out.SetResponse(http.StatusNotFound, "user not found")
@@ -78,7 +78,7 @@ func (s *AuthService) BasicAuthLogin(ctx context.Context, reqBody LoginIn) (out 
 	}
 
 	// compare the password
-	if err := bcrypt.CompareHashAndPassword([]byte(loginData.Password), []byte(reqBody.Password)); err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(loginData.Password.String), []byte(reqBody.Password)); err != nil {
 		out.SetResponse(http.StatusUnauthorized, "invalid password")
 		return
 	}

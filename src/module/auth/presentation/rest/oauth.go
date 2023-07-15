@@ -11,32 +11,52 @@ import (
 func (p AuthPresenter) OAuthLogin(c *fiber.Ctx) error {
 	var response primitive.BaseResponse
 
-	// call the service
-	serviceOut := p.AuthService.OAuthLogin(c.Context())
-	response.Message = serviceOut.GetMessage()
+	appId := c.Get("X-App-ID")
 
-	if serviceOut.GetCode() >= 200 && serviceOut.GetCode() < 400 {
-		response.Data = serviceOut
+	switch appId {
+	case primitive.InternalAppID:
+		// call the service
+		serviceOut := p.InternalAuthService.OAuthLogin(c.Context())
+		response.Message = serviceOut.GetMessage()
+
+		if serviceOut.GetCode() >= 200 && serviceOut.GetCode() < 400 {
+			response.Data = serviceOut
+		}
+
+		c.Status(serviceOut.GetCode())
+		return c.JSON(response)
+
+	default:
+		response.Message = "invalid app id"
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(response)
 	}
-
-	c.Status(serviceOut.GetCode())
-	return c.JSON(response)
 }
 
 func (p AuthPresenter) OAuthCallback(c *fiber.Ctx) error {
 	var response primitive.BaseResponse
 
-	var query service.OAuthCallbackIn
-	c.QueryParser(&query)
+	appId := c.Get("X-App-ID")
 
-	// call the service
-	serviceOut := p.AuthService.OAuthCallback(c.Context(), query)
-	response.Message = serviceOut.GetMessage()
+	switch appId {
+	case primitive.InternalAppID:
+		var query service.OAuthCallbackIn
+		c.QueryParser(&query)
 
-	if serviceOut.GetCode() >= 200 && serviceOut.GetCode() < 400 {
-		response.Data = serviceOut
+		// call the service
+		serviceOut := p.InternalAuthService.OAuthCallback(c.Context(), query)
+		response.Message = serviceOut.GetMessage()
+
+		if serviceOut.GetCode() >= 200 && serviceOut.GetCode() < 400 {
+			response.Data = serviceOut
+		}
+
+		c.Status(serviceOut.GetCode())
+		return c.JSON(response)
+
+	default:
+		response.Message = "invalid app id"
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(response)
 	}
-
-	c.Status(serviceOut.GetCode())
-	return c.JSON(response)
 }

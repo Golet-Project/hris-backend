@@ -4,7 +4,6 @@ import (
 	"context"
 	"hris/module/shared/jwt"
 	"hris/module/shared/primitive"
-	"log"
 	"net/http"
 	"time"
 
@@ -25,14 +24,13 @@ type OAuthCallbackOut struct {
 }
 
 // Handle callback when login usig google OAuth
-func (s *AuthService) OAuthCallback(ctx context.Context, query OAuthCallbackIn) (out OAuthCallbackOut) {
+func (s *InternalAuthService) OAuthCallback(ctx context.Context, query OAuthCallbackIn) (out OAuthCallbackOut) {
 	httpClient := &http.Client{
 		Timeout: 10 * time.Second,
 	}
 	ctx = context.WithValue(ctx, oauth2.HTTPClient, httpClient)
 
 	token, err := s.oauth2Cfg.Exchange(ctx, query.Code)
-	log.Println(query.Code)
 	if err != nil {
 		out.SetResponse(http.StatusUnauthorized, "failed to exchange token")
 		return
@@ -53,7 +51,7 @@ func (s *AuthService) OAuthCallback(ctx context.Context, query OAuthCallbackIn) 
 	}
 
 	// get the user data
-	user, err := s.AuthRepo.GetLoginCredential(ctx, userInfo.Email)
+	user, err := s.AuthRepo.InternalGetLoginCredential(ctx, userInfo.Email)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			out.SetResponse(http.StatusUnauthorized, "user not registered")

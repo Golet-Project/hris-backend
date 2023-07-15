@@ -50,6 +50,7 @@ func (c CommonResult) GetError() error {
 // how the response data structure
 // should be returned
 type BaseResponse struct {
+	Error   interface{} `json:"error,omitempty"`
 	Message string      `json:"message"`
 	Data    interface{} `json:"data,omitempty"`
 }

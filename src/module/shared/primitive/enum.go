@@ -8,3 +8,9 @@ const (
 	Update
 	Delete
 )
+
+const (
+	InternalAppID = "internal"
+	WebAppID      = "web"
+	MobileAppID   = "mobile"
+)

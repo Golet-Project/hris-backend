@@ -24,14 +24,14 @@ type RequestValidationIssue struct {
 	//
 	// This should be aligned with the documentation on how the consumers (or users)
 	// handle their validation errors from us.
-	Code RequestValidationCode
+	Code RequestValidationCode `json:"code"`
 	// Field specifies the field that the error happened. If the field is on a nested object,
 	// you can separate it using a dot. For example:
 	//
 	// 		{ "customer": { "name": "string" } }
 	// becomes
 	// 		customer.name
-	Field string
+	Field string `json:"field"`
 	// Message must contain helpful message that helps the user create proper request.
 	// This should also be simple, and should not repeat what's on the code and field value.
 	// For example: "maximum of 50 characters", "must be numeric", "must not empty".
