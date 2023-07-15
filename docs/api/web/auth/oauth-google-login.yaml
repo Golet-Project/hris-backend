@@ -1,0 +1,27 @@
+post:
+  tags: [Auth]
+  summary: Get the google OAuth redirect URL
+  operationId: postOAuthGoogleLogin
+  responses:
+    "307":
+      description: Temporary redirect into the given URL
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              data:
+                type: object
+                properties:
+                  url:
+                    type: string
+                    format: uri
+                    description: Google OAuth redirect URL
+                    example: https://accounts.google.com/o/oauth2/auth?client_id=
+                required:
+                  - url
+            required:
+              - message
+              - data

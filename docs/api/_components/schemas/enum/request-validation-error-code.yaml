@@ -1,0 +1,7 @@
+type: string
+enum:
+  - field_required
+  - too_short
+  - too_long
+  - prohibited_value
+  - invalid_value

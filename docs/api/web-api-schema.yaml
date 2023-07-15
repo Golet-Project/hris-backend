@@ -1,0 +1,39 @@
+openapi: 3.0.3
+info:
+  title: HROOST - OpenAPI 3.0
+  description: |-
+    HROOST **Web** API Documentation
+  contact:
+    email: apiteam@swagger.io
+  version: 1.0.0
+servers:
+  - url: https://example.com
+tags:
+  - name: Auth
+    description: Everything about authentication
+paths:
+  /auth/login:
+    $ref: ./web/auth/auth-login.yaml
+  /auth/forgot-password:
+    $ref: ./web/auth/auth-forgot-password.yaml
+  /auth/password-recovery/check:
+    $ref: ./web/auth/auth-password-recovery-check.yaml
+  /auth/password:
+    $ref: ./web/auth/auth-password.yaml
+  /oauth/google/login:
+    $ref: ./web/auth/oauth-google-login.yaml
+  /oauth/google/callback:
+    $ref: ./web/auth/oauth-google-callback.yaml
+
+components:
+  schemas:
+    AppID:
+      $ref: "./_components/schemas/enum/app-id.yaml"
+    RequestValidationErrorCode:
+      $ref: "./_components/schemas/enum/request-validation-error-code.yaml"
+  responses:
+    ResponseInternalServerError:
+      $ref: "./_components/responses/internal-server-error.yaml"
+  securitySchemes:
+    ApiKeyAuth:
+      $ref: "./_components/securities/api-key-auth.yaml"

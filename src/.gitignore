@@ -8,3 +8,6 @@ tmp
 
 # debug
 __debug_bin
+
+# deploy
+*.fly.toml

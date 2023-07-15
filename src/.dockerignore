@@ -1,0 +1,16 @@
+# git
+.git
+.gitignore
+
+# env
+.env.example
+.env
+
+# air
+.air.conf
+
+# docker compose
+*docker-compose.yaml
+
+# deploy
+*.fly.toml

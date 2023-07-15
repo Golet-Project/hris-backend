@@ -1,0 +1,7 @@
+AppID:
+  type: string
+  enum:
+    - web
+    - internal
+    - mobile
+
