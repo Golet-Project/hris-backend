@@ -9,8 +9,23 @@ const (
 	Delete
 )
 
+type AppID string
+
 const (
-	InternalAppID = "internal"
-	WebAppID      = "web"
-	MobileAppID   = "mobile"
+	InternalAppID AppID = "internal"
+	WebAppID      AppID = "web"
+	MobileAppID   AppID = "mobile"
 )
+
+func (a AppID) String() string {
+	switch a {
+	case InternalAppID:
+		return "internal"
+	case WebAppID:
+		return "web"
+	case MobileAppID:
+		return "mobile"
+	default:
+		return "UNSPECIFIED"
+	}
+}

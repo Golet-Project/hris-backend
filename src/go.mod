@@ -8,6 +8,7 @@ require (
 	github.com/jackc/pgx/v5 v5.3.1
 	github.com/joho/godotenv v1.5.1
 	github.com/maxbrunsfeld/counterfeiter/v6 v6.6.1
+	github.com/mileusna/useragent v1.3.3
 	github.com/pkg/errors v0.9.1
 	github.com/redis/go-redis/v9 v9.0.5
 	golang.org/x/crypto v0.7.0

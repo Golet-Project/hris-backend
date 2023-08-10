@@ -10,7 +10,7 @@ import (
 func (a *AuthPresenter) ForgotPassword(c *fiber.Ctx) error {
 	var res primitive.BaseResponse
 
-	appId := c.Get("X-App-ID")
+	appId := c.Locals("AppID").(primitive.AppID)
 
 	switch appId {
 	case primitive.InternalAppID:

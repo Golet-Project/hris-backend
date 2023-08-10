@@ -16,7 +16,7 @@ import (
 
 type InternalForgotPasswordIn struct {
 	Email string `json:"email"`
-	AppID string
+	AppID primitive.AppID
 }
 
 type InternalForgotPasswordOut struct {
@@ -110,7 +110,7 @@ func (s *InternalAuthService) ForgotPassword(ctx context.Context, in InternalFor
 	err = s.AuthRepo.RedisSetPasswordRecoveryToken(ctx, admin.UserUID, token)
 
 	// send password recovery link via email
-	emailRecoveryLink := os.Getenv("INTERNAL_WEB_BASE_URL") + "/password-recovery?token=" + token + "&uid=" + admin.UserUID + "&cid=" + in.AppID
+	emailRecoveryLink := os.Getenv("INTERNAL_WEB_BASE_URL") + "/password-recovery?token=" + token + "&uid=" + admin.UserUID + "&cid=" + in.AppID.String()
 
 	mailBuilder := mailer.NewMailer()
 	mailBuilder.Subject("Email Recovery")

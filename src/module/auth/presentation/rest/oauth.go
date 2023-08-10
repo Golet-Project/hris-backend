@@ -11,7 +11,7 @@ import (
 func (p AuthPresenter) OAuthLogin(c *fiber.Ctx) error {
 	var response primitive.BaseResponse
 
-	appId := c.Get("X-App-ID")
+	appId := c.Locals("AppID").(primitive.AppID)
 
 	switch appId {
 	case primitive.InternalAppID:
@@ -39,7 +39,7 @@ func (p AuthPresenter) OAuthCallback(c *fiber.Ctx) error {
 	appId := c.Get("X-App-ID")
 
 	switch appId {
-	case primitive.InternalAppID:
+	case primitive.InternalAppID.String():
 		var query service.OAuthCallbackIn
 		c.QueryParser(&query)
 
