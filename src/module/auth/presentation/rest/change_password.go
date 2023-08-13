@@ -14,6 +14,8 @@ func (a *AuthPresenter) InternalChangePassword(c *fiber.Ctx) error {
 	token := c.Get("X-Api-Key")
 
 	switch appId {
+	case primitive.WebAppID:
+		fallthrough
 	case primitive.InternalAppID:
 		var body service.InternalChangePasswordIn
 		if err := c.BodyParser(&body); err != nil {
