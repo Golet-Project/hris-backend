@@ -14,7 +14,7 @@ func (a *AuthPresenter) InternalPasswordRecoveryCheck(c *fiber.Ctx) error {
 	token := c.Get("X-Api-Key")
 
 	switch appId {
-	case primitive.WebAppID:
+	case primitive.TenantAppID:
 		fallthrough
 	case primitive.InternalAppID:
 		// call the service

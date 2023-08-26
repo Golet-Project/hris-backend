@@ -51,7 +51,7 @@ func ValidateInternalForgotPasswordPayload(body InternalForgotPasswordIn) *primi
 			Message: "x-app-id header is required",
 		})
 	} else {
-		if body.AppID != primitive.InternalAppID && body.AppID != primitive.MobileAppID && body.AppID != primitive.WebAppID {
+		if body.AppID != primitive.InternalAppID && body.AppID != primitive.MobileAppID && body.AppID != primitive.TenantAppID {
 			allIssues = append(allIssues, primitive.RequestValidationIssue{
 				Code:    primitive.RequestValidationCodeProhibitedValue,
 				Field:   "x-app-id",

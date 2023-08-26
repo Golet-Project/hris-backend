@@ -5,6 +5,7 @@ import (
 	"hris/module/employee"
 	"hris/module/region"
 	"hris/module/shared/primitive"
+	"hris/module/tenant"
 	"reflect"
 
 	"github.com/gofiber/fiber/v2"
@@ -48,6 +49,11 @@ func NewApp(config AppConfig) *fiber.App {
 		DB: config.DB,
 	})
 
+	//=== Tenant ===
+	tenant := tenant.InitTenant(&tenant.Dependency{
+		DB: config.DB,
+	})
+
 	app.Use(cors.New(cors.Config{
 		// AllowOrigins: "*",
 		// AllowOrigins: "http://localhost:3000,https://google.com",
@@ -85,8 +91,8 @@ func NewApp(config AppConfig) *fiber.App {
 			case primitive.InternalAppID.String():
 				c.Locals("AppID", primitive.InternalAppID)
 				return c.Next()
-			case primitive.WebAppID.String():
-				c.Locals("AppID", primitive.WebAppID)
+			case primitive.TenantAppID.String():
+				c.Locals("AppID", primitive.TenantAppID)
 				return c.Next()
 
 			default:
@@ -120,6 +126,7 @@ func NewApp(config AppConfig) *fiber.App {
 	auth.Route(app)
 	employee.Route(app)
 	region.Route(app)
+	tenant.Route(app)
 
 	return app
 }

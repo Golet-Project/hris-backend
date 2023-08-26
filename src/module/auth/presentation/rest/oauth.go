@@ -14,7 +14,7 @@ func (p AuthPresenter) OAuthLogin(c *fiber.Ctx) error {
 	appId := c.Locals("AppID").(primitive.AppID)
 
 	switch appId {
-	case primitive.WebAppID:
+	case primitive.TenantAppID:
 		fallthrough
 	case primitive.InternalAppID:
 		// call the service
