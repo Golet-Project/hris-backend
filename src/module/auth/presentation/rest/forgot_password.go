@@ -13,6 +13,8 @@ func (a *AuthPresenter) ForgotPassword(c *fiber.Ctx) error {
 	appId := c.Locals("AppID").(primitive.AppID)
 
 	switch appId {
+	case primitive.WebAppID:
+		fallthrough
 	case primitive.InternalAppID:
 		var body service.InternalForgotPasswordIn
 		if err := c.BodyParser(&body); err != nil {

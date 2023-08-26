@@ -25,12 +25,33 @@ paths:
   /oauth/google/callback:
     $ref: ./internal/auth/oauth-google-callback.yaml
 
+  # province
+  /provinces:
+    $ref: ./internal/region/province.yaml
+
 components:
   schemas:
     AppID:
       $ref: "./_components/schemas/enum/app-id.yaml"
     RequestValidationErrorCode:
       $ref: "./_components/schemas/enum/request-validation-error-code.yaml"
+  parameters:
+    Header-X-App-ID:
+      in: header
+      name: X-App-ID
+      required: true
+      schema:
+        type: string
+        enum:
+          - internal
+        default: web
+    Header-User-Agent:
+      in: header
+      name: User-Agent
+      required: true
+      schema:
+        type: string
+        example: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
   responses:
     ResponseInternalServerError:
       $ref: "./_components/responses/internal-server-error.yaml"

@@ -7,11 +7,12 @@ info:
     email: apiteam@swagger.io
   version: 1.0.0
 servers:
-  - url: https://example.com
+  - url: http://localhost:3001
 tags:
   - name: Auth
     description: Everything about authentication
 paths:
+  # auth
   /auth/login:
     $ref: ./web/auth/auth-login.yaml
   /auth/forgot-password:
@@ -25,15 +26,38 @@ paths:
   /oauth/google/callback:
     $ref: ./web/auth/oauth-google-callback.yaml
 
+  # province
+  /provinces:
+    $ref: ./web/region/province.yaml
+
 components:
   schemas:
     AppID:
       $ref: "./_components/schemas/enum/app-id.yaml"
     RequestValidationErrorCode:
       $ref: "./_components/schemas/enum/request-validation-error-code.yaml"
+  parameters:
+    Header-X-App-ID:
+      in: header
+      name: X-App-ID
+      required: true
+      schema:
+        type: string
+        enum:
+          - web
+        default: web
+    Header-User-Agent:
+      in: header
+      name: User-Agent
+      required: true
+      schema:
+        type: string
+        example: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
   responses:
     ResponseInternalServerError:
       $ref: "./_components/responses/internal-server-error.yaml"
   securitySchemes:
     ApiKeyAuth:
       $ref: "./_components/securities/api-key-auth.yaml"
+    BearerAuth:
+      $ref: "./_components/securities/bearer-auth.yaml"
