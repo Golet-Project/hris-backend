@@ -3,6 +3,7 @@ package main
 import (
 	auth "hris/module/auth"
 	"hris/module/employee"
+	"hris/module/region"
 	"hris/module/shared/primitive"
 	"reflect"
 
@@ -39,6 +40,11 @@ func NewApp(config AppConfig) *fiber.App {
 
 	//=== EMPLOYEE ===
 	employee := employee.InitEmployee(&employee.Dependency{
+		DB: config.DB,
+	})
+
+	//=== Region ===
+	region := region.InitRegion(&region.Dependency{
 		DB: config.DB,
 	})
 
@@ -113,6 +119,7 @@ func NewApp(config AppConfig) *fiber.App {
 
 	auth.Route(app)
 	employee.Route(app)
+	region.Route(app)
 
 	return app
 }

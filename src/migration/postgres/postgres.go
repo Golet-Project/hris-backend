@@ -75,5 +75,25 @@ func (m *Migrate) RunMigration(ctx context.Context) error {
 	// 	return err
 	// }
 
+	if err := m.SeedWilayah(ctx); err != nil {
+		return err
+	}
+
+	if err := m.CreateTableAndSeedProvince(ctx); err != nil {
+		return err
+	}
+
+	if err := m.CreateTableAndSeedRegency(ctx); err != nil {
+		return err
+	}
+
+	if err := m.CreateTableAndSeedDistrict(ctx); err != nil {
+		return err
+	}
+
+	if err := m.CreateTableAndSeedVillage(ctx); err != nil {
+		return err
+	}
+
 	return nil
 }

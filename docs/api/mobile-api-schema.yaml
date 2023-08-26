@@ -7,7 +7,7 @@ info:
     email: apiteam@swagger.io
   version: 1.0.0
 servers:
-  - url: https://example.com
+  - url: http://localhost:3001
 tags:
   - name: Auth
     description: Everything about authentication
@@ -17,15 +17,30 @@ paths:
   /auth/forgot-password:
     $ref: ./mobile/auth/auth-forgot-password.yaml
 
+  # Region
+  /provinces:
+    $ref: ./mobile/region/province.yaml
+
 components:
   schemas:
     AppID:
       $ref: "./_components/schemas/enum/app-id.yaml"
     RequestValidationErrorCode:
       $ref: "./_components/schemas/enum/request-validation-error-code.yaml"
+  parameters:
+    Header-User-Agent:
+      in: header
+      name: User-Agent
+      required: true
+      schema:
+        type: string
+        default: Android 13 (33)/Xiaomi M2101K7BNY/User 0.8.0 (80)/in_ID
+        example: Android 13 (33)/Xiaomi M2101K7BNY/User 0.8.0 (80)/in_ID
   responses:
     ResponseInternalServerError:
       $ref: "./_components/responses/internal-server-error.yaml"
   securitySchemes:
     ApiKeyAuth:
       $ref: "./_components/securities/api-key-auth.yaml"
+    BearerAuth:
+      $ref: "./_components/securities/bearer-auth.yaml"
