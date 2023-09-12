@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"hris/module/shared/primitive"
+	"hris/module/tenant/repo/queue"
 	"hris/module/tenant/repo/tenant"
 	"net/http"
 
@@ -106,8 +107,9 @@ func (s *Internal_TenantService) CreateTenant(ctx context.Context, in Internal_C
 	}
 
 	// send to MQ and run migration
-	// TODO: send to MQ
-	err = s.TenantRepo.MigrateTenantDB(ctx, in.Domain)
+	err = s.QueueRepo.MigrateTenantDB(ctx, queue.MigrateTenantDBIn{
+		Domain: in.Domain,
+	})
 	if err != nil {
 		out.SetResponse(http.StatusInternalServerError, "internal server error", err)
 		return

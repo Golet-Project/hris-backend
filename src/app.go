@@ -4,6 +4,7 @@ import (
 	auth "hris/module/auth"
 	"hris/module/employee"
 	"hris/module/region"
+	"hris/module/shared/postgres"
 	"hris/module/shared/primitive"
 	"hris/module/tenant"
 	"reflect"
@@ -11,15 +12,18 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/hibiken/asynq"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/mileusna/useragent"
 	"github.com/redis/go-redis/v9"
 )
 
 type AppConfig struct {
-	DB       *pgxpool.Pool
-	Redis    *redis.Client
-	FiberCfg fiber.Config
+	DB               *pgxpool.Pool
+	Redis            *redis.Client
+	FiberCfg         fiber.Config
+	QueueClient      *asynq.Client
+	PostgresResolver *postgres.Resolver
 }
 
 // NewApp initialize the app
@@ -51,7 +55,8 @@ func NewApp(config AppConfig) *fiber.App {
 
 	//=== Tenant ===
 	tenant := tenant.InitTenant(&tenant.Dependency{
-		DB: config.DB,
+		DB:          config.DB,
+		QueueClient: config.QueueClient,
 	})
 
 	app.Use(cors.New(cors.Config{
