@@ -13,7 +13,7 @@ type AppID string
 
 const (
 	InternalAppID AppID = "internal"
-	WebAppID      AppID = "web"
+	TenantAppID   AppID = "tenant"
 	MobileAppID   AppID = "mobile"
 )
 
@@ -21,8 +21,8 @@ func (a AppID) String() string {
 	switch a {
 	case InternalAppID:
 		return "internal"
-	case WebAppID:
-		return "web"
+	case TenantAppID:
+		return "tenant"
 	case MobileAppID:
 		return "mobile"
 	default:

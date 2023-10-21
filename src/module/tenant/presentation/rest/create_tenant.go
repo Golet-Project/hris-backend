@@ -1,41 +1,37 @@
 package rest
 
 import (
-	"hris/module/auth/service"
 	"hris/module/shared/primitive"
+	"hris/module/tenant/service"
 
 	"github.com/gofiber/fiber/v2"
 )
 
-func (a *AuthPresenter) InternalChangePassword(c *fiber.Ctx) error {
+func (t *TenantPresenter) CreateTenant(c *fiber.Ctx) error {
 	var res primitive.BaseResponse
 
 	appId := c.Locals("AppID").(primitive.AppID)
-	token := c.Get("X-Api-Key")
-
 	switch appId {
-	case primitive.TenantAppID:
-		fallthrough
 	case primitive.InternalAppID:
-		var body service.InternalChangePasswordIn
+		var body service.Internal_CreateTenantIn
 		if err := c.BodyParser(&body); err != nil {
-			c.Status(fiber.StatusBadRequest)
 			res.Message = err.Error()
+			c.Status(fiber.StatusBadRequest)
 			return c.JSON(res)
 		}
 
-		body.Token = token
-
-		var serviceOut = a.InternalAuthService.ChangePassword(c.Context(), body)
+		// call the service
+		serviceOut := t.Internal_TenantService.CreateTenant(c.Context(), body)
 
 		res.Message = serviceOut.GetMessage()
 
-		if serviceOut.GetCode() >= 400 && serviceOut.GetCode() < 500 {
-			res.Data = serviceOut.GetError()
+		if serviceOut.GetCode() >= 200 && serviceOut.GetCode() < 400 {
+			res.Data = serviceOut
+		} else if serviceOut.GetCode() >= 400 && serviceOut.GetCode() < 500 {
+			res.Error = serviceOut.GetError()
 		}
 
 		c.Status(serviceOut.GetCode())
-
 		return c.JSON(res)
 
 	default:
@@ -43,5 +39,4 @@ func (a *AuthPresenter) InternalChangePassword(c *fiber.Ctx) error {
 		c.Status(fiber.StatusBadRequest)
 		return c.JSON(res)
 	}
-
 }

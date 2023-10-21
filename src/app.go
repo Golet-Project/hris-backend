@@ -4,21 +4,26 @@ import (
 	auth "hris/module/auth"
 	"hris/module/employee"
 	"hris/module/region"
+	"hris/module/shared/postgres"
 	"hris/module/shared/primitive"
+	"hris/module/tenant"
 	"reflect"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/hibiken/asynq"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/mileusna/useragent"
 	"github.com/redis/go-redis/v9"
 )
 
 type AppConfig struct {
-	DB       *pgxpool.Pool
-	Redis    *redis.Client
-	FiberCfg fiber.Config
+	DB               *pgxpool.Pool
+	Redis            *redis.Client
+	FiberCfg         fiber.Config
+	QueueClient      *asynq.Client
+	PostgresResolver *postgres.Resolver
 }
 
 // NewApp initialize the app
@@ -46,6 +51,12 @@ func NewApp(config AppConfig) *fiber.App {
 	//=== Region ===
 	region := region.InitRegion(&region.Dependency{
 		DB: config.DB,
+	})
+
+	//=== Tenant ===
+	tenant := tenant.InitTenant(&tenant.Dependency{
+		DB:          config.DB,
+		QueueClient: config.QueueClient,
 	})
 
 	app.Use(cors.New(cors.Config{
@@ -85,8 +96,8 @@ func NewApp(config AppConfig) *fiber.App {
 			case primitive.InternalAppID.String():
 				c.Locals("AppID", primitive.InternalAppID)
 				return c.Next()
-			case primitive.WebAppID.String():
-				c.Locals("AppID", primitive.WebAppID)
+			case primitive.TenantAppID.String():
+				c.Locals("AppID", primitive.TenantAppID)
 				return c.Next()
 
 			default:
@@ -120,6 +131,7 @@ func NewApp(config AppConfig) *fiber.App {
 	auth.Route(app)
 	employee.Route(app)
 	region.Route(app)
+	tenant.Route(app)
 
 	return app
 }

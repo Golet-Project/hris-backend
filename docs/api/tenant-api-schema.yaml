@@ -14,21 +14,21 @@ tags:
 paths:
   # auth
   /auth/login:
-    $ref: ./web/auth/auth-login.yaml
+    $ref: ./tenant/auth/auth-login.yaml
   /auth/forgot-password:
-    $ref: ./web/auth/auth-forgot-password.yaml
+    $ref: ./tenant/auth/auth-forgot-password.yaml
   /auth/password-recovery/check:
-    $ref: ./web/auth/auth-password-recovery-check.yaml
+    $ref: ./tenant/auth/auth-password-recovery-check.yaml
   /auth/password:
-    $ref: ./web/auth/auth-password.yaml
+    $ref: ./tenant/auth/auth-password.yaml
   /oauth/google/login:
-    $ref: ./web/auth/oauth-google-login.yaml
+    $ref: ./tenant/auth/oauth-google-login.yaml
   /oauth/google/callback:
-    $ref: ./web/auth/oauth-google-callback.yaml
+    $ref: ./tenant/auth/oauth-google-callback.yaml
 
   # province
   /provinces:
-    $ref: ./web/region/province.yaml
+    $ref: ./tenant/region/province.yaml
 
 components:
   schemas:
@@ -44,8 +44,8 @@ components:
       schema:
         type: string
         enum:
-          - web
-        default: web
+          - tenant
+        default: tenant
     Header-User-Agent:
       in: header
       name: User-Agent

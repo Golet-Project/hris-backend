@@ -11,7 +11,7 @@ func (e *EmployeePresenter) FindAllEmployees(c *fiber.Ctx) error {
 
 	appId := c.Locals("AppID").(primitive.AppID)
 	switch appId {
-	case primitive.WebAppID:
+	case primitive.TenantAppID:
 		// call the service
 		serviceOut := e.WebAuthService.FindAllEmployees(c.Context())
 

@@ -7,7 +7,7 @@ tmp
 *docker-compose.yaml
 
 # debug
-__debug_bin
+__debug_bin*
 
 # deploy
 *.fly.toml
