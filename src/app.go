@@ -1,7 +1,7 @@
 package main
 
 import (
-	auth "hris/module/auth"
+	"hris/module/auth"
 	"hris/module/employee"
 	"hris/module/region"
 	"hris/module/shared/postgres"

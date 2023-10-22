@@ -1,14 +1,14 @@
 package rest
 
 import (
-	"hris/module/auth/service"
+	"hris/module/auth/internal"
 	"hris/module/shared/primitive"
 
 	"github.com/gofiber/fiber/v2"
 )
 
 // Handle login request for mobile and web
-func (p AuthPresenter) BasicAuthLogin(c *fiber.Ctx) error {
+func (p AuthPresentation) BasicAuthLogin(c *fiber.Ctx) error {
 	var res primitive.BaseResponse
 
 	appId := c.Locals("AppID").(primitive.AppID)
@@ -17,14 +17,14 @@ func (p AuthPresenter) BasicAuthLogin(c *fiber.Ctx) error {
 	case primitive.TenantAppID:
 		fallthrough
 	case primitive.InternalAppID:
-		var body service.InternalBasicAuthLoginIn
+		var body internal.BasicAuthLoginIn
 		if err := c.BodyParser(&body); err != nil {
 			c.Status(fiber.StatusBadRequest)
 			res.Message = err.Error()
 			return c.JSON(res)
 		}
 
-		var loginOut = p.InternalAuthService.BasicAuthLogin(c.Context(), body)
+		var loginOut = p.Internal.BasicAuthLogin(c.Context(), body)
 
 		res.Message = loginOut.GetMessage()
 

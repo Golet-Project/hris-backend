@@ -1,17 +1,17 @@
 package auth
 
 import (
-	"hris/module/auth/presentation/rest"
-	"hris/module/auth/repo/auth"
-	"hris/module/auth/service"
 	"log"
+
+	"hris/module/auth/internal"
+	"hris/module/auth/presentation/rest"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 )
 
 type Auth struct {
-	AuthPresenter *rest.AuthPresenter
+	AuthPresentation *rest.AuthPresentation
 }
 
 type Dependency struct {
@@ -27,20 +27,16 @@ func InitAuth(d *Dependency) *Auth {
 		log.Fatal("[x] Auth packge require a redis connection")
 	}
 
-	authRepo := auth.Repository{
-		DB:    d.DB,
+	internalAuthService := internal.New(&internal.Dependency{
+		Pg:    d.DB,
 		Redis: d.Redis,
-	}
-
-	internalAuthService := service.NewInternalAuthService(&authRepo)
-	webAuthService := service.NewWebAuthService(&authRepo)
-	mobileAuthService := service.NewMobileAuthService(&authRepo)
+	})
+	// webAuthService := service.NewWebAuthService(&authRepo)
+	// mobileAuthService := service.NewMobileAuthService(&authRepo)
 
 	return &Auth{
-		AuthPresenter: &rest.AuthPresenter{
-			InternalAuthService: internalAuthService,
-			WebAuthService: webAuthService,
-			MobileAuthService: mobileAuthService,
+		AuthPresentation: &rest.AuthPresentation{
+			Internal: internalAuthService,
 		},
 	}
 }
