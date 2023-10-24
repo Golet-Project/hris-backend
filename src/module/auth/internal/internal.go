@@ -3,6 +3,7 @@ package internal
 import (
 	"hris/module/auth/internal/db"
 	"hris/module/auth/internal/redis"
+	"log"
 	"os"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -26,6 +27,13 @@ type Dependency struct {
 }
 
 func New(d *Dependency) *Internal {
+	if d.Pg == nil {
+		log.Fatal("[x] Database connection required on auth module")
+	}
+	if d.Redis == nil {
+		log.Fatal("[x] Redis connection required on auth module")
+	}
+
 	return &Internal{
 		db: &db.Db{
 			Pg:    d.Pg,

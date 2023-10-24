@@ -4,11 +4,12 @@ post:
   summary: Login with email and password
   operationId: postAuthLogin
   parameters:
-    - in: header
-      name: X-App-ID
-      required: true
-      schema:
-        $ref: "../../web-api-schema.yaml#/components/schemas/AppID"
+    - $ref: "../../mobile-api-schema.yaml#/components/parameters/Header-User-Agent"
+    # - in: header
+    #   name: User-Agent
+    #   required: true
+    #   schema:
+    #     $ref: "../../tenant-api-schema.yaml#/components/schemas/AppID"
   requestBody:
     description: Required login data
     required: true
@@ -43,6 +44,24 @@ post:
                 properties:
                   access_token:
                     type: string
+                  employee:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                        format: email
+                      full_name:
+                        type: string
+                      gender:
+                        $ref: "../../_components/schemas/enum/gender.yml"
+                      birth_date:
+                        type: string
+                        format: date
+                      address:
+                        type: string
+                      join_date:
+                        type: string
+                        format: date
                 required:
                   - access_token
             required:
@@ -64,7 +83,7 @@ post:
                       type: object
                       properties:
                         code:
-                          $ref: ../../web-api-schema.yaml#/components/schemas/RequestValidationErrorCode
+                          $ref: ../../tenant-api-schema.yaml#/components/schemas/RequestValidationErrorCode
                         field:
                           type: string
                           description: Field that contains error
@@ -79,4 +98,4 @@ post:
             required:
               - message
     "500":
-      $ref: ../../web-api-schema.yaml#/components/responses/ResponseInternalServerError
+      $ref: ../../tenant-api-schema.yaml#/components/responses/ResponseInternalServerError

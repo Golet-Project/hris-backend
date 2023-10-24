@@ -152,7 +152,7 @@ func (d Date) MarshalJSON() ([]byte, error) {
 	if !d.Valid {
 		return []byte("null"), nil
 	}
-	dt, err := time.Parse("2006-01-02", d.String)
+	dt, err := time.Parse(time.RFC3339, d.String)
 	if err != nil {
 		return nil, err
 	}
