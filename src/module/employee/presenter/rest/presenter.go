@@ -1,9 +1,7 @@
 package rest
 
-import "hris/module/employee/service"
+import "hris/module/employee/tenant"
 
-type EmployeePresenter struct {
-	WebAuthService *service.WebEmployeeService
+type EmployeePresentation struct {
+	Tenant *tenant.Tenant
 }
-
-

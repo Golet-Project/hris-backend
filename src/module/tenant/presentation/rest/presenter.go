@@ -1,7 +1,7 @@
 package rest
 
-import "hris/module/tenant/service"
+import "hris/module/tenant/internal"
 
-type TenantPresenter struct {
-	Internal_TenantService *service.Internal_TenantService
+type TenantPresentation struct {
+	Internal *internal.Internal
 }

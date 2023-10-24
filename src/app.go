@@ -1,7 +1,7 @@
 package main
 
 import (
-	auth "hris/module/auth"
+	"hris/module/auth"
 	"hris/module/employee"
 	"hris/module/region"
 	"hris/module/shared/postgres"
@@ -39,8 +39,9 @@ func NewApp(config AppConfig) *fiber.App {
 	app.Use(logger.New())
 	//===== AUTH =====
 	auth := auth.InitAuth(&auth.Dependency{
-		DB:    config.DB,
-		Redis: config.Redis,
+		PgResolver: config.PostgresResolver,
+		DB:         config.DB,
+		Redis:      config.Redis,
 	})
 
 	//=== EMPLOYEE ===

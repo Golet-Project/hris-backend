@@ -1,16 +1,16 @@
 package rest
 
 import (
-	"hris/module/auth/service"
+	"hris/module/auth/internal"
 	"hris/module/shared/primitive"
 
 	"github.com/gofiber/fiber/v2"
 )
 
-func (a *AuthPresenter) InternalPasswordRecoveryCheck(c *fiber.Ctx) error {
+func (a *AuthPresentation) InternalPasswordRecoveryCheck(c *fiber.Ctx) error {
 	var res primitive.BaseResponse
 
-	appId := c.Locals("AppID").(primitive.AppID	)
+	appId := c.Locals("AppID").(primitive.AppID)
 	token := c.Get("X-Api-Key")
 
 	switch appId {
@@ -18,7 +18,7 @@ func (a *AuthPresenter) InternalPasswordRecoveryCheck(c *fiber.Ctx) error {
 		fallthrough
 	case primitive.InternalAppID:
 		// call the service
-		var body service.InternalPasswordRecoveryCheckIn
+		var body internal.PasswordRecoveryTokenCheckIn
 		if err := c.BodyParser(&body); err != nil {
 			c.Status(fiber.StatusBadRequest)
 			res.Message = err.Error()
@@ -27,7 +27,7 @@ func (a *AuthPresenter) InternalPasswordRecoveryCheck(c *fiber.Ctx) error {
 
 		body.Token = token
 
-		serviceOut := a.InternalAuthService.PasswordRecoveryCheck(c.Context(), body)
+		serviceOut := a.Internal.PasswordRecoveryTokenCheck(c.Context(), body)
 
 		res.Message = serviceOut.GetMessage()
 
