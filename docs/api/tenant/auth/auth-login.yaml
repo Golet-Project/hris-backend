@@ -9,6 +9,7 @@ post:
       required: true
       schema:
         $ref: "../../tenant-api-schema.yaml#/components/schemas/AppID"
+    - $ref: "../../tenant-api-schema.yaml#/components/parameters/Header-X-Domain"
   requestBody:
     description: Required login data
     required: true

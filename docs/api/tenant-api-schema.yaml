@@ -46,6 +46,12 @@ components:
         enum:
           - tenant
         default: tenant
+    Header-X-Domain:
+      in: header
+      name: X-Domain
+      required: true
+      schema:
+        type: string
     Header-User-Agent:
       in: header
       name: User-Agent
