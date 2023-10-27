@@ -12,6 +12,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/fiber/v2/utils"
 	"github.com/hibiken/asynq"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/mileusna/useragent"
@@ -68,7 +69,7 @@ func NewApp(config AppConfig) *fiber.App {
 
 	// check where the request is coming from, then translate it into an application ID
 	app.Use(func(c *fiber.Ctx) error {
-		userAgent := string(c.Context().UserAgent())
+		userAgent := utils.CopyString(string(c.Context().UserAgent()))
 
 		ua := useragent.Parse(userAgent)
 
@@ -92,13 +93,15 @@ func NewApp(config AppConfig) *fiber.App {
 		case useragent.Edge:
 			fallthrough
 		case useragent.Vivaldi:
-			appId := c.Get("X-App-ID")
+			appId := utils.CopyString(c.Get("X-App-ID"))
+			domain := utils.CopyString(c.Get("X-Domain"))
 			switch appId {
 			case primitive.InternalAppID.String():
 				c.Locals("AppID", primitive.InternalAppID)
 				return c.Next()
 			case primitive.TenantAppID.String():
 				c.Locals("AppID", primitive.TenantAppID)
+				c.Locals("domain", domain)
 				return c.Next()
 
 			default:
