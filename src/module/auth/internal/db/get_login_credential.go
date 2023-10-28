@@ -20,7 +20,7 @@ func (d *Db) GetLoginCredential(ctx context.Context, email string) (out GetLogin
 	WHERE
 	 	email = $1`
 
-	err = d.Pg.QueryRow(ctx, sql, email).Scan(&out.UserUID, &out.Email, &out.Password)
+	err = d.masterConn.QueryRow(ctx, sql, email).Scan(&out.UserUID, &out.Email, &out.Password)
 
 	return
 }

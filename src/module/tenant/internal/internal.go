@@ -15,24 +15,27 @@ type Internal struct {
 }
 
 type Dependency struct {
-	Pg    *pgxpool.Pool
-	Queue *asynq.Client
+	MasterConn *pgxpool.Pool
+	Queue      *asynq.Client
 }
 
 func New(d *Dependency) *Internal {
-	if d.Pg == nil {
+	if d.MasterConn == nil {
 		log.Fatal("[x] Database connection required on tenant module")
 	}
 	if d.Queue == nil {
 		log.Fatal("[x] Queue client required on tenant module")
 	}
 
+	dbImpl := db.New(&db.Dependency{
+		MasterConn: d.MasterConn,
+	})
+	queueImpl := queue.New(&queue.Dependency{
+		Client: d.Queue,
+	})
+
 	return &Internal{
-		db: &db.Db{
-			Pg: d.Pg,
-		},
-		queue: &queue.Queue{
-			Client: d.Queue,
-		},
+		db:    dbImpl,
+		queue: queueImpl,
 	}
 }

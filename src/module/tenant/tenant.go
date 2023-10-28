@@ -14,12 +14,12 @@ type Tenant struct {
 }
 
 type Dependency struct {
-	DB          *pgxpool.Pool
+	MasterConn  *pgxpool.Pool
 	QueueClient *asynq.Client
 }
 
 func InitTenant(d *Dependency) *Tenant {
-	if d.DB == nil {
+	if d.MasterConn == nil {
 		log.Fatal("[x] Database connection required on tenant module")
 	}
 	if d.QueueClient == nil {
@@ -28,13 +28,13 @@ func InitTenant(d *Dependency) *Tenant {
 
 	// init service
 	internalTenantService := internal.New(&internal.Dependency{
-		Pg:    d.DB,
-		Queue: d.QueueClient,
+		MasterConn: d.MasterConn,
+		Queue:      d.QueueClient,
 	})
 
+	tenantPresentation := rest.New(internalTenantService)
+
 	return &Tenant{
-		TenantPresentation: &rest.TenantPresentation{
-			Internal: internalTenantService,
-		},
+		TenantPresentation: tenantPresentation,
 	}
 }

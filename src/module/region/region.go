@@ -1,7 +1,7 @@
 package region
 
 import (
-	"hris/module/region/presenter/rest"
+	"hris/module/region/presentation/rest"
 	"hris/module/region/repo/province"
 	"hris/module/region/service"
 	"log"

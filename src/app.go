@@ -47,7 +47,7 @@ func NewApp(config AppConfig) *fiber.App {
 
 	//=== EMPLOYEE ===
 	employee := employee.InitEmployee(&employee.Dependency{
-		DB: config.DB,
+		MasterDB: config.DB,
 	})
 
 	//=== Region ===
@@ -57,7 +57,7 @@ func NewApp(config AppConfig) *fiber.App {
 
 	//=== Tenant ===
 	tenant := tenant.InitTenant(&tenant.Dependency{
-		DB:          config.DB,
+		MasterConn:  config.DB,
 		QueueClient: config.QueueClient,
 	})
 

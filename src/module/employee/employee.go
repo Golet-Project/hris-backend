@@ -1,7 +1,7 @@
 package employee
 
 import (
-	"hris/module/employee/presenter/rest"
+	"hris/module/employee/presentation/rest"
 	"hris/module/employee/tenant"
 	"log"
 
@@ -13,21 +13,21 @@ type Employee struct {
 }
 
 type Dependency struct {
-	DB *pgxpool.Pool
+	MasterDB *pgxpool.Pool
 }
 
 func InitEmployee(d *Dependency) *Employee {
-	if d.DB == nil {
+	if d.MasterDB == nil {
 		log.Fatal("[x] Employee package require a database connection")
 	}
 
 	tenantEmployeeService := tenant.New(&tenant.Dependency{
-		Pg: d.DB,
+		MasterConn: d.MasterDB,
 	})
 
+	employeePresentation := rest.New(tenantEmployeeService)
+
 	return &Employee{
-		EmployeePresentation: &rest.EmployeePresentation{
-			Tenant: tenantEmployeeService,
-		},
+		EmployeePresentation: employeePresentation,
 	}
 }

@@ -25,7 +25,7 @@ func (a *AuthPresentation) ForgotPassword(c *fiber.Ctx) error {
 
 		body.AppID = appId
 
-		serviceOut := a.Internal.ForgotPassword(c.Context(), body)
+		serviceOut := a.internal.ForgotPassword(c.Context(), body)
 
 		res.Message = serviceOut.GetMessage()
 
