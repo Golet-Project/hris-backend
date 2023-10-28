@@ -21,7 +21,7 @@ func (t *TenantPresentation) CreateTenant(c *fiber.Ctx) error {
 		}
 
 		// call the service
-		serviceOut := t.Internal.CreateTenant(c.Context(), body)
+		serviceOut := t.internal.CreateTenant(c.Context(), body)
 
 		res.Message = serviceOut.GetMessage()
 

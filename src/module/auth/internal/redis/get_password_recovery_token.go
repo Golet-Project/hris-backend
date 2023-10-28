@@ -9,7 +9,7 @@ import (
 func (r *Redis) GetPasswordRecoveryToken(ctx context.Context, userId string) (token string, err error) {
 	key := fmt.Sprintf("password_recovery_token_%s", userId)
 
-	token, err = r.Client.Get(ctx, key).Result()
+	token, err = r.client.Get(ctx, key).Result()
 
 	return
 }

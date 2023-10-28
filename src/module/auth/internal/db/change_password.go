@@ -7,20 +7,20 @@ import (
 )
 
 type ChangePasswordIn struct {
-	UID string	
+	UID      string
 	Password string
 }
 
-func (d *Db) ChangePassword(ctx context.Context, in ChangePasswordIn) (rowsAffected int64, err error) {	
+func (d *Db) ChangePassword(ctx context.Context, in ChangePasswordIn) (rowsAffected int64, err error) {
 	sql := `
 	UPDATE internal_admin SET
 		password = @password
 	WHERE
 		uid = @uid`
 
-	commandTag, err := d.Pg.Exec(ctx, sql, pgx.NamedArgs{
+	commandTag, err := d.masterConn.Exec(ctx, sql, pgx.NamedArgs{
 		"password": in.Password,
-		"uid"	: in.UID,
+		"uid":      in.UID,
 	})
 	if err != nil {
 		return

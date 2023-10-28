@@ -20,7 +20,7 @@ func (q *Queue) MigrateTenantDB(ctx context.Context, in MigrateTenantDBIn) error
 		return err
 	}
 
-	_, err = q.Client.Enqueue(createdTask)
+	_, err = q.client.Enqueue(createdTask)
 	if err != nil {
 		return err
 	}

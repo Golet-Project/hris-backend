@@ -13,7 +13,7 @@ type CountTenantByDomainOut struct {
 func (d *Db) CountTenantByDomain(ctx context.Context, domain string) (out CountTenantByDomainOut, err error) {
 	sql := `SELECT COUNT(id) FROM tenant WHERE domain = @domain`
 
-	err = d.Pg.QueryRow(ctx, sql, pgx.NamedArgs{
+	err = d.masterConn.QueryRow(ctx, sql, pgx.NamedArgs{
 		"domain": domain,
 	}).Scan(&out.Count)
 

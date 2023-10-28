@@ -26,7 +26,7 @@ func (a *AuthPresentation) InternalChangePassword(c *fiber.Ctx) error {
 
 		body.Token = token
 
-		var serviceOut = a.Internal.ChangePassword(c.Context(), body)
+		var serviceOut = a.internal.ChangePassword(c.Context(), body)
 
 		res.Message = serviceOut.GetMessage()
 

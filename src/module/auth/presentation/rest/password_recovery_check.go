@@ -27,7 +27,7 @@ func (a *AuthPresentation) InternalPasswordRecoveryCheck(c *fiber.Ctx) error {
 
 		body.Token = token
 
-		serviceOut := a.Internal.PasswordRecoveryTokenCheck(c.Context(), body)
+		serviceOut := a.internal.PasswordRecoveryTokenCheck(c.Context(), body)
 
 		res.Message = serviceOut.GetMessage()
 

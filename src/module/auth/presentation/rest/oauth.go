@@ -18,7 +18,7 @@ func (p AuthPresentation) OAuthLogin(c *fiber.Ctx) error {
 		fallthrough
 	case primitive.InternalAppID:
 		// call the service
-		serviceOut := p.Internal.OAuthLogin(c.Context())
+		serviceOut := p.internal.OAuthLogin(c.Context())
 		response.Message = serviceOut.GetMessage()
 
 		if serviceOut.GetCode() >= 200 && serviceOut.GetCode() < 400 {
@@ -46,7 +46,7 @@ func (p AuthPresentation) OAuthCallback(c *fiber.Ctx) error {
 		c.QueryParser(&query)
 
 		// call the service
-		serviceOut := p.Internal.OAuthCallback(c.Context(), query)
+		serviceOut := p.internal.OAuthCallback(c.Context(), query)
 		response.Message = serviceOut.GetMessage()
 
 		if serviceOut.GetCode() >= 200 && serviceOut.GetCode() < 400 {

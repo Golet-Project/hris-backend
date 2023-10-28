@@ -11,13 +11,19 @@ type Tenant struct {
 }
 
 type Dependency struct {
-	Pg *pgxpool.Pool
+	MasterConn *pgxpool.Pool
 }
 
 func New(d *Dependency) *Tenant {
+	if d.MasterConn == nil {
+		panic("[x] Master database connection required on employee/tenant module")
+	}
+
+	dbImpl := db.New(&db.Dependency{
+		MasterConn: d.MasterConn,
+	})
+
 	return &Tenant{
-		db: &db.Db{
-			Pg: d.Pg,
-		},
+		db: dbImpl,
 	}
 }

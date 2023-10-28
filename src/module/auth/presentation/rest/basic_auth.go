@@ -26,7 +26,7 @@ func (p AuthPresentation) BasicAuthLogin(c *fiber.Ctx) error {
 		}
 		body.Domain = domain
 
-		var loginOut = p.Tenant.BasicAuthLogin(c.Context(), body)
+		var loginOut = p.tenant.BasicAuthLogin(c.Context(), body)
 
 		res.Message = loginOut.GetMessage()
 
@@ -46,7 +46,7 @@ func (p AuthPresentation) BasicAuthLogin(c *fiber.Ctx) error {
 			return c.JSON(res)
 		}
 
-		var loginOut = p.Internal.BasicAuthLogin(c.Context(), body)
+		var loginOut = p.internal.BasicAuthLogin(c.Context(), body)
 
 		res.Message = loginOut.GetMessage()
 
@@ -67,7 +67,7 @@ func (p AuthPresentation) BasicAuthLogin(c *fiber.Ctx) error {
 			return c.JSON(res)
 		}
 
-		var loginOut = p.Mobile.BasicAuthLogin(c.Context(), body)
+		var loginOut = p.mobile.BasicAuthLogin(c.Context(), body)
 
 		res.Message = loginOut.GetMessage()
 

@@ -6,6 +6,7 @@ import (
 	"hris/module/auth/internal"
 	"hris/module/auth/mobile"
 	"hris/module/auth/presentation/rest"
+	"hris/module/auth/tenant"
 	"hris/module/shared/postgres"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -49,13 +50,15 @@ func InitAuth(d *Dependency) *Auth {
 
 		UserService: d.userService,
 	})
-	// webAuthService := service.NewWebAuthService(&authRepo)
-	// mobileAuthService := service.NewMobileAuthService(&authRepo)
+	tenantAuthService := tenant.New(&tenant.Dependency{
+		PgResolver: d.PgResolver,
+		Redis:      d.Redis,
+		MasterConn: d.DB,
+	})
+
+	authPresentation := rest.New(internalAuthService, mobileAuthService, tenantAuthService)
 
 	return &Auth{
-		AuthPresentation: &rest.AuthPresentation{
-			Internal: internalAuthService,
-			Mobile:   mobileAuthService,
-		},
+		AuthPresentation: authPresentation,
 	}
 }

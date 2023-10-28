@@ -34,14 +34,17 @@ func New(d *Dependency) *Internal {
 		log.Fatal("[x] Redis connection required on auth module")
 	}
 
+	dbImpl := db.New(&db.Dependency{
+		MasterConn: d.Pg,
+		Redis:      d.Redis,
+	})
+	redisImpl := redis.New(&redis.Dependency{
+		Client: d.Redis,
+	})
+
 	return &Internal{
-		db: &db.Db{
-			Pg:    d.Pg,
-			Redis: d.Redis,
-		},
-		redis: &redis.Redis{
-			Client: d.Redis,
-		},
+		db:    dbImpl,
+		redis: redisImpl,
 
 		oauth2Cfg: &oauth2.Config{
 			ClientID:     os.Getenv("OAUTH_CLIENT_ID"),

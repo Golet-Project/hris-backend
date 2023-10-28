@@ -25,7 +25,7 @@ func (d *Db) FindAllEmployee(ctx context.Context) (out []FindAllEmployeeOut, err
 	FROM
 		employee AS e`
 
-	rows, err := d.Pg.Query(ctx, sql)
+	rows, err := d.masterConn.Query(ctx, sql)
 	if err != nil {
 		return
 	}

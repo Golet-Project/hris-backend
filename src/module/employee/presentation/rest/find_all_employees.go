@@ -13,7 +13,7 @@ func (e *EmployeePresentation) FindAllEmployee(c *fiber.Ctx) error {
 	switch appId {
 	case primitive.TenantAppID:
 		// call the service
-		serviceOut := e.Tenant.FindAllEmployee(c.Context())
+		serviceOut := e.tenant.FindAllEmployee(c.Context())
 
 		res.Message = serviceOut.GetMessage()
 

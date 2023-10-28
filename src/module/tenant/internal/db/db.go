@@ -1,7 +1,25 @@
 package db
 
-import "github.com/jackc/pgx/v5/pgxpool"
+import (
+	"log"
+
+	"github.com/jackc/pgx/v5/pgxpool"
+)
 
 type Db struct {
-	Pg *pgxpool.Pool
+	masterConn *pgxpool.Pool
+}
+
+type Dependency struct {
+	MasterConn *pgxpool.Pool
+}
+
+func New(d *Dependency) *Db {
+	if d.MasterConn == nil {
+		log.Fatal("[x] Master database connection required on tenant/internal/db module")
+	}
+
+	return &Db{
+		masterConn: d.MasterConn,
+	}
 }

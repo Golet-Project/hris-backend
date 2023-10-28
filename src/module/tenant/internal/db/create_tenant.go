@@ -25,7 +25,7 @@ func (d *Db) CreateTenant(ctx context.Context, in CreateTenantIn) (out CreateTen
 		@name, @domain
 	) RETURNING uid, name, domain;`
 
-	err = d.Pg.QueryRow(ctx, sql, pgx.NamedArgs{
+	err = d.masterConn.QueryRow(ctx, sql, pgx.NamedArgs{
 		"name":   in.Name,
 		"domain": in.Domain,
 	}).Scan(&out.UID, &out.Name, &out.Domain)
