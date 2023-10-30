@@ -93,6 +93,7 @@ func (t *Tenant) BasicAuthLogin(ctx context.Context, body BasicAuthLoginIn) (out
 	}
 
 	out.AccessToken = jwt.GenerateAccessToken(adminCredential.UserID)
+	out.SetResponse(http.StatusOK, "login success")
 
 	return
 }
