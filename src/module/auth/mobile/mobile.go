@@ -2,6 +2,7 @@ package mobile
 
 import (
 	"hris/module/auth/mobile/db"
+	"hris/module/auth/mobile/redis"
 	"hris/module/shared/postgres"
 	"log"
 
@@ -12,16 +13,17 @@ import (
 )
 
 type Mobile struct {
-	db *db.Db
+	db    *db.Db
+	redis *redis.Redis
 
 	// other service
 	userService *userService.Service
 }
 
 type Dependency struct {
-	MasterConn *pgxpool.Pool
-	PgResolver *postgres.Resolver
-	Redis      *redisClient.Client
+	MasterConn  *pgxpool.Pool
+	PgResolver  *postgres.Resolver
+	RedisClient *redisClient.Client
 
 	// other service
 	UserService *userService.Service
@@ -29,20 +31,24 @@ type Dependency struct {
 
 func New(d *Dependency) *Mobile {
 	if d.MasterConn == nil {
-		log.Fatal("[x] Master database connection required on auth module")
+		log.Fatal("[x] Master database connection required on auth/mobile module")
 	}
 	if d.PgResolver == nil {
-		log.Fatal("[x] Database resolver required on auth module")
+		log.Fatal("[x] Database resolver required on auth/mobile module")
 	}
-	if d.Redis == nil {
-		log.Fatal("[x] Redis connection required on auth module")
+	if d.RedisClient == nil {
+		log.Fatal("[x] Redis connection required on auth/mobile module")
 	}
 
 	return &Mobile{
 		db: db.New(&db.Dependency{
 			MasterConn: d.MasterConn,
 			PgResolver: d.PgResolver,
-			Redis:      d.Redis,
+			Redis:      d.RedisClient,
+		}),
+
+		redis: redis.New(&redis.Dependency{
+			Client: d.RedisClient,
 		}),
 
 		userService: d.UserService,

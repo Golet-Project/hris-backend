@@ -40,9 +40,9 @@ func NewApp(config AppConfig) *fiber.App {
 	app.Use(logger.New())
 	//===== AUTH =====
 	auth := auth.InitAuth(&auth.Dependency{
-		PgResolver: config.PostgresResolver,
-		DB:         config.DB,
-		Redis:      config.Redis,
+		PgResolver:  config.PostgresResolver,
+		DB:          config.DB,
+		RedisClient: config.Redis,
 	})
 
 	//=== EMPLOYEE ===
