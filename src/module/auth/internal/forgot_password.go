@@ -113,9 +113,13 @@ func (i *Internal) ForgotPassword(ctx context.Context, in ForgotPasswordIn) (out
 
 	// store into redis with expire time
 	err = i.redis.SetPasswordRecoveryToken(ctx, admin.UserUID, token)
+	if err != nil {
+		out.SetResponse(http.StatusInternalServerError, "internal server error", err)
+		return
+	}
 
 	// send password recovery link via email
-	emailRecoveryLink := os.Getenv("INTERNAL_WEB_BASE_URL") + "/password-recovery?token=" + token + "&uid=" + admin.UserUID + "&cid=" + in.AppID.String()
+	emailRecoveryLink := os.Getenv("INTERNAL_WEB_BASE_URL") + "/auth/password-recovery?token=" + token + "&uid=" + admin.UserUID + "&cid=" + in.AppID.String()
 
 	mailBuilder := mailer.NewMailer()
 	mailBuilder.Subject("Email Recovery")

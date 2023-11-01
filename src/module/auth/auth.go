@@ -10,7 +10,7 @@ import (
 	"hris/module/shared/postgres"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/redis/go-redis/v9"
+	redisClient "github.com/redis/go-redis/v9"
 
 	userService "hris/module/user/service"
 )
@@ -20,9 +20,9 @@ type Auth struct {
 }
 
 type Dependency struct {
-	DB         *pgxpool.Pool
-	PgResolver *postgres.Resolver
-	Redis      *redis.Client
+	DB          *pgxpool.Pool
+	PgResolver  *postgres.Resolver
+	RedisClient *redisClient.Client
 
 	// other module service
 	userService *userService.Service
@@ -32,7 +32,7 @@ func InitAuth(d *Dependency) *Auth {
 	if d.DB == nil {
 		log.Fatal("[x] Auth package require a database connection")
 	}
-	if d.Redis == nil {
+	if d.RedisClient == nil {
 		log.Fatal("[x] Auth packge require a redis connection")
 	}
 	if d.PgResolver == nil {
@@ -41,18 +41,19 @@ func InitAuth(d *Dependency) *Auth {
 
 	internalAuthService := internal.New(&internal.Dependency{
 		Pg:    d.DB,
-		Redis: d.Redis,
+		Redis: d.RedisClient,
 	})
 	mobileAuthService := mobile.New(&mobile.Dependency{
 		MasterConn: d.DB,
 		PgResolver: d.PgResolver,
-		Redis:      d.Redis,
+
+		RedisClient: d.RedisClient,
 
 		UserService: d.userService,
 	})
 	tenantAuthService := tenant.New(&tenant.Dependency{
 		PgResolver: d.PgResolver,
-		Redis:      d.Redis,
+		Redis:      d.RedisClient,
 		MasterConn: d.DB,
 	})
 
