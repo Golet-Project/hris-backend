@@ -8,6 +8,7 @@ import (
 	"hris/module/shared/primitive"
 	"hris/module/tenant"
 	"reflect"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -69,6 +70,12 @@ func NewApp(config AppConfig) *fiber.App {
 
 	// check where the request is coming from, then translate it into an application ID
 	app.Use(func(c *fiber.Ctx) error {
+		// except for the change password endpoint
+		originalUrl := utils.CopyString(c.OriginalURL())
+		if strings.HasPrefix(originalUrl, "/auth/password") && c.Method() == "PUT" {
+			return c.Next()
+		}
+
 		userAgent := utils.CopyString(string(c.Context().UserAgent()))
 
 		ua := useragent.Parse(userAgent)
