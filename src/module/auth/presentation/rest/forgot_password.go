@@ -30,6 +30,12 @@ func (a *AuthPresentation) ForgotPassword(c *fiber.Ctx) error {
 
 		res.Message = serviceOut.GetMessage()
 
+		if serviceOut.GetCode() >= 200 && serviceOut.GetCode() < 400 {
+			res.Data = serviceOut.GetMessage()
+		} else if serviceOut.GetCode() >= 400 && serviceOut.GetCode() < 500 {
+			res.Error = serviceOut.GetError()
+		}
+
 		c.Status(serviceOut.GetCode())
 		return c.JSON(res)
 
@@ -46,7 +52,7 @@ func (a *AuthPresentation) ForgotPassword(c *fiber.Ctx) error {
 		res.Message = serviceOut.GetMessage()
 
 		if serviceOut.GetCode() >= 200 && serviceOut.GetCode() < 400 {
-			res.Data = serviceOut
+			res.Data = serviceOut.GetMessage()
 		} else if serviceOut.GetCode() >= 400 && serviceOut.GetCode() < 500 {
 			res.Error = serviceOut.GetError()
 		}
