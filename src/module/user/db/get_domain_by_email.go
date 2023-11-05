@@ -8,8 +8,6 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-const domainRedisKey = "domain:"
-
 func (d *Db) GetDomainByEmail(ctx context.Context, email string) (domain string, err error) {
 	// get from redis first
 	domain, err = d.redis.Get(ctx, domainRedisKey+email).Result()

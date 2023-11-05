@@ -25,7 +25,7 @@ type Dependency struct {
 	RedisClient *redisClient.Client
 
 	// other module service
-	userService *userService.Service
+	UserService *userService.Service
 }
 
 func InitAuth(d *Dependency) *Auth {
@@ -38,6 +38,9 @@ func InitAuth(d *Dependency) *Auth {
 	if d.PgResolver == nil {
 		log.Fatal("[x] Auth package require a database resolver")
 	}
+	if d.UserService == nil {
+		log.Fatal("[x] Auth package require a user service")
+	}
 
 	internalAuthService := internal.New(&internal.Dependency{
 		Pg:    d.DB,
@@ -49,7 +52,7 @@ func InitAuth(d *Dependency) *Auth {
 
 		RedisClient: d.RedisClient,
 
-		UserService: d.userService,
+		UserService: d.UserService,
 	})
 	tenantAuthService := tenant.New(&tenant.Dependency{
 		PgResolver: d.PgResolver,

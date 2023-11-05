@@ -7,6 +7,8 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
+const domainRedisKey = "domain:"
+
 type Db struct {
 	masterConn *pgxpool.Pool
 	redis      *redis.Client
