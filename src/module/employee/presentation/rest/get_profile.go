@@ -26,7 +26,7 @@ func (e *EmployeePresentation) GetProfile(c *fiber.Ctx) error {
 		if serviceOut.GetCode() >= 400 && serviceOut.GetCode() <= 500 {
 			res.Data = nil
 		} else {
-			res.Data = serviceOut.Employee
+			res.Data = serviceOut
 		}
 
 		c.Status(serviceOut.GetCode())

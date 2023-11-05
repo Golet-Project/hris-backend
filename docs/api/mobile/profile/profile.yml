@@ -1,0 +1,47 @@
+get:
+  tags:
+    - Profile
+  summary: Get employee profile
+  operationId: getProfile
+  security:
+    - BearerAuth: []
+  parameters:
+    - $ref: ../../mobile-api-schema.yaml#/components/parameters/Header-User-Agent
+  responses:
+    "200":
+      description: success
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              data:
+                type: object
+                properties:
+                  employee:
+                    type: object
+                    properties:
+                      uid:
+                        type: string
+                        format: uuid
+                        description: Employee ID
+                      full_name:
+                        type: string
+                      email:
+                        type: string
+                        format: email
+                      gender:
+                        $ref: "../../_components/schemas/enum/gender.yml"
+                      birth_date:
+                        type: string
+                        format: date
+                      join_date:
+                        type: string
+                        format: date
+                      profile_picture:
+                        type: string
+                        format: uri
+                      address:
+                        type: string
