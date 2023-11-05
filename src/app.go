@@ -7,6 +7,7 @@ import (
 	"hris/module/shared/postgres"
 	"hris/module/shared/primitive"
 	"hris/module/tenant"
+	"hris/module/user"
 	"reflect"
 	"strings"
 
@@ -39,16 +40,27 @@ func NewApp(config AppConfig) *fiber.App {
 	}
 
 	app.Use(logger.New())
+	//=== User ===
+	user := user.InitUser(&user.Dependency{
+		MasterDB:    config.DB,
+		RedisClient: config.Redis,
+	})
+
 	//===== AUTH =====
 	auth := auth.InitAuth(&auth.Dependency{
 		PgResolver:  config.PostgresResolver,
 		DB:          config.DB,
 		RedisClient: config.Redis,
+
+		UserService: user.UserService,
 	})
 
 	//=== EMPLOYEE ===
 	employee := employee.InitEmployee(&employee.Dependency{
-		MasterDB: config.DB,
+		MasterDB:   config.DB,
+		PgResolver: config.PostgresResolver,
+
+		UserService: user.UserService,
 	})
 
 	//=== Region ===

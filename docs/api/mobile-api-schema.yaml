@@ -12,6 +12,7 @@ tags:
   - name: Auth
     description: Everything about authentication
 paths:
+  # Auth
   /auth/login:
     $ref: ./mobile/auth/auth-login.yaml
   /auth/forgot-password:
@@ -20,6 +21,10 @@ paths:
   # Region
   /provinces:
     $ref: ./mobile/region/province.yaml
+
+  # Profile
+  /profile:
+    $ref: ./mobile/profile/profile.yml
 
 components:
   schemas:
