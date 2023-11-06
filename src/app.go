@@ -1,6 +1,7 @@
 package main
 
 import (
+	"hris/module/attendance"
 	"hris/module/auth"
 	"hris/module/employee"
 	"hris/module/region"
@@ -72,6 +73,13 @@ func NewApp(config AppConfig) *fiber.App {
 	tenant := tenant.InitTenant(&tenant.Dependency{
 		MasterConn:  config.DB,
 		QueueClient: config.QueueClient,
+	})
+
+	//=== Attendance ===
+	attendance := attendance.InitAtteandance(&attendance.Dependency{
+		PgResolver: config.PostgresResolver,
+
+		UserService: user.UserService,
 	})
 
 	app.Use(cors.New(cors.Config{
@@ -155,6 +163,7 @@ func NewApp(config AppConfig) *fiber.App {
 	employee.Route(app)
 	region.Route(app)
 	tenant.Route(app)
+	attendance.Route(app)
 
 	return app
 }
