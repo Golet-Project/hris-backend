@@ -11,8 +11,7 @@ import (
 )
 
 type Mobile struct {
-	db         *db.Db
-	pgResolver *postgres.Resolver
+	db *db.Db
 
 	// other service
 	userService *userService.Service
@@ -41,8 +40,7 @@ func New(d Dependency) *Mobile {
 	})
 
 	return &Mobile{
-		db:         dbImpl,
-		pgResolver: d.PgResolver,
+		db: dbImpl,
 
 		userService: d.UserService,
 	}
