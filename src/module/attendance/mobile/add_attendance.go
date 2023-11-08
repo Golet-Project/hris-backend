@@ -86,6 +86,12 @@ func ValidateAddAttendanceRequest(req AddAttendanceIn) *primitive.RequestValidat
 		}
 	}
 
+	if len(allIssues) > 0 {
+		return &primitive.RequestValidationError{
+			Issues: allIssues,
+		}
+	}
+
 	return nil
 }
 
@@ -119,9 +125,19 @@ func (m *Mobile) AddAttendance(ctx context.Context, req AddAttendanceIn) (out Ad
 			return
 		}
 	}
-
 	if !exist {
 		out.SetResponse(http.StatusNotFound, "employee not found")
+		return
+	}
+
+	// check if attendance already exist
+	exists, err := m.db.CheckTodayAttendanceById(ctx, domain, req.UID)
+	if err != nil {
+		out.SetResponse(http.StatusInternalServerError, "interal server error", err)
+		return
+	}
+	if exists {
+		out.SetResponse(http.StatusConflict, "attendance already exist")
 		return
 	}
 

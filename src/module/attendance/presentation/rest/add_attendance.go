@@ -2,6 +2,7 @@ package rest
 
 import (
 	"hris/module/attendance/mobile"
+	"hris/module/shared/jwt"
 	"hris/module/shared/primitive"
 
 	"github.com/gofiber/fiber/v2"
@@ -11,6 +12,7 @@ func (a AttandancePresentation) AddAttendance(c *fiber.Ctx) error {
 	var res primitive.BaseResponse
 
 	appId := c.Locals("AppID").(primitive.AppID)
+	claims := c.Locals("user_auth").(jwt.CustomClaims)
 
 	switch appId {
 	case primitive.MobileAppID:
@@ -21,12 +23,13 @@ func (a AttandancePresentation) AddAttendance(c *fiber.Ctx) error {
 			return c.JSON(res)
 		}
 
+		body.UID = claims.UserUID
 		var loginOut = a.mobile.AddAttendance(c.Context(), body)
 
 		res.Message = loginOut.GetMessage()
 
 		if loginOut.GetCode() >= 200 && loginOut.GetCode() < 400 {
-			res.Data = loginOut
+			res.Data = loginOut.GetMessage()
 		} else if loginOut.GetCode() >= 400 && loginOut.GetCode() < 500 {
 			res.Error = loginOut.GetError()
 		}

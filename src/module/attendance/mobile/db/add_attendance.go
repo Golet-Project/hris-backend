@@ -22,7 +22,7 @@ func (d *Db) AddAttendance(ctx context.Context, domain string, in AddAttendanceI
 	var sql = `
 	INSERT INTO attendance
 	(
-		employee_id, timezone, latitude, longitude
+		employee_uid, timezone, latitude, longitude
 	) 
 		VALUES 
 	(
