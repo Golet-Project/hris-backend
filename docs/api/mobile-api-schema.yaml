@@ -26,6 +26,10 @@ paths:
   /profile:
     $ref: ./mobile/profile/profile.yml
 
+  # Attendance
+  /attendance:
+    $ref: ./mobile/attendance/attendance.yml
+
 components:
   schemas:
     AppID:

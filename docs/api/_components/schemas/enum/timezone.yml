@@ -1,0 +1,5 @@
+type: number
+enum:
+  - 7
+  - 8
+  - 9
