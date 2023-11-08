@@ -14,7 +14,7 @@ func (d *Db) CheckTodayAttendanceById(ctx context.Context, domain string, uid st
 	WHERE
 		employee_uid = $1
 		AND
-		created_at::date = now()::date`
+		checkin_time::date = now()::date`
 
 	conn, err := d.pgResolver.Resolve(postgres.Domain(domain))
 	if err != nil {
