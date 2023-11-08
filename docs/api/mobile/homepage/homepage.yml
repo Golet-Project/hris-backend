@@ -1,0 +1,77 @@
+get:
+  tags: ["Homepage"]
+  summary: Get homepage dashboard data
+  operationId: getHomepage
+  parameters:
+    - in: header
+      name: X-Timezone
+      schema:
+        $ref: "../../_components/schemas/enum/timezone.yml"
+  responses:
+    "200":
+      description: success
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              data:
+                type: object
+                properties:
+                  today_attendance:
+                    type: object
+                    properties:
+                      timezone:
+                        $ref: "../../_components/schemas/enum/timezone.yml"
+                      checkin_time:
+                        type: string
+                        format: date-time
+                        example: "2023-11-08T15:47:26+07:00"
+                      checkout_time:
+                        type: string
+                        format: date-time
+                        default: ""
+                      approved_at:
+                        type: string
+                        format: date-time
+                        default: ""
+                    required:
+                      - timezone
+                      - checkin_time
+                      - checkout_time
+                      - approved_at
+                required:
+                  - today_attendance
+            required:
+              - message
+              - data
+    "400":
+      description: "Request validation failed"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              error:
+                type: object
+                properties:
+                  issue:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                        field:
+                          type: string
+                        message:
+                          type: string
+            required:
+              - message
+              - error
+    "500":
+      $ref: "../../_components/responses/internal-server-error.yaml"

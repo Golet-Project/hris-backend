@@ -30,6 +30,10 @@ paths:
   /attendance:
     $ref: ./mobile/attendance/attendance.yml
 
+  # Homepage
+  /homepage:
+    $ref: ./mobile/homepage/homepage.yml
+
 components:
   schemas:
     AppID:

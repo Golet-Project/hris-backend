@@ -4,6 +4,7 @@ import (
 	"hris/module/attendance"
 	"hris/module/auth"
 	"hris/module/employee"
+	"hris/module/homepage"
 	"hris/module/region"
 	"hris/module/shared/postgres"
 	"hris/module/shared/primitive"
@@ -77,6 +78,13 @@ func NewApp(config AppConfig) *fiber.App {
 
 	//=== Attendance ===
 	attendance := attendance.InitAtteandance(&attendance.Dependency{
+		PgResolver: config.PostgresResolver,
+
+		UserService: user.UserService,
+	})
+
+	//== Homepae ===
+	homepage := homepage.InitHomePage(&homepage.Dependency{
 		PgResolver: config.PostgresResolver,
 
 		UserService: user.UserService,
@@ -164,6 +172,7 @@ func NewApp(config AppConfig) *fiber.App {
 	region.Route(app)
 	tenant.Route(app)
 	attendance.Route(app)
+	homepage.Route(app)
 
 	return app
 }
