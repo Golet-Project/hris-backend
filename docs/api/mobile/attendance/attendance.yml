@@ -1,0 +1,70 @@
+post:
+  tags: ["Attendance"]
+  summary: Insert attendance
+  operationId: postAttendance
+  parameters:
+    - $ref: "../../mobile-api-schema.yaml#/components/parameters/Header-User-Agent"
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            timezone:
+              $ref: "../../_components/schemas/enum/timezone.yml"
+            coordinate:
+              type: object
+              properties:
+                latitude:
+                  type: number
+                  format: float
+                longitude:
+                  type: number
+                  format: float
+              required:
+                - latitude
+                - longitude
+          required:
+            - timezone
+            - coordinate
+  responses:
+    "201":
+      description: Success
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              data:
+                type: string
+                example: "success"
+            required:
+              - message
+              - data
+    "400":
+      description: |-
+        Whether:
+        - Request validation failed
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+            required:
+              - message
+    "409":
+      description: "Attendance already inserted"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+            required:
+              - message
