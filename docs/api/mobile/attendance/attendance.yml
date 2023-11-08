@@ -2,6 +2,8 @@ post:
   tags: ["Attendance"]
   summary: Insert attendance
   operationId: postAttendance
+  security:
+    - BearerAuth: []
   parameters:
     - $ref: "../../mobile-api-schema.yaml#/components/parameters/Header-User-Agent"
   requestBody:
@@ -59,6 +61,45 @@ post:
               - message
     "409":
       description: "Attendance already inserted"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+            required:
+              - message
+
+put:
+  tags: ["Attendance"]
+  summary: Perform checkout
+  operationId: putAttendance
+  security:
+    - BearerAuth: []
+  parameters:
+    - $ref: "../../mobile-api-schema.yaml#/components/parameters/Header-User-Agent"
+  responses:
+    "201":
+      description: Success
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              data:
+                type: string
+                example: "success"
+            required:
+              - message
+              - data
+    "400":
+      description: |-
+        Whether:
+        - already checkout
+        - not yet checkin
       content:
         application/json:
           schema:
