@@ -1,6 +1,7 @@
 package mobile
 
 import (
+	"hris/module/homepage/mobile/db"
 	"hris/module/shared/postgres"
 	"log"
 
@@ -8,7 +9,9 @@ import (
 )
 
 type Mobile struct {
-	pgResolver *postgres.Resolver
+	db *db.Db
+
+	userService *userService.Service
 }
 
 type Dependency struct {
@@ -26,7 +29,13 @@ func New(d *Dependency) *Mobile {
 		log.Fatal("[x] User service required on homepage/mobile package")
 	}
 
+	dbImpl := db.New(&db.Dependency{
+		PgResolver: d.PgResolver,
+	})
+
 	return &Mobile{
-		pgResolver: d.PgResolver,
+		db: dbImpl,
+
+		userService: d.UserService,
 	}
 }

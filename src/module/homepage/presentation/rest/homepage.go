@@ -1,20 +1,47 @@
 package rest
 
 import (
+	"hris/module/homepage/mobile"
+	"hris/module/shared/jwt"
 	"hris/module/shared/primitive"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/utils"
 )
 
 func (r *Rest) HomePage(c *fiber.Ctx) error {
 	var res primitive.BaseResponse
 
 	appId := c.Locals("AppID").(primitive.AppID)
+	claims := c.Locals("user_auth").(jwt.CustomClaims)
 
 	switch appId {
 	case primitive.MobileAppID:
-		c.Status(fiber.StatusOK)
-		return c.JSON("OK")
+		tzString := utils.CopyString(c.Get("x-Timezone"))
+		tz, err := strconv.Atoi(tzString)
+		if err != nil {
+			c.Status(fiber.StatusBadRequest)
+			res.Message = err.Error()
+			return c.JSON(res)
+		}
+
+		var req mobile.HomePageIn
+		req.UID = claims.UserUID
+		req.Timezone = primitive.Timezone(tz)
+
+		serviceOut := r.mobile.HomePage(c.Context(), req)
+
+		res.Message = serviceOut.GetMessage()
+
+		if serviceOut.GetCode() >= 400 {
+			res.Data = serviceOut.GetError()
+		} else {
+			res.Data = serviceOut
+		}
+
+		c.Status(serviceOut.GetCode())
+		return c.JSON(res)
 	default:
 		res.Message = "invalid app id"
 		c.Status(fiber.StatusBadRequest)
