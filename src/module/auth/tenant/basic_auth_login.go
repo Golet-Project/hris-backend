@@ -15,7 +15,6 @@ import (
 type BasicAuthLoginIn struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
-	Domain   string
 }
 
 type BasicAuthLoginOut struct {
@@ -49,15 +48,6 @@ func ValidateBasicAuthLoginBody(body BasicAuthLoginIn) *primitive.RequestValidat
 		allIssues = append(allIssues, issues...)
 	}
 
-	// validate domain
-	if len(body.Domain) == 0 {
-		allIssues = append(allIssues, primitive.RequestValidationIssue{
-			Code:    primitive.RequestValidationCodeTooShort,
-			Field:   "domain",
-			Message: "domain header is required",
-		})
-	}
-
 	if len(allIssues) > 0 {
 		return &primitive.RequestValidationError{
 			Issues: allIssues,
@@ -75,7 +65,7 @@ func (t *Tenant) BasicAuthLogin(ctx context.Context, body BasicAuthLoginIn) (out
 	}
 
 	// get the login credentials
-	adminCredential, err := t.db.GetLoginCredential(ctx, body.Email, body.Domain)
+	adminCredential, err := t.db.GetLoginCredential(ctx, body.Email)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			out.SetResponse(http.StatusNotFound, "user not found")
@@ -92,7 +82,10 @@ func (t *Tenant) BasicAuthLogin(ctx context.Context, body BasicAuthLoginIn) (out
 		return
 	}
 
-	out.AccessToken = jwt.GenerateAccessToken(adminCredential.UserID)
+	out.AccessToken = jwt.GenerateTenantAccessToken(jwt.TenantAccessTokenParam{
+		UserUID: adminCredential.UserID,
+		Domain:  adminCredential.Domain,
+	})
 	out.SetResponse(http.StatusOK, "login success")
 
 	return

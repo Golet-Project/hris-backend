@@ -73,3 +73,39 @@ func DecodeAccessToken(accessToken string) (CustomClaims, error) {
 	}
 	return CustomClaims{}, fmt.Errorf("error when parsing into claims")
 }
+
+type TenantAccessTokenParam struct {
+	UserUID string `json:"user_uid"`
+	Domain  string `json:"domain"`
+}
+
+type TenantCustomClaims struct {
+	UserUID string `json:"user_uid"`
+	Domain  string `json:"domain"`
+	jwt.RegisteredClaims
+}
+
+func GenerateTenantAccessToken(param TenantAccessTokenParam) string {
+	var ACCESS_TOKEN_EXPIRE_TIME, _ = strconv.ParseInt(os.Getenv("ACCESS_TOKEN_EXPIRE_TIME"), 10, 64)
+	var ACCESS_TOKEN_SECRET = os.Getenv("ACCESS_TOKEN_SECRET")
+
+	now := time.Now()
+	ttl := time.Duration(ACCESS_TOKEN_EXPIRE_TIME) * time.Second
+
+	claims := TenantCustomClaims{
+		UserUID: param.UserUID,
+		Domain:  param.Domain,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: &jwt.NumericDate{
+				Time: now.Add(ttl),
+			},
+			IssuedAt: &jwt.NumericDate{
+				Time: now,
+			},
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	ss, _ := token.SignedString([]byte(ACCESS_TOKEN_SECRET))
+	return ss
+}
