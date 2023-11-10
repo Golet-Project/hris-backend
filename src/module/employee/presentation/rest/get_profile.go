@@ -12,10 +12,11 @@ func (e *EmployeePresentation) GetProfile(c *fiber.Ctx) error {
 	var res primitive.BaseResponse
 
 	appId := c.Locals("AppID").(primitive.AppID)
-	claims := c.Locals("user_auth").(jwt.CustomClaims)
 
 	switch appId {
 	case primitive.MobileAppID:
+		claims := c.Locals("user_auth").(jwt.CustomClaims)
+
 		// call the service
 		serviceOut := e.mobile.GetProfile(c.Context(), mobile.GetProfileIn{
 			UID: claims.UserUID,

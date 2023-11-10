@@ -13,6 +13,7 @@ import (
 )
 
 type FindAllEmployeeIn struct {
+	Domain string
 }
 
 type FindAllEmployee struct {
@@ -33,10 +34,36 @@ type FindAllEmployeeOut struct {
 	Employee []FindAllEmployee `json:"employee"`
 }
 
+func ValidateFindAllEmployeeIn(req FindAllEmployeeIn) *primitive.RequestValidationError {
+	var allIssues []primitive.RequestValidationIssue
+
+	if req.Domain == "" {
+		allIssues = append(allIssues, primitive.RequestValidationIssue{
+			Code:    primitive.RequestValidationCodeTooShort,
+			Field:   "domain",
+			Message: "domain is required",
+		})
+	}
+
+	if len(allIssues) > 0 {
+		return &primitive.RequestValidationError{
+			Issues: allIssues,
+		}
+	}
+
+	return nil
+}
+
 // FindAllEmployee find all employee
-func (t *Tenant) FindAllEmployee(ctx context.Context) (out FindAllEmployeeOut) {
+func (t *Tenant) FindAllEmployee(ctx context.Context, req FindAllEmployeeIn) (out FindAllEmployeeOut) {
+	// validate the request
+	if err := ValidateFindAllEmployeeIn(req); err != nil {
+		out.SetResponse(http.StatusBadRequest, "request validation failed")
+		return
+	}
+
 	// find the employee
-	employees, err := t.db.FindAllEmployee(ctx)
+	employees, err := t.db.FindAllEmployee(ctx, req.Domain)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			out.SetResponse(http.StatusOK, "success")

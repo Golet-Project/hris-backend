@@ -1,21 +1,32 @@
 package db
 
-import "github.com/jackc/pgx/v5/pgxpool"
+import (
+	"hris/module/shared/postgres"
+	"log"
+
+	"github.com/jackc/pgx/v5/pgxpool"
+)
 
 type Db struct {
 	masterConn *pgxpool.Pool
+	pgResolver *postgres.Resolver
 }
 
 type Dependency struct {
 	MasterConn *pgxpool.Pool
+	PgResolver *postgres.Resolver
 }
 
 func New(d *Dependency) *Db {
 	if d.MasterConn == nil {
-		panic("[x] Master database connection required on employee/tenant/db module")
+		log.Fatal("[x] Master database connection required on employee/tenant/db module")
+	}
+	if d.PgResolver == nil {
+		log.Fatal("[x] Postgres resolver required on employee/tenant/db module")
 	}
 
 	return &Db{
 		masterConn: d.MasterConn,
+		pgResolver: d.PgResolver,
 	}
 }
