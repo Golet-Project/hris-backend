@@ -17,14 +17,12 @@ func (p AuthPresentation) BasicAuthLogin(c *fiber.Ctx) error {
 
 	switch appId {
 	case primitive.TenantAppID:
-		domain := c.Locals("domain").(string)
 		var body tenant.BasicAuthLoginIn
 		if err := c.BodyParser(&body); err != nil {
 			c.Status(fiber.StatusBadRequest)
 			res.Message = err.Error()
 			return c.JSON(res)
 		}
-		body.Domain = domain
 
 		var loginOut = p.tenant.BasicAuthLogin(c.Context(), body)
 
