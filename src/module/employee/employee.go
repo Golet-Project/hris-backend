@@ -37,6 +37,7 @@ func InitEmployee(d *Dependency) *Employee {
 
 	tenantEmployeeService := tenant.New(&tenant.Dependency{
 		MasterConn: d.MasterDB,
+		PgResolver: d.PgResolver,
 	})
 	mobileEmployeeService := mobile.New(mobile.Dependency{
 		MasterConn: d.MasterDB,

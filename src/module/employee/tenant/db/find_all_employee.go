@@ -2,8 +2,11 @@ package db
 
 import (
 	"context"
+	"hris/module/shared/postgres"
 	"hris/module/shared/primitive"
 	"time"
+
+	"github.com/jackc/pgx/v5"
 )
 
 type FindAllEmployeeOut struct {
@@ -17,7 +20,11 @@ type FindAllEmployeeOut struct {
 	EndDate        primitive.Date
 }
 
-func (d *Db) FindAllEmployee(ctx context.Context) (out []FindAllEmployeeOut, err error) {
+func (d *Db) FindAllEmployee(ctx context.Context, domain string) (out []FindAllEmployeeOut, err error) {
+	if domain == "" {
+		return nil, pgx.ErrNoRows
+	}
+
 	sql := `
 	SELECT
 		e.uid, e.email, e.full_name, e.birth_date, e.gender, e.employee_status,
@@ -25,7 +32,12 @@ func (d *Db) FindAllEmployee(ctx context.Context) (out []FindAllEmployeeOut, err
 	FROM
 		employee AS e`
 
-	rows, err := d.masterConn.Query(ctx, sql)
+	conn, err := d.pgResolver.Resolve(postgres.Domain(domain))
+	if err != nil {
+		return
+	}
+
+	rows, err := conn.Query(ctx, sql)
 	if err != nil {
 		return
 	}

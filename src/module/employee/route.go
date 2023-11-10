@@ -7,6 +7,6 @@ import (
 )
 
 func (e Employee) Route(app *fiber.App) {
-	app.Get("/employee", e.EmployeePresentation.FindAllEmployee)
+	app.Get("/employee", middleware.Jwt(), e.EmployeePresentation.FindAllEmployee)
 	app.Get("/profile", middleware.Jwt(), e.EmployeePresentation.GetProfile)
 }

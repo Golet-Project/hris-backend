@@ -2,13 +2,15 @@ package middleware
 
 import (
 	"hris/module/shared/jwt"
+	"hris/module/shared/primitive"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
 )
 
 type ReqHeader struct {
-	Authorization string `reqHeader:"Authorization"`
+	Authorization string          `reqHeader:"Authorization"`
+	AppID         primitive.AppID `reqHeader:"X-App-ID"`
 }
 
 func Jwt() fiber.Handler {
@@ -33,18 +35,35 @@ func Jwt() fiber.Handler {
 		splitted := strings.Split(headers.Authorization, " ")
 		token := splitted[len(splitted)-1]
 
-		// verify the token
-		claims, err := jwt.DecodeAccessToken(token)
-		if err != nil {
-			c.Status(fiber.StatusUnauthorized)
-			return c.JSON(map[string]interface{}{
-				"message": err.Error(),
-			})
+		switch headers.AppID {
+		case primitive.TenantAppID:
+			// verify the token
+			claims, err := jwt.DecodeTenantAccessToken(token)
+			if err != nil {
+				c.Status(fiber.StatusUnauthorized)
+				return c.JSON(map[string]interface{}{
+					"message": err.Error(),
+				})
+			}
+
+			// pass the data
+			c.Locals("user_auth", claims)
+
+		case primitive.InternalAppID:
+		case primitive.MobileAppID:
+			// verify the token
+			claims, err := jwt.DecodeAccessToken(token)
+			if err != nil {
+				c.Status(fiber.StatusUnauthorized)
+				return c.JSON(map[string]interface{}{
+					"message": err.Error(),
+				})
+			}
+
+			// pass the data
+			c.Locals("user_auth", claims)
+
 		}
-
-		// pass the data
-		c.Locals("user_auth", claims)
-
 		return c.Next()
 	}
 }

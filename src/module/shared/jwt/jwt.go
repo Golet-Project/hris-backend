@@ -74,6 +74,8 @@ func DecodeAccessToken(accessToken string) (CustomClaims, error) {
 	return CustomClaims{}, fmt.Errorf("error when parsing into claims")
 }
 
+//== Tenant ==
+
 type TenantAccessTokenParam struct {
 	UserUID string `json:"user_uid"`
 	Domain  string `json:"domain"`
@@ -108,4 +110,33 @@ func GenerateTenantAccessToken(param TenantAccessTokenParam) string {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	ss, _ := token.SignedString([]byte(ACCESS_TOKEN_SECRET))
 	return ss
+}
+
+func DecodeTenantAccessToken(accessToken string) (TenantCustomClaims, error) {
+	var ACCESS_TOKEN_SECRET = os.Getenv("ACCESS_TOKEN_SECRET")
+	token, err := jwt.ParseWithClaims(accessToken, &TenantCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(ACCESS_TOKEN_SECRET), nil
+	})
+
+	if !token.Valid {
+		if ve, ok := err.(*jwt.ValidationError); ok {
+			if ve.Errors&jwt.ValidationErrorMalformed != 0 {
+				return TenantCustomClaims{}, ErrAccessTokenMalformed
+			} else if ve.Errors&(jwt.ValidationErrorExpired|jwt.ValidationErrorNotValidYet) != 0 {
+				return TenantCustomClaims{}, ErrAccessTokenExpired
+			} else {
+				return TenantCustomClaims{}, fmt.Errorf("error when decoding token")
+			}
+		}
+	}
+
+	if claims, ok := token.Claims.(*TenantCustomClaims); ok {
+		// manually verify issuer
+		// if !claims.VerifyIssuer(issuer, true) {
+		// 	return nil, fmt.Errorf("invalid token issuer")
+		// }
+
+		return *claims, nil
+	}
+	return TenantCustomClaims{}, fmt.Errorf("error when parsing into claims")
 }
