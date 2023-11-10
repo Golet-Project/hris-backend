@@ -12,7 +12,6 @@ func TestValidateBasicAuthLoginBody(t *testing.T) {
 		payload := tenant.BasicAuthLoginIn{
 			Email:    "email@email.com",
 			Password: "Password321",
-			Domain:   "tokopedia",
 		}
 
 		err := tenant.ValidateBasicAuthLoginBody(payload)
@@ -26,7 +25,6 @@ func TestValidateBasicAuthLoginBody(t *testing.T) {
 		payload := tenant.BasicAuthLoginIn{
 			Email:    "email@email.com",
 			Password: "Password@321",
-			Domain:   "tokopedia",
 		}
 
 		err := tenant.ValidateBasicAuthLoginBody(payload)
@@ -39,7 +37,6 @@ func TestValidateBasicAuthLoginBody(t *testing.T) {
 	validPayload := tenant.BasicAuthLoginIn{
 		Email:    "email@email.com",
 		Password: "Password321",
-		Domain:   "tokopedia",
 	}
 
 	t.Run("email is required", func(t *testing.T) {
@@ -142,23 +139,6 @@ func TestValidateBasicAuthLoginBody(t *testing.T) {
 	t.Run("password contains no number", func(t *testing.T) {
 		mock := validPayload
 		mock.Password = "Passwords"
-		var requestValidationError *primitive.RequestValidationError
-
-		got := tenant.ValidateBasicAuthLoginBody(mock)
-
-		if got == nil {
-			t.Errorf("Expect: error\nGot: nil")
-		}
-
-		if !errors.As(got, &requestValidationError) {
-			t.Errorf("Expect: %T\nGot: %T", got, requestValidationError)
-		}
-	})
-
-	// domain
-	t.Run("domain is required", func(t *testing.T) {
-		mock := validPayload
-		mock.Domain = ""
 		var requestValidationError *primitive.RequestValidationError
 
 		got := tenant.ValidateBasicAuthLoginBody(mock)
