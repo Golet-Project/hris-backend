@@ -9,12 +9,12 @@ import (
 )
 
 type ReqHeader struct {
-	Authorization string          `reqHeader:"Authorization"`
-	AppID         primitive.AppID `reqHeader:"X-App-ID"`
+	Authorization string `reqHeader:"Authorization"`
 }
 
 func Jwt() fiber.Handler {
 	return func(c *fiber.Ctx) error {
+		appId := c.Locals("AppID").(primitive.AppID)
 		var headers ReqHeader
 		// get the header
 		err := c.ReqHeaderParser(&headers)
@@ -35,7 +35,7 @@ func Jwt() fiber.Handler {
 		splitted := strings.Split(headers.Authorization, " ")
 		token := splitted[len(splitted)-1]
 
-		switch headers.AppID {
+		switch appId {
 		case primitive.TenantAppID:
 			// verify the token
 			claims, err := jwt.DecodeTenantAccessToken(token)
