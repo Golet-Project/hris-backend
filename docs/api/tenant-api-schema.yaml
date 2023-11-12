@@ -30,6 +30,10 @@ paths:
   /provinces:
     $ref: ./tenant/region/province.yaml
 
+  # attendance
+  /attendance:
+    $ref: ./tenant/attendance/attendance.yml
+
 components:
   schemas:
     AppID:

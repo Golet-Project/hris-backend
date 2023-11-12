@@ -1,0 +1,43 @@
+get:
+  tags: ["Attendance"]
+  summary: "Find all attendance"
+  operationId: getAttendance
+  security:
+    - BearerAuth: []
+  parameters:
+    - $ref: "../../tenant-api-schema.yaml#/components/parameters/Header-User-Agent"
+    - $ref: "../../tenant-api-schema.yaml#/components/parameters/Header-X-App-ID"
+  responses:
+    "200":
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    uid:
+                      type: string
+                      format: uuid
+                    full_name:
+                      type: string
+                    date:
+                      type: string
+                      format: date
+                    checkin_time:
+                      type: string
+                      format: time
+                    checkout_time:
+                      type: string
+                      format: time
+                    approved_at:
+                      type: string
+                      format: time
+                    approved_by:
+                      type: string

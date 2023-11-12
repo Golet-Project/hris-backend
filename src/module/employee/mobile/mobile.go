@@ -34,7 +34,7 @@ func New(d Dependency) *Mobile {
 		log.Fatal("[x] UserService module required on employee/mobile module")
 	}
 
-	dbImpl := db.New(db.Dependency{
+	dbImpl := db.New(&db.Dependency{
 		MasterConn: d.MasterConn,
 		PgResolver: d.PgResolver,
 	})

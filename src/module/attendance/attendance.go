@@ -3,6 +3,7 @@ package attendance
 import (
 	"hris/module/attendance/mobile"
 	"hris/module/attendance/presentation/rest"
+	"hris/module/attendance/tenant"
 	"hris/module/shared/postgres"
 	"log"
 
@@ -22,10 +23,10 @@ type Dependency struct {
 
 func InitAtteandance(d *Dependency) *Attendance {
 	if d.PgResolver == nil {
-		log.Fatal("[x] postgres resolver is required on attendance/mobile module")
+		log.Fatal("[x] postgres resolver is required on attendance module")
 	}
 	if d.UserService == nil {
-		log.Fatal("[x] user service is required on attendance/mobile module")
+		log.Fatal("[x] user service is required on attendance module")
 	}
 
 	mobileAttendanceService := mobile.New(&mobile.Dependency{
@@ -33,8 +34,13 @@ func InitAtteandance(d *Dependency) *Attendance {
 
 		UserService: d.UserService,
 	})
+	tenantAttendanceService := tenant.New(&tenant.Dependency{
+		PgResolver: d.PgResolver,
 
-	attendancePresentation := rest.New(mobileAttendanceService)
+		UserService: d.UserService,
+	})
+
+	attendancePresentation := rest.New(mobileAttendanceService, tenantAttendanceService)
 
 	return &Attendance{
 		AttendancePresentation: attendancePresentation,
