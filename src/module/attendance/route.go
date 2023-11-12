@@ -9,4 +9,6 @@ import (
 func (a Attendance) Route(app *fiber.App) {
 	app.Post("/attendance", middleware.Jwt(), a.AttendancePresentation.AddAttendance)
 	app.Put("/attendance", middleware.Jwt(), a.AttendancePresentation.Checkout)
+
+	app.Get("/attendance", middleware.Jwt(), a.AttendancePresentation.FindAllAttendance)
 }

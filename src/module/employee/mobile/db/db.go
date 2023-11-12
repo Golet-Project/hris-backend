@@ -18,7 +18,7 @@ type Dependency struct {
 	PgResolver *postgres.Resolver
 }
 
-func New(d Dependency) *Db {
+func New(d *Dependency) *Db {
 	if d.MasterConn == nil {
 		log.Fatal("[x] Master database connection required on employee/mobile/db module")
 	}
