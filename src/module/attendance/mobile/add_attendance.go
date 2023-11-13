@@ -13,7 +13,7 @@ import (
 
 type AddAttendanceIn struct {
 	UID        string
-	Timezone   primitive.Timezone   `json:"timezone"`
+	Timezone   primitive.Timezone
 	Coordinate primitive.Coordinate `json:"coordinate"`
 }
 
