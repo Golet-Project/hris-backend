@@ -13,8 +13,6 @@ post:
         schema:
           type: object
           properties:
-            timezone:
-              $ref: "../../_components/schemas/enum/timezone.yml"
             coordinate:
               type: object
               properties:
