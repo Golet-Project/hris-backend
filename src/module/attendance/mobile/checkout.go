@@ -10,7 +10,8 @@ import (
 )
 
 type CheckoutIn struct {
-	UID string
+	UID      string
+	Timezone primitive.Timezone
 }
 
 type CheckoutOut struct {
@@ -31,7 +32,7 @@ func (m *Mobile) Checkout(ctx context.Context, req CheckoutIn) (out CheckoutOut)
 	}
 
 	// validate checkin
-	attendanceInExists, err := m.db.CheckTodayAttendanceById(ctx, domain, req.UID)
+	attendanceInExists, err := m.db.CheckTodayAttendanceById(ctx, domain, req.UID, req.Timezone)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			out.SetResponse(http.StatusNotFound, "employee not found")
