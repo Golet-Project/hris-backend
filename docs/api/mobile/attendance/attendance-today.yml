@@ -1,0 +1,73 @@
+get:
+  tags: ["Attendance"]
+  summary: "Get employee today attendance"
+  operationId: getAttendanceToday
+  security:
+    - BearerAuth: []
+  parameters:
+    - $ref: "../../mobile-api-schema.yaml#/components/parameters/Header-User-Agent"
+    - $ref: "../../mobile-api-schema.yaml#/components/parameters/Header-X-Timezone"
+  responses:
+    "200":
+      description: success
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              data:
+                type: object
+                properties:
+                  timezone:
+                    $ref: "../../_components/schemas/enum/timezone.yml"
+                  checkin_time:
+                    type: string
+                    format: time
+                    description: Checkin time in UTC timezone
+                  checkout_time:
+                    type: string
+                    format: time
+                    description: Checkout time in UTC timezone
+                  approved_at:
+                    type: string
+                    format: time
+                    description: Approved time in UTC timezone
+                  start_working_time:
+                    type: string
+                    format: time
+                  end_working_time:
+                    type: string
+                    format: time
+                  attendance_radius:
+                    type: number
+                    format: float
+                    description: Attendance radius in meter
+                  company:
+                    type: object
+                    properties:
+                      coordinate:
+                        type: object
+                        properties:
+                          latitude:
+                            type: number
+                            format: float
+                          longitude:
+                            type: number
+                            format: float
+                      address:
+                        type: string
+    "400":
+      description: |-
+        Whether:
+        - Request validation failed
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+            required:
+              - message

@@ -29,6 +29,8 @@ paths:
   # Attendance
   /attendance:
     $ref: ./mobile/attendance/attendance.yml
+  /attendance/today:
+    $ref: ./mobile/attendance/attendance-today.yml
 
   # Homepage
   /homepage:
@@ -49,6 +51,12 @@ components:
         type: string
         default: Android 13 (33)/Xiaomi M2101K7BNY/User 0.8.0 (80)/in_ID
         example: Android 13 (33)/Xiaomi M2101K7BNY/User 0.8.0 (80)/in_ID
+    Header-X-Timezone:
+      in: header
+      name: X-Timezone
+      required: true
+      schema:
+        $ref: "./_components/schemas/enum/timezone.yml"
   responses:
     ResponseInternalServerError:
       $ref: "./_components/responses/internal-server-error.yaml"
