@@ -18,11 +18,11 @@ func (r *Rest) HomePage(c *fiber.Ctx) error {
 
 	switch appId {
 	case primitive.MobileAppID:
-		tzString := utils.CopyString(c.Get("x-Timezone"))
+		tzString := utils.CopyString(c.Get("local_tz"))
 		tz, err := strconv.Atoi(tzString)
 		if err != nil {
 			c.Status(fiber.StatusBadRequest)
-			res.Message = err.Error()
+			res.Message = "local_tz header is invalid"
 			return c.JSON(res)
 		}
 

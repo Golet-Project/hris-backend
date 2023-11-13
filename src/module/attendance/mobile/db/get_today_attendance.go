@@ -31,6 +31,19 @@ func (d *Db) GetTodayAttendance(ctx context.Context, domain string, param GetTod
 		return GetTodayAttendanceOut{}, pgx.ErrNoRows
 	}
 
+	var companySql = `
+	SELECT
+		latitude, longitude
+	FROM
+		tenant
+	WHERE
+		domain = $1`
+
+	err = d.masterConn.QueryRow(ctx, companySql, domain).Scan(&out.Company.Coordinate.Latitude, &out.Company.Coordinate.Longitude)
+	if err != nil {
+		return
+	}
+
 	var sql = `
 	SELECT
 		timezone, checkin_time, checkout_time, approved_at

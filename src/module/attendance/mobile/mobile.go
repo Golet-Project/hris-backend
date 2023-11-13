@@ -6,6 +6,8 @@ import (
 	"log"
 
 	userService "hris/module/user/service"
+
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Mobile struct {
@@ -16,6 +18,7 @@ type Mobile struct {
 }
 
 type Dependency struct {
+	MasterConn *pgxpool.Pool
 	PgResolver *postgres.Resolver
 
 	// other service
@@ -23,6 +26,9 @@ type Dependency struct {
 }
 
 func New(d *Dependency) *Mobile {
+	if d.MasterConn == nil {
+		log.Fatal("[x] Master connection required on attendance/mobile module")
+	}
 	if d.PgResolver == nil {
 		log.Fatal("[x] Database resolver required on attendance/mobile module")
 	}
@@ -31,6 +37,7 @@ func New(d *Dependency) *Mobile {
 	}
 
 	dbImpl := db.New(&db.Dependency{
+		MasterConn: d.MasterConn,
 		PgResolver: d.PgResolver,
 	})
 

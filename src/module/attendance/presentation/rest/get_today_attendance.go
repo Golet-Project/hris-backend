@@ -17,11 +17,11 @@ func (a AttandancePresentation) GetTodayAttendance(c *fiber.Ctx) error {
 
 	switch appId {
 	case primitive.MobileAppID:
-		tzString := utils.CopyString(c.Get("x-Timezone"))
+		tzString := utils.CopyString(c.Get("local_tz"))
 		tz, err := strconv.Atoi(tzString)
 		if err != nil {
 			c.Status(fiber.StatusBadRequest)
-			res.Message = "X-Timezone header is invalid"
+			res.Message = "local_tz header is invalid"
 			return c.JSON(res)
 		}
 
