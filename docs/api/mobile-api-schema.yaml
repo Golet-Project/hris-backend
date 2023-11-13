@@ -51,9 +51,9 @@ components:
         type: string
         default: Android 13 (33)/Xiaomi M2101K7BNY/User 0.8.0 (80)/in_ID
         example: Android 13 (33)/Xiaomi M2101K7BNY/User 0.8.0 (80)/in_ID
-    Header-X-Timezone:
+    Header-local_tz:
       in: header
-      name: X-Timezone
+      name: local_tz
       required: true
       schema:
         $ref: "./_components/schemas/enum/timezone.yml"
