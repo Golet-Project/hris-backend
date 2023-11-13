@@ -98,7 +98,7 @@ func (m *Mobile) GetTodayAttendance(ctx context.Context, req GetTodayAttendanceI
 		out.EndWorkingHour = todayAttendance.EndWorkingHour.Time.UTC().Format("15:04:05")
 	}
 	// TODO: get from database
-	out.AttendanceRadius = 1
+	out.AttendanceRadius = 200
 	out.Company = todayAttendance.Company
 	if todayAttendance.Company.Address.Valid {
 		out.Company.Address = todayAttendance.Company.Address
