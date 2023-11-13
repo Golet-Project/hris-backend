@@ -11,4 +11,5 @@ func (a Attendance) Route(app *fiber.App) {
 	app.Put("/attendance", middleware.Jwt(), a.AttendancePresentation.Checkout)
 
 	app.Get("/attendance", middleware.Jwt(), a.AttendancePresentation.FindAllAttendance)
+	app.Get("/attendance/today", middleware.Jwt(), a.AttendancePresentation.GetTodayAttendance)
 }

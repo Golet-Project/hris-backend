@@ -1,7 +1,7 @@
 package rest
 
 import (
-	"hris/module/homepage/mobile"
+	"hris/module/attendance/mobile"
 	"hris/module/shared/jwt"
 	"hris/module/shared/primitive"
 	"strconv"
@@ -10,11 +10,10 @@ import (
 	"github.com/gofiber/fiber/v2/utils"
 )
 
-func (r *Rest) HomePage(c *fiber.Ctx) error {
+func (a AttandancePresentation) GetTodayAttendance(c *fiber.Ctx) error {
 	var res primitive.BaseResponse
 
 	appId := c.Locals("AppID").(primitive.AppID)
-	claims := c.Locals("user_auth").(jwt.CustomClaims)
 
 	switch appId {
 	case primitive.MobileAppID:
@@ -26,11 +25,13 @@ func (r *Rest) HomePage(c *fiber.Ctx) error {
 			return c.JSON(res)
 		}
 
-		var req mobile.HomePageIn
-		req.UID = claims.UserUID
+		claims := c.Locals("user_auth").(jwt.CustomClaims)
+
+		var req mobile.GetTodayAttendanceIn
+		req.EmployeeUID = claims.UserUID
 		req.Timezone = primitive.Timezone(tz)
 
-		serviceOut := r.mobile.HomePage(c.Context(), req)
+		serviceOut := a.mobile.GetTodayAttendance(c.Context(), req)
 
 		res.Message = serviceOut.GetMessage()
 
@@ -42,6 +43,7 @@ func (r *Rest) HomePage(c *fiber.Ctx) error {
 
 		c.Status(serviceOut.GetCode())
 		return c.JSON(res)
+
 	default:
 		res.Message = "invalid app id"
 		c.Status(fiber.StatusBadRequest)

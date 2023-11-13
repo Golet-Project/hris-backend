@@ -3,10 +3,8 @@ get:
   summary: Get homepage dashboard data
   operationId: getHomepage
   parameters:
-    - in: header
-      name: X-Timezone
-      schema:
-        $ref: "../../_components/schemas/enum/timezone.yml"
+    - $ref: "../../mobile-api-schema.yaml#/components/parameters/Header-User-Agent"
+    - $ref: "../../mobile-api-schema.yaml#/components/parameters/Header-local_tz"
   responses:
     "200":
       description: success

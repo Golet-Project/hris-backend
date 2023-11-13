@@ -78,6 +78,7 @@ func NewApp(config AppConfig) *fiber.App {
 
 	//=== Attendance ===
 	attendance := attendance.InitAtteandance(&attendance.Dependency{
+		MasterConn: config.DB,
 		PgResolver: config.PostgresResolver,
 
 		UserService: user.UserService,
