@@ -165,6 +165,7 @@ func makeTenantConnection(domain string) (conn *pgxpool.Pool, err error) {
 	}
 	connConfig.MinConns = 3
 	connConfig.MaxConns = 5
+	connConfig.ConnConfig.RuntimeParams["timezone"] = "UTC"
 
 	pgPool, err := pgxpool.NewWithConfig(context.TODO(), connConfig)
 	if err != nil {

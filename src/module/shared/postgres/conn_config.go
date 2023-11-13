@@ -23,6 +23,7 @@ func MasterConnConfig() (*pgxpool.Config, error) {
 
 	connConfig.MinConns = 3
 	connConfig.MaxConns = 5
+	connConfig.ConnConfig.RuntimeParams["timezone"] = "UTC"
 
 	return connConfig, nil
 }
@@ -43,6 +44,7 @@ func TenantConnConfig(dbName string) (*pgxpool.Config, error) {
 
 	connConfig.MinConns = 3
 	connConfig.MaxConns = 5
+	connConfig.ConnConfig.RuntimeParams["timezone"] = "UTC"
 
 	return connConfig, nil
 }
@@ -63,6 +65,7 @@ func WorkerConnConfig() (*pgxpool.Config, error) {
 
 	connConfig.MaxConns = 3
 	connConfig.MinConns = 1
+	connConfig.ConnConfig.RuntimeParams["timezone"] = "UTC"
 
 	return connConfig, nil
 }
