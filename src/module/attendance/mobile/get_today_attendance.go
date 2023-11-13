@@ -7,6 +7,7 @@ import (
 	"hris/module/shared/entities"
 	"hris/module/shared/primitive"
 	"net/http"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 )
@@ -83,20 +84,28 @@ func (m *Mobile) GetTodayAttendance(ctx context.Context, req GetTodayAttendanceI
 
 	out.Timezone = todayAttendance.Timezone
 	if todayAttendance.CheckinTime.Valid {
-		out.CheckinTime = todayAttendance.CheckinTime.Time.UTC().Format("15:04:05")
+		out.CheckinTime = todayAttendance.CheckinTime.Time.UTC().Format(primitive.UtcRFC3339)
 	}
 	if todayAttendance.CheckoutTime.Valid {
-		out.CheckoutTime = todayAttendance.CheckoutTime.Time.UTC().Format("15:04:05")
+		out.CheckoutTime = todayAttendance.CheckoutTime.Time.UTC().Format(primitive.UtcRFC3339)
 	}
 	if todayAttendance.ApprovedAt.Valid {
-		out.ApprovedAt = todayAttendance.ApprovedAt.Time.UTC().Format("15:04:05")
+		out.ApprovedAt = todayAttendance.ApprovedAt.Time.UTC().Format(primitive.UtcRFC3339)
 	}
-	if todayAttendance.StartWorkingHour.Valid {
-		out.StartWorkingHour = todayAttendance.StartWorkingHour.Time.UTC().Format("15:04:05")
+	st, err := time.Parse("15:04", "09:00")
+	if err != nil {
+		out.SetResponse(http.StatusInternalServerError, "error getting today attendance", err)
+		return
 	}
-	if todayAttendance.EndWorkingHour.Valid {
-		out.EndWorkingHour = todayAttendance.EndWorkingHour.Time.UTC().Format("15:04:05")
+	out.StartWorkingHour = st.Format("15:04")
+
+	et, err := time.Parse("15:04", "17:00")
+	if err != nil {
+		out.SetResponse(http.StatusInternalServerError, "error getting today attendance", err)
+		return
 	}
+	out.EndWorkingHour = et.Format("15:04")
+
 	// TODO: get from database
 	out.AttendanceRadius = 200
 	out.Company = todayAttendance.Company
