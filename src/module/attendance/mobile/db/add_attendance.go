@@ -4,6 +4,7 @@ import (
 	"context"
 	"hris/module/shared/postgres"
 	"hris/module/shared/primitive"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 )
@@ -19,14 +20,19 @@ func (d *Db) AddAttendance(ctx context.Context, domain string, in AddAttendanceI
 		return pgx.ErrNoRows
 	}
 
+	now, err := in.Timezone.Now()
+	if err != nil {
+		return
+	}
+
 	var sql = `
 	INSERT INTO attendance
 	(
-		employee_uid, timezone, latitude, longitude
+		employee_uid, timezone, checkin_time, latitude, longitude
 	) 
 		VALUES 
 	(
-			$1, $2, $3, $4
+			$1, $2, $3, $4, $5
 	)`
 
 	conn, err := d.pgResolver.Resolve(postgres.Domain(domain))
@@ -34,7 +40,13 @@ func (d *Db) AddAttendance(ctx context.Context, domain string, in AddAttendanceI
 		return
 	}
 
-	_, err = conn.Exec(ctx, sql, in.EmployeeUID, in.Timezone.Value(), in.Coordinate.Latitude, in.Coordinate.Longitude)
+	_, err = conn.Exec(ctx, sql,
+		in.EmployeeUID,
+		in.Timezone.Value(),
+		now.Format(time.RFC3339),
+		in.Coordinate.Latitude,
+		in.Coordinate.Longitude,
+	)
 
 	return
 }

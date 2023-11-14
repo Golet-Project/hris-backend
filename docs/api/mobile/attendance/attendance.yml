@@ -6,6 +6,7 @@ post:
     - BearerAuth: []
   parameters:
     - $ref: "../../mobile-api-schema.yaml#/components/parameters/Header-User-Agent"
+    - $ref:  "../../mobile-api-schema.yaml#/components/parameters/Header-local_tz"
   requestBody:
     required: true
     content:
@@ -13,8 +14,6 @@ post:
         schema:
           type: object
           properties:
-            timezone:
-              $ref: "../../_components/schemas/enum/timezone.yml"
             coordinate:
               type: object
               properties:
@@ -79,6 +78,7 @@ put:
     - BearerAuth: []
   parameters:
     - $ref: "../../mobile-api-schema.yaml#/components/parameters/Header-User-Agent"
+    - $ref:  "../../mobile-api-schema.yaml#/components/parameters/Header-local_tz"
   responses:
     "201":
       description: Success

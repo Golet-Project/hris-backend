@@ -13,7 +13,7 @@ import (
 
 type AddAttendanceIn struct {
 	UID        string
-	Timezone   primitive.Timezone   `json:"timezone"`
+	Timezone   primitive.Timezone
 	Coordinate primitive.Coordinate `json:"coordinate"`
 }
 
@@ -131,7 +131,7 @@ func (m *Mobile) AddAttendance(ctx context.Context, req AddAttendanceIn) (out Ad
 	}
 
 	// check if attendance already exist
-	exists, err := m.db.CheckTodayAttendanceById(ctx, domain, req.UID)
+	exists, err := m.db.CheckTodayAttendanceById(ctx, domain, req.UID, req.Timezone)
 	if err != nil {
 		out.SetResponse(http.StatusInternalServerError, "interal server error", err)
 		return

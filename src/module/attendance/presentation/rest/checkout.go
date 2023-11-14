@@ -4,8 +4,10 @@ import (
 	"hris/module/attendance/mobile"
 	"hris/module/shared/jwt"
 	"hris/module/shared/primitive"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/utils"
 )
 
 func (a AttandancePresentation) Checkout(c *fiber.Ctx) error {
@@ -16,8 +18,17 @@ func (a AttandancePresentation) Checkout(c *fiber.Ctx) error {
 
 	switch appId {
 	case primitive.MobileAppID:
+		tzString := utils.CopyString(c.Get("local_tz"))
+		tz, err := strconv.Atoi(tzString)
+		if err != nil {
+			c.Status(fiber.StatusBadRequest)
+			res.Message = "local_tz header is invalid"
+			return c.JSON(res)
+		}
+
 		req := mobile.CheckoutIn{
-			UID: claims.UserUID,
+			UID:      claims.UserUID,
+			Timezone: primitive.Timezone(tz),
 		}
 
 		serviceOut := a.mobile.Checkout(c.Context(), req)
