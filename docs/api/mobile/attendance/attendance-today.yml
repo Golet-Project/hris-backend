@@ -22,6 +22,10 @@ get:
                 properties:
                   timezone:
                     $ref: "../../_components/schemas/enum/timezone.yml"
+                  current_time:
+                    type: string
+                    format: datetime
+                    example: "2023-11-19T11:07:22+00:00"
                   checkin_time:
                     type: string
                     format: time
