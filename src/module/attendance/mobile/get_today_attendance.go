@@ -21,6 +21,7 @@ type GetTodayAttendanceOut struct {
 	primitive.CommonResult
 
 	Timezone         primitive.Timezone `json:"timezone"`
+	CurrentTime      string             `json:"current_time"`
 	CheckinTime      string             `json:"checkin_time"`
 	CheckoutTime     string             `json:"checkout_time"`
 	ApprovedAt       string             `json:"approved_at"`
@@ -82,7 +83,9 @@ func (m *Mobile) GetTodayAttendance(ctx context.Context, req GetTodayAttendanceI
 		}
 	}
 
+	// build response
 	out.Timezone = todayAttendance.Timezone
+	out.CurrentTime = time.Now().UTC().Format(primitive.UtcRFC3339)
 	if todayAttendance.CheckinTime.Valid {
 		out.CheckinTime = todayAttendance.CheckinTime.Time.UTC().Format(primitive.UtcRFC3339)
 	}
@@ -106,8 +109,7 @@ func (m *Mobile) GetTodayAttendance(ctx context.Context, req GetTodayAttendanceI
 	}
 	out.EndWorkingHour = et.Format("15:04")
 
-	// TODO: get from database
-	out.AttendanceRadius = 200
+	out.AttendanceRadius = todayAttendance.AttendanceRadius.Int64
 	out.Company = todayAttendance.Company
 	if todayAttendance.Company.Address.Valid {
 		out.Company.Address = todayAttendance.Company.Address

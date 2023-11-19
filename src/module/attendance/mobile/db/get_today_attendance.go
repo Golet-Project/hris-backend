@@ -15,10 +15,11 @@ type GetTodayAttendanceIn struct {
 }
 
 type GetTodayAttendanceOut struct {
-	Timezone     primitive.Timezone
-	CheckinTime  primitive.Time
-	CheckoutTime primitive.Time
-	ApprovedAt   primitive.Time
+	Timezone         primitive.Timezone
+	AttendanceRadius primitive.Int64
+	CheckinTime      primitive.Time
+	CheckoutTime     primitive.Time
+	ApprovedAt       primitive.Time
 
 	StartWorkingHour primitive.Time
 	EndWorkingHour   primitive.Time
@@ -33,13 +34,13 @@ func (d *Db) GetTodayAttendance(ctx context.Context, domain string, param GetTod
 
 	var companySql = `
 	SELECT
-		latitude, longitude
+		latitude, longitude, attendance_radius
 	FROM
 		tenant
 	WHERE
 		domain = $1`
 
-	err = d.masterConn.QueryRow(ctx, companySql, domain).Scan(&out.Company.Coordinate.Latitude, &out.Company.Coordinate.Longitude)
+	err = d.masterConn.QueryRow(ctx, companySql, domain).Scan(&out.Company.Coordinate.Latitude, &out.Company.Coordinate.Longitude, &out.AttendanceRadius)
 	if err != nil {
 		return
 	}
