@@ -3,9 +3,10 @@ package tenant
 import (
 	"context"
 	"errors"
-	"hris/module/shared/primitive"
 	"net/http"
 	"time"
+
+	"hris/module/shared/primitive"
 
 	"github.com/jackc/pgx/v5"
 )
@@ -17,7 +18,6 @@ type FindAllAttendanceIn struct {
 type Attendance struct {
 	UID          string `json:"uid"`
 	FullName     string `json:"full_name"`
-	Date         string `json:"date"`
 	CheckinTime  string `json:"checkin_time"`
 	CheckoutTime string `json:"checkout_time"`
 	ApprovedAt   string `json:"approved_at"`
@@ -48,14 +48,13 @@ func (t *Tenant) FindAllAttendance(ctx context.Context, req FindAllAttendanceIn)
 		a.UID = attendance.UID
 		a.FullName = attendance.FullName
 		if attendance.CheckinTime.Valid {
-			a.Date = attendance.CheckinTime.Time.Format("2006-01-02")
-			a.CheckinTime = attendance.CheckinTime.Time.Format("15:04:05")
+			a.CheckinTime = attendance.CheckinTime.Time.UTC().Format(time.RFC3339)
 		}
 		if attendance.CheckoutTime.Valid {
-			a.CheckoutTime = attendance.CheckoutTime.Time.Format("15:04:05")
+			a.CheckoutTime = attendance.CheckoutTime.Time.UTC().Format(time.RFC3339)
 		}
 		if attendance.ApprovedAt.Valid {
-			a.ApprovedAt = attendance.ApprovedAt.Time.Format(time.RFC3339)
+			a.ApprovedAt = attendance.ApprovedAt.Time.UTC().Format(time.RFC3339)
 		}
 		a.ApprovedBy = attendance.ApprovedBy.String
 
