@@ -27,17 +27,17 @@ get:
                       format: uuid
                     full_name:
                       type: string
-                    date:
-                      type: string
-                      format: date
                     checkin_time:
                       type: string
                       format: time
+                      description: "time in UTC"
                     checkout_time:
                       type: string
                       format: time
+                      description: "time in UTC"
                     approved_at:
                       type: string
                       format: time
+                      description: "time in UTC"
                     approved_by:
                       type: string
