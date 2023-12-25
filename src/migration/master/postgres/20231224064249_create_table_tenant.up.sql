@@ -1,4 +1,4 @@
-CREATE TABLE tenant (
+CREATE TABLE IF NOT EXISTS tenant (
 	id SERIAL NOT NULL,
 	uid UUID NOT NULL DEFAULT uuid_generate_v4(),
 	name VARCHAR(100) NOT NULL,

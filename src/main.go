@@ -14,10 +14,14 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/pgx/v5"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/hibiken/asynq"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
+	"github.com/urfave/cli/v2"
 )
 
 func init() {
@@ -27,6 +31,99 @@ func init() {
 func main() {
 	cfg := parseConfig()
 
+	app := &cli.App{
+		Name: "hroost",
+		Commands: []*cli.Command{
+			{
+				Name:     "server",
+				Usage:    "run the application server",
+				Category: "Server",
+				Action: func(cCtx *cli.Context) error {
+					RunApp(cfg)
+
+					return nil
+				},
+			},
+			{
+				Name:     "migrate",
+				Usage:    "command about database migration",
+				Category: "Migration",
+				Subcommands: []*cli.Command{
+					{
+						Name:  "up",
+						Usage: "run database migration",
+						Action: func(cCtx *cli.Context) error {
+							databaseURL := fmt.Sprintf("pgx5://%s:%s@%s:%s/%s",
+								cfg.pgUser,
+								cfg.pgPassword,
+								cfg.pgHost,
+								cfg.pgPort,
+								cfg.pgDatabase,
+							)
+
+							log.Println("running migration up...")
+							m, err := migrate.New(
+								"file://migration/master/postgres",
+								databaseURL,
+							)
+							if err != nil {
+								return err
+							}
+							defer m.Close()
+
+							err = m.Up()
+							if err != nil {
+								return err
+							}
+
+							log.Println("done!")
+
+							return nil
+						},
+					},
+					{
+						Name:  "down",
+						Usage: "rollback database migration",
+						Action: func(cCtx *cli.Context) error {
+							databaseURL := fmt.Sprintf("pgx5://%s:%s@%s:%s/%s",
+								cfg.pgUser,
+								cfg.pgPassword,
+								cfg.pgHost,
+								cfg.pgPort,
+								cfg.pgDatabase,
+							)
+
+							log.Println("running migration up...")
+							m, err := migrate.New(
+								"file://migration/master/postgres",
+								databaseURL,
+							)
+							if err != nil {
+								return err
+							}
+							defer m.Close()
+
+							err = m.Down()
+							if err != nil {
+								return err
+							}
+
+							log.Println("done!")
+
+							return nil
+						},
+					},
+				},
+			},
+		},
+	}
+
+	if err := app.Run(os.Args); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func RunApp(cfg config) {
 	// init database
 	pgPool := initDatabase(cfg)
 	defer pgPool.Close()

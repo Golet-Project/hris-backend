@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS internal_admin (
 	birth_date DATE NOT NULL,
 	profile_picture TEXT NOT NULL,
 
-	CONSTRAINT users_pkey PRIMARY KEY (id)
+	CONSTRAINT internal_admin_pkey PRIMARY KEY (id)
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS internal_admin_email_key ON internal_admin (email)

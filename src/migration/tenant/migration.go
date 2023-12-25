@@ -2,8 +2,14 @@ package tenant
 
 import (
 	"context"
+	"fmt"
 	"hris/module/shared/postgres"
 	"log"
+	"os"
+
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/pgx/v5"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -31,13 +37,32 @@ func (m *Migration) Run(ctx context.Context, tenant Tenant) error {
 		return err
 	}
 
-	connConfig, err := postgres.TenantConnConfig(dbName)
+	migrationDatabaseURL := fmt.Sprintf("pgx5://%s:%s@%s:%s/%s",
+		os.Getenv("PG_USER"),
+		os.Getenv("PG_PASSWORD"),
+		os.Getenv("PG_HOST"),
+		os.Getenv("PG_PORT"),
+		dbName,
+	)
+	goMigrate, err := migrate.New("file://migration/tenant/postgres", migrationDatabaseURL)
+	if err != nil {
+		return err
+	}
+	defer goMigrate.Close()
+
+	log.Println("running database migration...")
+	err = goMigrate.Up()
+	if err != nil {
+		return err
+	}
+
+	tenantConnConfig, err := postgres.TenantConnConfig(dbName)
 	if err != nil {
 		log.Println("[x] Failed to make tenant database connection")
 		return err
 	}
 
-	pgPool, err := pgxpool.NewWithConfig(context.TODO(), connConfig)
+	pgPool, err := pgxpool.NewWithConfig(ctx, tenantConnConfig)
 	if err != nil {
 		return err
 	}
@@ -52,29 +77,6 @@ func (m *Migration) Run(ctx context.Context, tenant Tenant) error {
 		DomainName: postgres.Domain(tenant.Domain),
 		Pool:       pgPool,
 	})
-
-	tx, err := pgPool.Begin(context.TODO())
-
-	if err := m.CreateExtensionUuid(context.TODO(), tx); err != nil {
-		if e := tx.Rollback(ctx); e != nil {
-			return e
-		}
-
-		return err
-	}
-
-	// migrate employee table
-	if err := m.CreateTableEmployee(context.TODO(), tx); err != nil {
-		if e := tx.Rollback(ctx); e != nil {
-			return e
-		}
-
-		return err
-	}
-
-	if err := tx.Commit(ctx); err != nil {
-		return err
-	}
 
 	// TODO: delete this
 	log.Print("=====\n\n")

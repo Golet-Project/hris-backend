@@ -11,6 +11,12 @@ type config struct {
 	httpPort string
 	pgUrl    string
 
+	pgUser     string
+	pgPassword string
+	pgHost     string
+	pgPort     string
+	pgDatabase string
+
 	appName string
 
 	accessTokenExpireTime int64
@@ -54,6 +60,8 @@ func parseConfig() config {
 		if len(pgHost) == 0 {
 			log.Fatal("PG_HOST can not be empty")
 		}
+
+		cfg.pgHost = pgHost
 	}
 
 	pgPort, ok := os.LookupEnv("PG_PORT")
@@ -63,6 +71,8 @@ func parseConfig() config {
 		if len(pgPort) == 0 {
 			log.Fatal("PG_PORT can not be empty")
 		}
+
+		cfg.pgPort = pgPort
 	}
 
 	pgUser, ok := os.LookupEnv("PG_USER")
@@ -72,7 +82,10 @@ func parseConfig() config {
 		if len(pgUser) == 0 {
 			log.Fatal("PG_USER can not be empty")
 		}
+
+		cfg.pgUser = pgUser
 	}
+
 	pgPassword, ok := os.LookupEnv("PG_PASSWORD")
 	if !ok {
 		log.Fatal("PG_PASSWORD is not set")
@@ -80,6 +93,8 @@ func parseConfig() config {
 		if len(pgPassword) == 0 {
 			log.Fatal("PG_PASSWORD can not be empty")
 		}
+
+		cfg.pgPassword = pgPassword
 	}
 
 	pgMasterDB, ok := os.LookupEnv("PG_MASTER_DB")
@@ -89,6 +104,8 @@ func parseConfig() config {
 		if len(pgMasterDB) == 0 {
 			log.Fatal("PG_MASTER_DB can not be empty")
 		}
+
+		cfg.pgDatabase = pgMasterDB
 	}
 	cfg.pgUrl = fmt.Sprintf("postgres://%s:%s@%s:%s/%s",
 		pgUser,
