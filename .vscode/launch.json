@@ -12,7 +12,7 @@
       "program": "${workspaceFolder}/src",
       "envFile": "${workspaceFolder}/src/.env",
       "args": [
-        "."
+        "server"
       ]
     }
   ]
