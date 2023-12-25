@@ -1,5 +1,6 @@
 CREATE TABLE IF NOT EXISTS attendance (
 	id BIGSERIAL NOT NULL,
+	uid UUID NOT NULL DEFAULT uuid_generate_v4(),
 	employee_uid UUID NOT NULL,
 	timezone SMALLINT NOT NULL,
 	latitude DOUBLE PRECISION NOT NULL,
