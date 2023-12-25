@@ -32,7 +32,8 @@ func main() {
 	cfg := parseConfig()
 
 	app := &cli.App{
-		Name: "hroost",
+		Name:                   "hroost",
+		UseShortOptionHandling: true,
 		Commands: []*cli.Command{
 			{
 				Name:     "server",
@@ -93,7 +94,7 @@ func main() {
 								cfg.pgDatabase,
 							)
 
-							log.Println("running migration up...")
+							log.Println("running migration down...")
 							m, err := migrate.New(
 								"file://migration/master/postgres",
 								databaseURL,
