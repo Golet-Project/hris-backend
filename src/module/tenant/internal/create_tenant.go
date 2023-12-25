@@ -19,9 +19,9 @@ type CreateTenantIn struct {
 type CreateTenantOut struct {
 	primitive.CommonResult
 
-	ID     string
-	Name   string
-	Domain string
+	ID     string `json:"id"`
+	Name   string `json:"name"`
+	Domain string `json:"domain"`
 }
 
 // ValidateCreateTenantIn validate the request body

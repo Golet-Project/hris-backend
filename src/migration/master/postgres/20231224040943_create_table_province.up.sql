@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS province (
+	id VARCHAR(2) NOT NULL,
+	name VARCHAR(255) NOT NULL,
+
+	CONSTRAINT province_pkey PRIMARY KEY (id)
+);
