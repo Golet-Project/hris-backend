@@ -1,7 +1,7 @@
 package rest
 
 import (
-	"hris/module/auth/internal"
+	"hris/module/auth/central"
 	"hris/module/auth/mobile"
 	"hris/module/auth/tenant"
 	"hris/module/shared/primitive"
@@ -36,15 +36,15 @@ func (p AuthPresentation) BasicAuthLogin(c *fiber.Ctx) error {
 
 		c.Status(loginOut.GetCode())
 		return c.JSON(res)
-	case primitive.InternalAppID:
-		var body internal.BasicAuthLoginIn
+	case primitive.CentralAppID:
+		var body central.BasicAuthLoginIn
 		if err := c.BodyParser(&body); err != nil {
 			c.Status(fiber.StatusBadRequest)
 			res.Message = err.Error()
 			return c.JSON(res)
 		}
 
-		var loginOut = p.internal.BasicAuthLogin(c.Context(), body)
+		var loginOut = p.central.BasicAuthLogin(c.Context(), body)
 
 		res.Message = loginOut.GetMessage()
 

@@ -1,2 +1,2 @@
-DROP INDEX IF EXISTS internal_admin_email_key;
-DROP TABLE IF EXISTS internal_admin;
+DROP INDEX IF EXISTS central_admin_email_key;
+DROP TABLE IF EXISTS central_admin;

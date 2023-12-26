@@ -3,7 +3,7 @@ package auth
 import (
 	"log"
 
-	"hris/module/auth/internal"
+	"hris/module/auth/central"
 	"hris/module/auth/mobile"
 	"hris/module/auth/presentation/rest"
 	"hris/module/auth/tenant"
@@ -42,7 +42,7 @@ func InitAuth(d *Dependency) *Auth {
 		log.Fatal("[x] Auth package require a user service")
 	}
 
-	internalAuthService := internal.New(&internal.Dependency{
+	centralAuthService := central.New(&central.Dependency{
 		Pg:    d.DB,
 		Redis: d.RedisClient,
 	})
@@ -60,7 +60,7 @@ func InitAuth(d *Dependency) *Auth {
 		MasterConn: d.DB,
 	})
 
-	authPresentation := rest.New(internalAuthService, mobileAuthService, tenantAuthService)
+	authPresentation := rest.New(centralAuthService, mobileAuthService, tenantAuthService)
 
 	return &Auth{
 		AuthPresentation: authPresentation,

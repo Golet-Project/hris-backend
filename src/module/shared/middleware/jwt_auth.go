@@ -49,7 +49,7 @@ func Jwt() fiber.Handler {
 			// pass the data
 			c.Locals("user_auth", claims)
 
-		case primitive.InternalAppID:
+		case primitive.CentralAppID:
 		case primitive.MobileAppID:
 			// verify the token
 			claims, err := jwt.DecodeAccessToken(token)

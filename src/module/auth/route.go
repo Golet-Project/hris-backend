@@ -11,8 +11,8 @@ func (a Auth) Route(app *fiber.App) {
 	app.Get("/oauth/google/callback", a.AuthPresentation.OAuthCallback)
 
 	app.Post("/auth/forgot-password", a.AuthPresentation.ForgotPassword)
-	app.Post("/auth/password-recovery/check", a.AuthPresentation.InternalPasswordRecoveryCheck)
-	app.Put("/auth/password", a.AuthPresentation.InternalChangePassword)
+	app.Post("/auth/password-recovery/check", a.AuthPresentation.CentralPasswordRecoveryCheck)
+	app.Put("/auth/password", a.AuthPresentation.CentralChangePassword)
 
 	// user
 	// app.Post("/auth/login")

@@ -234,12 +234,12 @@ func parseConfig() config {
 	}
 
 	// INTERAL WEB BASE URL
-	if val, ok := os.LookupEnv("INTERNAL_WEB_BASE_URL"); ok {
+	if val, ok := os.LookupEnv("CENTRAL_WEB_BASE_URL"); ok {
 		if len(val) == 0 {
-			log.Fatal("INTERNAL_WEB_BASE_URL can not be empty")
+			log.Fatal("CENTRAL_WEB_BASE_URL can not be empty")
 		}
 	} else {
-		log.Fatal("INTERAL_WEB_BASE_URL is not set")
+		log.Fatal("CENTRAL_WEB_BASE_URL is not set")
 	}
 
 	return cfg

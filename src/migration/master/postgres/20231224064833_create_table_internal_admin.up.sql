@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS internal_admin (
+CREATE TABLE IF NOT EXISTS central_admin (
 	id BIGSERIAL NOT NULL,
 	uid UUID NOT NULL DEFAULT uuid_generate_v4(),
 	email VARCHAR(100) NOT NULL,
@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS internal_admin (
 	birth_date DATE NOT NULL,
 	profile_picture TEXT NOT NULL,
 
-	CONSTRAINT internal_admin_pkey PRIMARY KEY (id)
+	CONSTRAINT central_admin_pkey PRIMARY KEY (id)
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS internal_admin_email_key ON internal_admin (email)
+CREATE UNIQUE INDEX IF NOT EXISTS central_admin_email_key ON central_admin (email)
