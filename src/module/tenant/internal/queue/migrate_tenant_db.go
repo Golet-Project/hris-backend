@@ -2,7 +2,7 @@ package queue
 
 import (
 	"context"
-	"hris/module/shared/task"
+	"hris/module/tenant/internal/task"
 	"log"
 )
 
