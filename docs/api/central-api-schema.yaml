@@ -2,41 +2,32 @@ openapi: 3.0.3
 info:
   title: HROOST - OpenAPI 3.0
   description: |-
-    HROOST **Web** API Documentation
+    HROOST **Internal** API Documentation
   contact:
     email: apiteam@swagger.io
   version: 1.0.0
 servers:
-  - url: http://localhost:3001
+  - url: https://example.com
 tags:
   - name: Auth
     description: Everything about authentication
 paths:
-  # auth
   /auth/login:
-    $ref: ./tenant/auth/auth-login.yaml
+    $ref: ./central/auth/auth-login.yaml
   /auth/forgot-password:
-    $ref: ./tenant/auth/auth-forgot-password.yaml
+    $ref: ./central/auth/auth-forgot-password.yaml
   /auth/password-recovery/check:
-    $ref: ./tenant/auth/auth-password-recovery-check.yaml
+    $ref: ./central/auth/auth-password-recovery-check.yaml
   /auth/password:
-    $ref: ./tenant/auth/auth-password.yaml
+    $ref: ./central/auth/auth-password.yaml
   /oauth/google/login:
-    $ref: ./tenant/auth/oauth-google-login.yaml
+    $ref: ./central/auth/oauth-google-login.yaml
   /oauth/google/callback:
-    $ref: ./tenant/auth/oauth-google-callback.yaml
+    $ref: ./central/auth/oauth-google-callback.yaml
 
   # province
   /provinces:
-    $ref: ./tenant/region/province.yaml
-
-  # attendance
-  /attendance:
-    $ref: ./tenant/attendance/attendance.yml
-
-  # employee
-  /employee:
-    # TODO: implement me
+    $ref: ./central/region/province.yaml
 
 components:
   schemas:
@@ -52,14 +43,8 @@ components:
       schema:
         type: string
         enum:
-          - tenant
-        default: tenant
-    Header-X-Domain:
-      in: header
-      name: X-Domain
-      required: true
-      schema:
-        type: string
+          - internal
+        default: web
     Header-User-Agent:
       in: header
       name: User-Agent
@@ -73,5 +58,3 @@ components:
   securitySchemes:
     ApiKeyAuth:
       $ref: "./_components/securities/api-key-auth.yaml"
-    BearerAuth:
-      $ref: "./_components/securities/bearer-auth.yaml"

@@ -2,7 +2,7 @@ package rest
 
 import (
 	"hris/module/shared/primitive"
-	"hris/module/tenant/internal"
+	"hris/module/tenant/central"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -12,8 +12,8 @@ func (t *TenantPresentation) CreateTenant(c *fiber.Ctx) error {
 
 	appId := c.Locals("AppID").(primitive.AppID)
 	switch appId {
-	case primitive.InternalAppID:
-		var body internal.CreateTenantIn
+	case primitive.CentralAppID:
+		var body central.CreateTenantIn
 		if err := c.BodyParser(&body); err != nil {
 			res.Message = err.Error()
 			c.Status(fiber.StatusBadRequest)
@@ -21,7 +21,7 @@ func (t *TenantPresentation) CreateTenant(c *fiber.Ctx) error {
 		}
 
 		// call the service
-		serviceOut := t.internal.CreateTenant(c.Context(), body)
+		serviceOut := t.central.CreateTenant(c.Context(), body)
 
 		res.Message = serviceOut.GetMessage()
 

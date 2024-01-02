@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"hris/module/shared/postgres"
-	"hris/module/shared/task"
+	tenantCentralTask "hris/module/tenant/central/task"
 	"log"
 	"os"
 
@@ -42,7 +42,7 @@ func NewWorker(workerDBConn *pgxpool.Pool, pgResolver *postgres.Resolver) (*Work
 
 	worker.Mux = asynq.NewServeMux()
 
-	worker.Mux.Handle(task.TenantCreate, task.NewTenantCreateHandler(workerDBConn, pgResolver))
+	worker.Mux.Handle(tenantCentralTask.TenantCreate, tenantCentralTask.NewTenantCreateHandler(workerDBConn, pgResolver))
 
 	return &worker, nil
 }

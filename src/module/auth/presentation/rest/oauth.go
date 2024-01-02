@@ -1,7 +1,7 @@
 package rest
 
 import (
-	"hris/module/auth/internal"
+	"hris/module/auth/central"
 	"hris/module/shared/primitive"
 
 	"github.com/gofiber/fiber/v2"
@@ -16,9 +16,9 @@ func (p AuthPresentation) OAuthLogin(c *fiber.Ctx) error {
 	switch appId {
 	case primitive.TenantAppID:
 		fallthrough
-	case primitive.InternalAppID:
+	case primitive.CentralAppID:
 		// call the service
-		serviceOut := p.internal.OAuthLogin(c.Context())
+		serviceOut := p.central.OAuthLogin(c.Context())
 		response.Message = serviceOut.GetMessage()
 
 		if serviceOut.GetCode() >= 200 && serviceOut.GetCode() < 400 {
@@ -41,12 +41,12 @@ func (p AuthPresentation) OAuthCallback(c *fiber.Ctx) error {
 	appId := c.Get("X-App-ID")
 
 	switch appId {
-	case primitive.InternalAppID.String():
-		var query internal.OAuthCallbackIn
+	case primitive.CentralAppID.String():
+		var query central.OAuthCallbackIn
 		c.QueryParser(&query)
 
 		// call the service
-		serviceOut := p.internal.OAuthCallback(c.Context(), query)
+		serviceOut := p.central.OAuthCallback(c.Context(), query)
 		response.Message = serviceOut.GetMessage()
 
 		if serviceOut.GetCode() >= 200 && serviceOut.GetCode() < 400 {

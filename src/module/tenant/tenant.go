@@ -1,7 +1,7 @@
 package tenant
 
 import (
-	"hris/module/tenant/internal"
+	"hris/module/tenant/central"
 	"hris/module/tenant/presentation/rest"
 	"log"
 
@@ -27,12 +27,12 @@ func InitTenant(d *Dependency) *Tenant {
 	}
 
 	// init service
-	internalTenantService := internal.New(&internal.Dependency{
+	centralTenantService := central.New(&central.Dependency{
 		MasterConn: d.MasterConn,
 		Queue:      d.QueueClient,
 	})
 
-	tenantPresentation := rest.New(internalTenantService)
+	tenantPresentation := rest.New(centralTenantService)
 
 	return &Tenant{
 		TenantPresentation: tenantPresentation,

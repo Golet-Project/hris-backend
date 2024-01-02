@@ -1,17 +1,17 @@
 package rest
 
-import "hris/module/tenant/internal"
+import "hris/module/tenant/central"
 
 type TenantPresentation struct {
-	internal *internal.Internal
+	central *central.Central
 }
 
-func New(internal *internal.Internal) *TenantPresentation {
-	if internal == nil {
-		panic("[x] Internal service required on tenant presentation")
+func New(central *central.Central) *TenantPresentation {
+	if central == nil {
+		panic("[x] Central service required on tenant presentation")
 	}
 
 	return &TenantPresentation{
-		internal: internal,
+		central: central,
 	}
 }

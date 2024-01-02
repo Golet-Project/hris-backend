@@ -132,8 +132,8 @@ func NewApp(config AppConfig) *fiber.App {
 			appId := utils.CopyString(c.Get("X-App-ID"))
 			domain := utils.CopyString(c.Get("X-Domain"))
 			switch appId {
-			case primitive.InternalAppID.String():
-				c.Locals("AppID", primitive.InternalAppID)
+			case primitive.CentralAppID.String():
+				c.Locals("AppID", primitive.CentralAppID)
 				return c.Next()
 			case primitive.TenantAppID.String():
 				c.Locals("AppID", primitive.TenantAppID)

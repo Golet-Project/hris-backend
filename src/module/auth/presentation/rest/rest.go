@@ -1,21 +1,21 @@
 package rest
 
 import (
-	"hris/module/auth/internal"
+	"hris/module/auth/central"
 	"hris/module/auth/mobile"
 	"hris/module/auth/tenant"
 	"log"
 )
 
 type AuthPresentation struct {
-	internal *internal.Internal
-	mobile   *mobile.Mobile
-	tenant   *tenant.Tenant
+	central *central.Central
+	mobile  *mobile.Mobile
+	tenant  *tenant.Tenant
 }
 
-func New(internal *internal.Internal, mobile *mobile.Mobile, tenant *tenant.Tenant) *AuthPresentation {
-	if internal == nil {
-		log.Fatal("[x] Internal service required on auth presentation")
+func New(central *central.Central, mobile *mobile.Mobile, tenant *tenant.Tenant) *AuthPresentation {
+	if central == nil {
+		log.Fatal("[x] Central service required on auth presentation")
 	}
 	if mobile == nil {
 		log.Fatal("[x] Mobile service required on auth presentation")
@@ -25,8 +25,8 @@ func New(internal *internal.Internal, mobile *mobile.Mobile, tenant *tenant.Tena
 	}
 
 	return &AuthPresentation{
-		internal: internal,
-		mobile:   mobile,
-		tenant:   tenant,
+		central: central,
+		mobile:  mobile,
+		tenant:  tenant,
 	}
 }
