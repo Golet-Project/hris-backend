@@ -34,6 +34,10 @@ paths:
   /attendance:
     $ref: ./tenant/attendance/attendance.yml
 
+  # employee
+  /employee:
+    # TODO: implement me
+
 components:
   schemas:
     AppID:
