@@ -1,11 +1,11 @@
 package mobile
 
 import (
-	"hris/module/homepage/mobile/db"
-	"hris/module/shared/postgres"
+	"hroost/module/homepage/mobile/db"
+	"hroost/module/shared/postgres"
 	"log"
 
-	userService "hris/module/user/service"
+	userService "hroost/module/user/service"
 )
 
 type Mobile struct {

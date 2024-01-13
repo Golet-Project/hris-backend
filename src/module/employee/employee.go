@@ -1,15 +1,15 @@
 package employee
 
 import (
-	"hris/module/employee/mobile"
-	"hris/module/employee/presentation/rest"
-	"hris/module/employee/tenant"
-	"hris/module/shared/postgres"
+	"hroost/module/employee/mobile"
+	"hroost/module/employee/presentation/rest"
+	"hroost/module/employee/tenant"
+	"hroost/module/shared/postgres"
 	"log"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	userService "hris/module/user/service"
+	userService "hroost/module/user/service"
 )
 
 type Employee struct {

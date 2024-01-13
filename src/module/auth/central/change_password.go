@@ -3,9 +3,9 @@ package central
 import (
 	"context"
 	"errors"
-	"hris/module/auth/central/db"
-	"hris/module/shared/primitive"
-	"hris/module/shared/validator"
+	"hroost/module/auth/central/db"
+	"hroost/module/shared/primitive"
+	"hroost/module/shared/validator"
 	"net/http"
 
 	"github.com/redis/go-redis/v9"

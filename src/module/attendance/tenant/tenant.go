@@ -1,9 +1,9 @@
 package tenant
 
 import (
-	"hris/module/attendance/tenant/db"
-	"hris/module/shared/postgres"
-	userService "hris/module/user/service"
+	"hroost/module/attendance/tenant/db"
+	"hroost/module/shared/postgres"
+	userService "hroost/module/user/service"
 	"log"
 )
 

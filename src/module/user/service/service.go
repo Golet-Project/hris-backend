@@ -1,7 +1,7 @@
 package service
 
 import (
-	"hris/module/user/db"
+	"hroost/module/user/db"
 	"log"
 
 	"github.com/jackc/pgx/v5/pgxpool"

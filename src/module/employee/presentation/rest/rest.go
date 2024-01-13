@@ -1,8 +1,8 @@
 package rest
 
 import (
-	"hris/module/employee/mobile"
-	"hris/module/employee/tenant"
+	"hroost/module/employee/mobile"
+	"hroost/module/employee/tenant"
 	"log"
 )
 

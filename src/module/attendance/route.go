@@ -1,7 +1,7 @@
 package attendance
 
 import (
-	"hris/module/shared/middleware"
+	"hroost/module/shared/middleware"
 
 	"github.com/gofiber/fiber/v2"
 )

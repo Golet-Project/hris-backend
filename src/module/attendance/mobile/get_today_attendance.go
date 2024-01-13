@@ -3,9 +3,9 @@ package mobile
 import (
 	"context"
 	"errors"
-	"hris/module/attendance/mobile/db"
-	"hris/module/shared/entities"
-	"hris/module/shared/primitive"
+	"hroost/module/attendance/mobile/db"
+	"hroost/module/shared/entities"
+	"hroost/module/shared/primitive"
 	"net/http"
 	"time"
 

@@ -3,7 +3,7 @@ package tenant
 import (
 	"context"
 	"fmt"
-	"hris/module/shared/postgres"
+	"hroost/module/shared/postgres"
 	"log"
 	"os"
 

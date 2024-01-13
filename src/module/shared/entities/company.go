@@ -1,6 +1,6 @@
 package entities
 
-import "hris/module/shared/primitive"
+import "hroost/module/shared/primitive"
 
 type Company struct {
 	Coordinate primitive.Coordinate `json:"coordinate,omitempty"`

@@ -2,7 +2,7 @@ package db
 
 import (
 	"context"
-	"hris/module/shared/postgres"
+	"hroost/module/shared/postgres"
 )
 
 func (d *Db) Checkout(ctx context.Context, domain, uid string) (rowsAffected int64, err error) {

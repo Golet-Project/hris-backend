@@ -3,10 +3,10 @@ package mobile
 import (
 	"context"
 	"errors"
-	"hris/module/shared/mailer"
-	"hris/module/shared/primitive"
-	"hris/module/shared/random"
-	"hris/module/shared/validator"
+	"hroost/module/shared/mailer"
+	"hroost/module/shared/primitive"
+	"hroost/module/shared/random"
+	"hroost/module/shared/validator"
 	"net/http"
 	"os"
 

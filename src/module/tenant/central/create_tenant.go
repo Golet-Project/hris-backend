@@ -3,9 +3,9 @@ package central
 import (
 	"context"
 	"errors"
-	"hris/module/shared/primitive"
-	"hris/module/tenant/central/db"
-	"hris/module/tenant/central/queue"
+	"hroost/module/shared/primitive"
+	"hroost/module/tenant/central/db"
+	"hroost/module/tenant/central/queue"
 	"net/http"
 
 	"github.com/jackc/pgx/v5"

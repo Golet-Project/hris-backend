@@ -1,7 +1,7 @@
 package rest
 
 import (
-	"hris/module/shared/primitive"
+	"hroost/module/shared/primitive"
 
 	"github.com/gofiber/fiber/v2"
 )

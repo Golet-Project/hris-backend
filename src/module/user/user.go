@@ -1,7 +1,7 @@
 package user
 
 import (
-	"hris/module/user/service"
+	"hroost/module/user/service"
 	"log"
 
 	redisClient "github.com/redis/go-redis/v9"

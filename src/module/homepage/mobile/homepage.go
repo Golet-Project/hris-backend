@@ -3,8 +3,8 @@ package mobile
 import (
 	"context"
 	"errors"
-	"hris/module/homepage/mobile/db"
-	"hris/module/shared/primitive"
+	"hroost/module/homepage/mobile/db"
+	"hroost/module/shared/primitive"
 	"net/http"
 	"time"
 

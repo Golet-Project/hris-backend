@@ -1,8 +1,8 @@
 package tenant
 
 import (
-	"hris/module/tenant/central"
-	"hris/module/tenant/presentation/rest"
+	"hroost/module/tenant/central"
+	"hroost/module/tenant/presentation/rest"
 	"log"
 
 	"github.com/hibiken/asynq"

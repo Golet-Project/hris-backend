@@ -1,9 +1,9 @@
 package rest
 
 import (
-	"hris/module/auth/central"
-	"hris/module/auth/mobile"
-	"hris/module/auth/tenant"
+	"hroost/module/auth/central"
+	"hroost/module/auth/mobile"
+	"hroost/module/auth/tenant"
 	"log"
 )
 

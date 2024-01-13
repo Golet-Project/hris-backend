@@ -3,10 +3,10 @@ package service
 import (
 	"context"
 	"errors"
-	"hris/module/shared/primitive"
+	"hroost/module/shared/primitive"
 	"net/http"
 
-	provinceRepo "hris/module/region/repo/province"
+	provinceRepo "hroost/module/region/repo/province"
 
 	"github.com/jackc/pgx/v5"
 )

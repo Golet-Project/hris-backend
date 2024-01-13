@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"hris/module/shared/postgres"
+	"hroost/module/shared/postgres"
 	"log"
 	"math/rand"
 	"os"

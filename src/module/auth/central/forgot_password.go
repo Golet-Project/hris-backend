@@ -3,9 +3,9 @@ package central
 import (
 	"context"
 	"errors"
-	"hris/module/shared/mailer"
-	"hris/module/shared/primitive"
-	"hris/module/shared/random"
+	"hroost/module/shared/mailer"
+	"hroost/module/shared/primitive"
+	"hroost/module/shared/random"
 	"net/http"
 	"os"
 

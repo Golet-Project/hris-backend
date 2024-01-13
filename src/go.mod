@@ -1,4 +1,4 @@
-module hris
+module hroost
 
 go 1.21.4
 

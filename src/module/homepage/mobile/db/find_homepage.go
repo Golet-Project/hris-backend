@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"hris/module/shared/postgres"
-	"hris/module/shared/primitive"
+	"hroost/module/shared/postgres"
+	"hroost/module/shared/primitive"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"

@@ -1,15 +1,15 @@
 package main
 
 import (
-	"hris/module/attendance"
-	"hris/module/auth"
-	"hris/module/employee"
-	"hris/module/homepage"
-	"hris/module/region"
-	"hris/module/shared/postgres"
-	"hris/module/shared/primitive"
-	"hris/module/tenant"
-	"hris/module/user"
+	"hroost/module/attendance"
+	"hroost/module/auth"
+	"hroost/module/employee"
+	"hroost/module/homepage"
+	"hroost/module/region"
+	"hroost/module/shared/postgres"
+	"hroost/module/shared/primitive"
+	"hroost/module/tenant"
+	"hroost/module/user"
 	"reflect"
 	"strings"
 

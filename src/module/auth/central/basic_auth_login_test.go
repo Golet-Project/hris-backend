@@ -2,8 +2,8 @@ package central_test
 
 import (
 	"errors"
-	"hris/module/auth/central"
-	"hris/module/shared/primitive"
+	"hroost/module/auth/central"
+	"hroost/module/shared/primitive"
 	"testing"
 )
 

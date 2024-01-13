@@ -1,13 +1,13 @@
 package mobile
 
 import (
-	"hris/module/employee/mobile/db"
-	"hris/module/shared/postgres"
+	"hroost/module/employee/mobile/db"
+	"hroost/module/shared/postgres"
 	"log"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	userService "hris/module/user/service"
+	userService "hroost/module/user/service"
 )
 
 type Mobile struct {

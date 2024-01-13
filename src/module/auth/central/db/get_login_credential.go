@@ -2,7 +2,7 @@ package db
 
 import (
 	"context"
-	"hris/module/shared/primitive"
+	"hroost/module/shared/primitive"
 )
 
 type GetLoginCredentialOut struct {

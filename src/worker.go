@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
-	"hris/module/shared/postgres"
-	tenantCentralTask "hris/module/tenant/central/task"
+	"hroost/module/shared/postgres"
+	tenantCentralTask "hroost/module/tenant/central/task"
 	"log"
 	"os"
 

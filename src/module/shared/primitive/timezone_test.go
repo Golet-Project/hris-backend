@@ -1,7 +1,7 @@
 package primitive_test
 
 import (
-	"hris/module/shared/primitive"
+	"hroost/module/shared/primitive"
 	"testing"
 	"time"
 )

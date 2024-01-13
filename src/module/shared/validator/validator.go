@@ -1,7 +1,7 @@
 package validator
 
 import (
-	"hris/module/shared/primitive"
+	"hroost/module/shared/primitive"
 	"regexp"
 )
 

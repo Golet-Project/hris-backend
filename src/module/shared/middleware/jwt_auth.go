@@ -1,8 +1,8 @@
 package middleware
 
 import (
-	"hris/module/shared/jwt"
-	"hris/module/shared/primitive"
+	"hroost/module/shared/jwt"
+	"hroost/module/shared/primitive"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"

@@ -3,9 +3,9 @@ package mobile
 import (
 	"context"
 	"errors"
-	"hris/module/auth/mobile/db"
-	"hris/module/shared/primitive"
-	"hris/module/shared/validator"
+	"hroost/module/auth/mobile/db"
+	"hroost/module/shared/primitive"
+	"hroost/module/shared/validator"
 	"net/http"
 
 	"github.com/google/uuid"

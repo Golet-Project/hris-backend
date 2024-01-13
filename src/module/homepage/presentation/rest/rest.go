@@ -1,7 +1,7 @@
 package rest
 
 import (
-	"hris/module/homepage/mobile"
+	"hroost/module/homepage/mobile"
 	"log"
 )
 

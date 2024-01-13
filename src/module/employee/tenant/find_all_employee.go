@@ -3,11 +3,11 @@ package tenant
 import (
 	"context"
 	"errors"
-	"hris/module/shared/primitive"
-	"hris/module/shared/utils"
+	"hroost/module/shared/primitive"
+	"hroost/module/shared/utils"
 	"net/http"
 
-	"hris/module/employee/tenant/db"
+	"hroost/module/employee/tenant/db"
 
 	"github.com/jackc/pgx/v5"
 )

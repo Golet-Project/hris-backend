@@ -2,8 +2,8 @@ package db
 
 import (
 	"context"
-	"hris/module/shared/postgres"
-	"hris/module/shared/primitive"
+	"hroost/module/shared/postgres"
+	"hroost/module/shared/primitive"
 )
 
 func (d *Db) CheckTodayAttendanceById(ctx context.Context, domain string, uid string, timezone primitive.Timezone) (exist bool, err error) {

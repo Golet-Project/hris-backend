@@ -1,6 +1,6 @@
 package rest
 
-import "hris/module/region/service"
+import "hroost/module/region/service"
 
 type RegionPresenter struct {
 	RegionService *service.RegionService

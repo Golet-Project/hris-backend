@@ -2,8 +2,8 @@ package tenant_test
 
 import (
 	"errors"
-	"hris/module/auth/tenant"
-	"hris/module/shared/primitive"
+	"hroost/module/auth/tenant"
+	"hroost/module/shared/primitive"
 	"testing"
 )
 

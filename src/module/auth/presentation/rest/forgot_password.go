@@ -1,9 +1,9 @@
 package rest
 
 import (
-	"hris/module/auth/central"
-	"hris/module/auth/mobile"
-	"hris/module/shared/primitive"
+	"hroost/module/auth/central"
+	"hroost/module/auth/mobile"
+	"hroost/module/shared/primitive"
 
 	"github.com/gofiber/fiber/v2"
 )

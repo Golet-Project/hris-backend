@@ -3,9 +3,9 @@ package mobile
 import (
 	"context"
 	"errors"
-	"hris/module/shared/jwt"
-	"hris/module/shared/primitive"
-	"hris/module/shared/validator"
+	"hroost/module/shared/jwt"
+	"hroost/module/shared/primitive"
+	"hroost/module/shared/validator"
 	"net/http"
 
 	"github.com/jackc/pgx/v5"

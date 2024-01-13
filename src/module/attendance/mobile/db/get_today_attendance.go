@@ -2,9 +2,9 @@ package db
 
 import (
 	"context"
-	"hris/module/shared/entities"
-	"hris/module/shared/postgres"
-	"hris/module/shared/primitive"
+	"hroost/module/shared/entities"
+	"hroost/module/shared/postgres"
+	"hroost/module/shared/primitive"
 
 	"github.com/jackc/pgx/v5"
 )

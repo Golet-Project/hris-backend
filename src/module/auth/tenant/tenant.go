@@ -1,8 +1,8 @@
 package tenant
 
 import (
-	"hris/module/auth/tenant/db"
-	"hris/module/shared/postgres"
+	"hroost/module/auth/tenant/db"
+	"hroost/module/shared/postgres"
 	"log"
 
 	"github.com/jackc/pgx/v5/pgxpool"

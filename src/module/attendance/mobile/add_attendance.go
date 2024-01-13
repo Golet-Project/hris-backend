@@ -3,8 +3,8 @@ package mobile
 import (
 	"context"
 	"errors"
-	"hris/module/attendance/mobile/db"
-	"hris/module/shared/primitive"
+	"hroost/module/attendance/mobile/db"
+	"hroost/module/shared/primitive"
 	"net/http"
 
 	"github.com/google/uuid"

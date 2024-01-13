@@ -2,8 +2,8 @@ package central
 
 import (
 	"context"
-	"hris/module/shared/jwt"
-	"hris/module/shared/primitive"
+	"hroost/module/shared/jwt"
+	"hroost/module/shared/primitive"
 	"net/http"
 	"time"
 

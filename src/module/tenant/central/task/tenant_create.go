@@ -3,8 +3,8 @@ package task
 import (
 	"context"
 	"encoding/json"
-	"hris/migration/tenant"
-	"hris/module/shared/postgres"
+	"hroost/migration/tenant"
+	"hroost/module/shared/postgres"
 	"log"
 
 	"github.com/hibiken/asynq"

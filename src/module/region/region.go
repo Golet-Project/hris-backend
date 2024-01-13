@@ -1,9 +1,9 @@
 package region
 
 import (
-	"hris/module/region/presentation/rest"
-	"hris/module/region/repo/province"
-	"hris/module/region/service"
+	"hroost/module/region/presentation/rest"
+	"hroost/module/region/repo/province"
+	"hroost/module/region/service"
 	"log"
 
 	"github.com/jackc/pgx/v5/pgxpool"

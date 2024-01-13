@@ -1,10 +1,10 @@
 package homepage
 
 import (
-	"hris/module/homepage/mobile"
-	"hris/module/homepage/presentation/rest"
-	"hris/module/shared/postgres"
-	userService "hris/module/user/service"
+	"hroost/module/homepage/mobile"
+	"hroost/module/homepage/presentation/rest"
+	"hroost/module/shared/postgres"
+	userService "hroost/module/user/service"
 	"log"
 )
 

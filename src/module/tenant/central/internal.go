@@ -1,8 +1,8 @@
 package central
 
 import (
-	"hris/module/tenant/central/db"
-	"hris/module/tenant/central/queue"
+	"hroost/module/tenant/central/db"
+	"hroost/module/tenant/central/queue"
 	"log"
 
 	"github.com/hibiken/asynq"

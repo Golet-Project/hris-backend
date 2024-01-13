@@ -1,9 +1,9 @@
 package rest
 
 import (
-	"hris/module/attendance/tenant"
-	"hris/module/shared/jwt"
-	"hris/module/shared/primitive"
+	"hroost/module/attendance/tenant"
+	"hroost/module/shared/jwt"
+	"hroost/module/shared/primitive"
 
 	"github.com/gofiber/fiber/v2"
 )

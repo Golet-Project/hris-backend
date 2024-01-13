@@ -3,7 +3,7 @@ package central
 import (
 	"context"
 	"errors"
-	"hris/module/shared/primitive"
+	"hroost/module/shared/primitive"
 	"net/http"
 
 	"github.com/redis/go-redis/v9"

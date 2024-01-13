@@ -1,7 +1,7 @@
 package db
 
 import (
-	"hris/module/shared/postgres"
+	"hroost/module/shared/postgres"
 	"log"
 )
 

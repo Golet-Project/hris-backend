@@ -1,11 +1,11 @@
 package mobile
 
 import (
-	"hris/module/attendance/mobile/db"
-	"hris/module/shared/postgres"
+	"hroost/module/attendance/mobile/db"
+	"hroost/module/shared/postgres"
 	"log"
 
-	userService "hris/module/user/service"
+	userService "hroost/module/user/service"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )

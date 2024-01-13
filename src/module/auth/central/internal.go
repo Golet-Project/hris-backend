@@ -1,8 +1,8 @@
 package central
 
 import (
-	"hris/module/auth/central/db"
-	"hris/module/auth/central/redis"
+	"hroost/module/auth/central/db"
+	"hroost/module/auth/central/redis"
 	"log"
 	"os"
 

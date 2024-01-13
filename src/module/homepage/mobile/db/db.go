@@ -1,6 +1,6 @@
 package db
 
-import "hris/module/shared/postgres"
+import "hroost/module/shared/postgres"
 
 type Db struct {
 	pgResolver *postgres.Resolver

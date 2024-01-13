@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"hris/module/shared/primitive"
+	"hroost/module/shared/primitive"
 
 	"github.com/jackc/pgx/v5"
 )

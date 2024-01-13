@@ -2,7 +2,7 @@ package central
 
 import (
 	"context"
-	"hris/module/shared/primitive"
+	"hroost/module/shared/primitive"
 	"net/http"
 )
 

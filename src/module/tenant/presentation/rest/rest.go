@@ -1,6 +1,6 @@
 package rest
 
-import "hris/module/tenant/central"
+import "hroost/module/tenant/central"
 
 type TenantPresentation struct {
 	central *central.Central

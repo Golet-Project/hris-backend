@@ -2,7 +2,7 @@ package db
 
 import (
 	"context"
-	"hris/module/shared/postgres"
+	"hroost/module/shared/postgres"
 
 	"github.com/jackc/pgx/v5"
 )

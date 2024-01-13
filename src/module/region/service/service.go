@@ -1,6 +1,6 @@
 package service
 
-import "hris/module/region/repo/province"
+import "hroost/module/region/repo/province"
 
 type RegionService struct {
 	ProvinceRepo *province.Repository

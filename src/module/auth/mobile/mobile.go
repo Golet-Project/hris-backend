@@ -1,15 +1,15 @@
 package mobile
 
 import (
-	"hris/module/auth/mobile/db"
-	"hris/module/auth/mobile/redis"
-	"hris/module/shared/postgres"
+	"hroost/module/auth/mobile/db"
+	"hroost/module/auth/mobile/redis"
+	"hroost/module/shared/postgres"
 	"log"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	redisClient "github.com/redis/go-redis/v9"
 
-	userService "hris/module/user/service"
+	userService "hroost/module/user/service"
 )
 
 type Mobile struct {

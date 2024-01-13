@@ -2,8 +2,8 @@ package mobile_test
 
 import (
 	"errors"
-	"hris/module/auth/mobile"
-	"hris/module/shared/primitive"
+	"hroost/module/auth/mobile"
+	"hroost/module/shared/primitive"
 	"reflect"
 	"testing"
 )

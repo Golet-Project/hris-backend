@@ -3,16 +3,16 @@ package auth
 import (
 	"log"
 
-	"hris/module/auth/central"
-	"hris/module/auth/mobile"
-	"hris/module/auth/presentation/rest"
-	"hris/module/auth/tenant"
-	"hris/module/shared/postgres"
+	"hroost/module/auth/central"
+	"hroost/module/auth/mobile"
+	"hroost/module/auth/presentation/rest"
+	"hroost/module/auth/tenant"
+	"hroost/module/shared/postgres"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	redisClient "github.com/redis/go-redis/v9"
 
-	userService "hris/module/user/service"
+	userService "hroost/module/user/service"
 )
 
 type Auth struct {

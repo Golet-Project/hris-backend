@@ -3,8 +3,8 @@ package db
 import (
 	"context"
 	"fmt"
-	"hris/module/shared/postgres"
-	"hris/module/shared/primitive"
+	"hroost/module/shared/postgres"
+	"hroost/module/shared/primitive"
 )
 
 type CreateEmployeeIn struct {

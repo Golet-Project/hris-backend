@@ -2,7 +2,7 @@ package queue
 
 import (
 	"context"
-	"hris/module/tenant/central/task"
+	"hroost/module/tenant/central/task"
 	"log"
 )
 

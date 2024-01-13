@@ -1,13 +1,13 @@
 package attendance
 
 import (
-	"hris/module/attendance/mobile"
-	"hris/module/attendance/presentation/rest"
-	"hris/module/attendance/tenant"
-	"hris/module/shared/postgres"
+	"hroost/module/attendance/mobile"
+	"hroost/module/attendance/presentation/rest"
+	"hroost/module/attendance/tenant"
+	"hroost/module/shared/postgres"
 	"log"
 
-	userService "hris/module/user/service"
+	userService "hroost/module/user/service"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )

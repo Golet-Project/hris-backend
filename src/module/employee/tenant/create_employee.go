@@ -2,8 +2,8 @@ package tenant
 
 import (
 	"context"
-	"hris/module/employee/tenant/db"
-	"hris/module/shared/primitive"
+	"hroost/module/employee/tenant/db"
+	"hroost/module/shared/primitive"
 	"net/http"
 )
 

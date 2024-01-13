@@ -1,9 +1,9 @@
 package rest
 
 import (
-	"hris/module/homepage/mobile"
-	"hris/module/shared/jwt"
-	"hris/module/shared/primitive"
+	"hroost/module/homepage/mobile"
+	"hroost/module/shared/jwt"
+	"hroost/module/shared/primitive"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"

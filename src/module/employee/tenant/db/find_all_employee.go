@@ -2,8 +2,8 @@ package db
 
 import (
 	"context"
-	"hris/module/shared/postgres"
-	"hris/module/shared/primitive"
+	"hroost/module/shared/postgres"
+	"hroost/module/shared/primitive"
 	"time"
 
 	"github.com/jackc/pgx/v5"
