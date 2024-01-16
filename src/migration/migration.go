@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"hris/migration/postgres"
+	"hroost/migration/postgres"
 	"log"
 	"os"
 
