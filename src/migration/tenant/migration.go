@@ -3,7 +3,7 @@ package tenant
 import (
 	"context"
 	"fmt"
-	"hroost/module/shared/postgres"
+	"hroost/infrastructure/store/postgres"
 	"log"
 	"os"
 
@@ -80,8 +80,8 @@ func (m *Migration) Run(ctx context.Context, tenant Tenant) error {
 
 	// TODO: delete this
 	log.Print("=====\n\n")
-	log.Println("current connected tenant is:")
-	m.PgResolver.GetAllTenantConn().Range(func(key, val interface{}) bool {
+	log.Println("current connected database is:")
+	m.PgResolver.GetAllConn().Range(func(key, val interface{}) bool {
 		log.Printf("%s", key)
 		return true
 	})
