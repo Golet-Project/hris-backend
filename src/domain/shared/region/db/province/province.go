@@ -1,7 +1,27 @@
 package province
 
-import "github.com/jackc/pgx/v5/pgxpool"
+import (
+	"fmt"
+	"hroost/infrastructure/store/postgres"
+)
 
-type Repository struct {
-	DB *pgxpool.Pool
+type Config struct {
+	PgResolver *postgres.Resolver
+}
+
+type Db struct {
+	pgResolver *postgres.Resolver
+}
+
+func New(cfg *Config) (*Db, error) {
+	if cfg == nil {
+		return nil, fmt.Errorf("pgResolver required")
+	}
+	if cfg.PgResolver == nil {
+		return nil, fmt.Errorf("pgResolver required")
+	}
+
+	return &Db{
+		pgResolver: cfg.PgResolver,
+	}, nil
 }

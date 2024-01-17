@@ -10,11 +10,11 @@ import (
 )
 
 type Config struct {
-	Service *service.RegionService
+	Service *service.Service
 }
 
 type Region struct {
-	service *service.RegionService
+	service *service.Service
 }
 
 func NewRegion(cfg *Config) (*Region, error) {

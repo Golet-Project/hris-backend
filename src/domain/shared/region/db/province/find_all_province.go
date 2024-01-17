@@ -2,6 +2,7 @@ package province
 
 import (
 	"context"
+	"hroost/infrastructure/store/postgres"
 )
 
 type FindAllProvinceOut struct {
@@ -9,14 +10,19 @@ type FindAllProvinceOut struct {
 	Name string
 }
 
-func (r *Repository) FindAllProvince(ctx context.Context) (out []FindAllProvinceOut, err error) {
+func (r *Db) FindAllProvince(ctx context.Context) (out []FindAllProvinceOut, err error) {
+	masterConn, err := r.pgResolver.Resolve(postgres.MasterDomain)
+	if err != nil {
+		return nil, err
+	}
+
 	var sql = `
 	SELECT
 		id, name
 	FROM
 		province`
 
-	rows, err := r.DB.Query(ctx, sql)
+	rows, err := masterConn.Query(ctx, sql)
 	if err != nil {
 		return
 	}
