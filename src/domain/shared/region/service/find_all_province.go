@@ -22,9 +22,9 @@ type FindAllProvinceOut struct {
 	Provinces []FindAllProvince
 }
 
-func (s *RegionService) FindAllProvince(ctx context.Context) (out FindAllProvinceOut) {
+func (s *Service) FindAllProvince(ctx context.Context) (out FindAllProvinceOut) {
 	// find all province
-	provinces, err := s.ProvinceRepo.FindAllProvince(ctx)
+	provinces, err := s.provinceDb.FindAllProvince(ctx)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			out.SetResponse(http.StatusOK, "success")
@@ -42,7 +42,7 @@ func (s *RegionService) FindAllProvince(ctx context.Context) (out FindAllProvinc
 	return
 }
 
-func (s *RegionService) mapFindAllProvince(in []provinceRepo.FindAllProvinceOut, out *FindAllProvinceOut) {
+func (s *Service) mapFindAllProvince(in []provinceRepo.FindAllProvinceOut, out *FindAllProvinceOut) {
 	for _, province := range in {
 		var p FindAllProvince
 		p.ID = province.ID

@@ -1,13 +1,27 @@
 package service
 
-import "hroost/domain/shared/region/db/province"
+import (
+	"fmt"
+	"hroost/domain/shared/region/db/province"
+)
 
-type RegionService struct {
-	ProvinceRepo *province.Repository
+type Config struct {
+	ProvinceDb *province.Db
 }
 
-func NewRegionService(provinceRepo *province.Repository) *RegionService {
-	return &RegionService{
-		ProvinceRepo: provinceRepo,
+type Service struct {
+	provinceDb *province.Db
+}
+
+func New(cfg *Config) (*Service, error) {
+	if cfg == nil {
+		return nil, fmt.Errorf("config required")
 	}
+	if cfg.ProvinceDb == nil {
+		return nil, fmt.Errorf("provinceDb required")
+	}
+
+	return &Service{
+		provinceDb: cfg.ProvinceDb,
+	}, nil
 }

@@ -20,18 +20,16 @@ import (
 type Server struct {
 	cfg config
 
-	dbConnFuncs []func(context.Context) error
-	pgResolver  *postgres.Resolver
+	pgResolver *postgres.Resolver
 
-	queueClientFunc func() error
-	queueClient     *asynq.Client
+	queueClient *asynq.Client
 
-	redisClientFunc func(context.Context) error
-	redisClient     *redis.Client
+	redisClient *redis.Client
 
 	worker *worker.Worker
 
-	app *fiber.App
+	app          *fiber.App
+	presentation *Presentation
 }
 
 func NewServer() *Server {
@@ -79,8 +77,6 @@ func (s *Server) Run(ctx context.Context) error {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	s.fiber()
 
 	// run app
 	g.Go(func() error {

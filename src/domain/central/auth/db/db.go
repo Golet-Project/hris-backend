@@ -1,8 +1,8 @@
 package db
 
 import (
+	"fmt"
 	"hroost/infrastructure/store/postgres"
-	"log"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -12,21 +12,24 @@ type Db struct {
 	redis      *redis.Client
 }
 
-type Dependency struct {
+type Config struct {
 	PgResolver *postgres.Resolver
 	Redis      *redis.Client
 }
 
-func New(d *Dependency) *Db {
-	if d.PgResolver == nil {
-		log.Fatal("[x] Master database connection required on auth/central/db module")
+func New(cfg *Config) (*Db, error) {
+	if cfg == nil {
+		return nil, fmt.Errorf("db required")
 	}
-	if d.Redis == nil {
-		log.Fatal("[x] Redis connection required on auth/central/db module")
+	if cfg.PgResolver == nil {
+		return nil, fmt.Errorf("pgResolver required")
+	}
+	if cfg.Redis == nil {
+		return nil, fmt.Errorf("redis required")
 	}
 
 	return &Db{
-		pgResolver: d.PgResolver,
-		redis:      d.Redis,
-	}
+		pgResolver: cfg.PgResolver,
+		redis:      cfg.Redis,
+	}, nil
 }
