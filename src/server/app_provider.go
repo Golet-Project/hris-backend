@@ -207,12 +207,22 @@ type TenantServiceProvider struct {
 }
 
 func (s *Server) initTenant() (*TenantServiceProvider, error) {
+	sharedService, err := s.initShared()
+	if err != nil {
+		return nil, err
+	}
+
 	// attendance
 	attendanceDb, err := tenantAttendanceDb.New(&tenantAttendanceDb.Config{PgResolver: s.pgResolver})
 	if err != nil {
 		return nil, err
 	}
-	attendanceService, err := tenantAttendanceService.New(&tenantAttendanceService.Config{Db: attendanceDb})
+	attendanceService, err := tenantAttendanceService.New(&tenantAttendanceService.Config{
+		Db: attendanceDb,
+
+		// shared service
+		UserService: sharedService.userService,
+	})
 	if err != nil {
 		return nil, err
 	}

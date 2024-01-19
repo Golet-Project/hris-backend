@@ -1,12 +1,10 @@
 package server
 
 import (
-	"fmt"
 	"hroost/module/shared/middleware"
 )
 
 func (s *Server) route() {
-	fmt.Println("routeee")
 	rest := s.presentation.rest
 
 	// attendance

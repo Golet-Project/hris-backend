@@ -12,8 +12,8 @@ import (
 )
 
 type FindAllProvince struct {
-	ID   string
-	Name string
+	ID   string `json:"id"`
+	Name string `json:"name"`
 }
 
 type FindAllProvinceOut struct {
