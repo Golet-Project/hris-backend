@@ -1,10 +1,11 @@
-package cmd
+package main
 
 import (
+	"hroost/cmd/command"
+	"log"
 	"math/rand"
+	"os"
 	"time"
-
-	"github.com/urfave/cli/v2"
 )
 
 func init() {
@@ -12,8 +13,9 @@ func init() {
 }
 
 func main() {
-	app := cli.NewApp()
-	app.Name = "hroost"
-	app.UseShortOptionHandling = true
-	app.Setup()
+	app := command.Root()
+
+	if err := app.Run(os.Args); err != nil {
+		log.Fatal(err)
+	}
 }

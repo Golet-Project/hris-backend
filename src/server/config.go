@@ -144,10 +144,8 @@ func parseConfig() config {
 		log.Fatal("REDIS_MASTER_PORT is not set")
 	}
 
-	if val, ok := os.LookupEnv("REDIS_MASTER_PASSWORD"); ok && len(val) > 0 {
+	if val, ok := os.LookupEnv("REDIS_MASTER_PASSWORD"); ok {
 		cfg.redisMasterPassword = val
-	} else {
-		log.Fatal("REDIS_MASTER_PASSWORD is not set")
 	}
 
 	if val, ok := os.LookupEnv("REDIS_MASTER_DB"); ok && len(val) > 0 {
@@ -164,18 +162,16 @@ func parseConfig() config {
 	if val, ok := os.LookupEnv("ASYNQ_REDIS_MASTER_HOST"); ok && len(val) > 0 {
 		cfg.asynqRedisMasterHost = val
 	} else {
-		log.Fatal("REDIS_MASTER_QUEUE_HOST is not set")
+		log.Fatal("ASYNQ_REDIS_MASTER_HOST is not set")
 	}
 	if val, ok := os.LookupEnv("ASYNQ_REDIS_MASTER_PORT"); ok && len(val) > 0 {
 		cfg.asynqRedisMasterPort = val
 	} else {
-		log.Fatal("REDIS_MASTER_QUEUE_PORT")
+		log.Fatal("ASYNQ_REDIS_MASTER_PORT is not set")
 	}
 
-	if val, ok := os.LookupEnv("ASYNQ_REDIS_MASTER_PASSWORD"); ok && len(val) > 0 {
+	if val, ok := os.LookupEnv("ASYNQ_REDIS_MASTER_PASSWORD"); ok {
 		cfg.asynqRedisMasterPassword = val
-	} else {
-		log.Fatal("REDIS_MASTER_QUEUE_PASSWORD")
 	}
 
 	if val, ok := os.LookupEnv("ASYNQ_REDIS_MASTER_DB"); ok && len(val) > 0 {
@@ -186,7 +182,7 @@ func parseConfig() config {
 
 		cfg.asynqRedisMasterDb = db
 	} else {
-		log.Fatal("REDIS_MASTER_QUEUE_DB is not set")
+		log.Fatal("ASYNC_REDIS_MASTER_DB is not set")
 	}
 
 	if val, ok := os.LookupEnv("SMTP_HOST"); ok && len(val) > 0 {

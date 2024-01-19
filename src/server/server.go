@@ -78,6 +78,8 @@ func (s *Server) Run(ctx context.Context) error {
 		log.Fatal(err)
 	}
 
+	s.start()
+
 	// run app
 	g.Go(func() error {
 		log.Println("app listening on port", s.cfg.httpPort)
@@ -89,7 +91,11 @@ func (s *Server) Run(ctx context.Context) error {
 		return s.worker.Run(ctx)
 	})
 
-	return g.Wait()
+	if err := g.Wait(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *Server) withMasterDbConn(ctx context.Context) error {
