@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"hroost/module/shared/primitive"
+	"hroost/shared/primitive"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"

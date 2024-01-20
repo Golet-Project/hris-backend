@@ -1,7 +1,7 @@
 package server
 
 import (
-	"hroost/module/shared/middleware"
+	"hroost/server/middleware"
 )
 
 func (s *Server) route() {

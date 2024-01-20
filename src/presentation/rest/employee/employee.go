@@ -2,11 +2,13 @@ package employee
 
 import (
 	"fmt"
-	"hroost/module/shared/jwt"
-	"hroost/module/shared/primitive"
+	mobileJwt "hroost/mobile/lib/jwt"
+	tenantJwt "hroost/tenant/lib/jwt"
 
-	mobileService "hroost/domain/mobile/employee/service"
-	tenantService "hroost/domain/tenant/employee/service"
+	"hroost/shared/primitive"
+
+	mobileService "hroost/mobile/domain/employee/service"
+	tenantService "hroost/tenant/domain/employee/service"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -35,7 +37,7 @@ func (e Employee) CreateEmployee(c *fiber.Ctx) error {
 	appId := c.Locals("AppID").(primitive.AppID)
 	switch appId {
 	case primitive.TenantAppID:
-		claims := c.Locals("user_auth").(jwt.TenantCustomClaims)
+		claims := c.Locals("user_auth").(tenantJwt.CustomClaims)
 
 		var req tenantService.FindAllEmployeeIn
 		req.Domain = claims.Domain
@@ -71,7 +73,7 @@ func (e Employee) FindAllEmployee(c *fiber.Ctx) error {
 	appId := c.Locals("AppID").(primitive.AppID)
 	switch appId {
 	case primitive.TenantAppID:
-		claims := c.Locals("user_auth").(jwt.TenantCustomClaims)
+		claims := c.Locals("user_auth").(tenantJwt.CustomClaims)
 
 		var req tenantService.FindAllEmployeeIn
 		req.Domain = claims.Domain
@@ -108,7 +110,7 @@ func (e Employee) GetProfile(c *fiber.Ctx) error {
 
 	switch appId {
 	case primitive.MobileAppID:
-		claims := c.Locals("user_auth").(jwt.CustomClaims)
+		claims := c.Locals("user_auth").(mobileJwt.CustomClaims)
 
 		// call the service
 		serviceOut := e.mobileService.GetProfile(c.Context(), mobileService.GetProfileIn{
