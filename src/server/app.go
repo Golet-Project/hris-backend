@@ -2,13 +2,14 @@ package server
 
 import (
 	"hroost/server/middleware"
+	"log"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 )
 
-func (s *Server) start() error {
+func (s *Server) init() error {
 	s.app = fiber.New(fiber.Config{
 		AppName: s.cfg.appName,
 	})
@@ -29,6 +30,7 @@ func (s *Server) start() error {
 
 	presentation, err := s.newAppProvider()
 	if err != nil {
+		log.Println("error ges")
 		return err
 	}
 

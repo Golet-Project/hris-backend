@@ -8,38 +8,38 @@ import (
 	"hroost/presentation/rest/region"
 	"hroost/presentation/rest/tenant_management"
 
-	sharedRegionDbProvince "hroost/domain/shared/region/db/province"
-	sharedUserDb "hroost/domain/shared/user/db"
+	sharedRegionDbProvince "hroost/shared/domain/region/db/province"
+	sharedUserDb "hroost/shared/domain/user/db"
 
-	sharedRegionService "hroost/domain/shared/region/service"
-	sharedUserService "hroost/domain/shared/user/service"
+	sharedRegionService "hroost/shared/domain/region/service"
+	sharedUserService "hroost/shared/domain/user/service"
 
-	centralAuthDb "hroost/domain/central/auth/db"
-	centralAuthMemory "hroost/domain/central/auth/memory"
-	centralTenantDb "hroost/domain/central/tenant/db"
-	centralTenantQueue "hroost/domain/central/tenant/queue"
+	centralAuthDb "hroost/central/domain/auth/db"
+	centralAuthMemory "hroost/central/domain/auth/memory"
+	centralTenantDb "hroost/central/domain/tenant/db"
+	centralTenantQueue "hroost/central/domain/tenant/queue"
 
-	centralAuthService "hroost/domain/central/auth/service"
-	centralTenantService "hroost/domain/central/tenant/service"
+	centralAuthService "hroost/central/domain/auth/service"
+	centralTenantService "hroost/central/domain/tenant/service"
 
-	mobileAttendanceDb "hroost/domain/mobile/attendance/db"
-	mobileAuthDb "hroost/domain/mobile/auth/db"
-	mobileAuthMemory "hroost/domain/mobile/auth/memory"
-	mobileEmployeeDb "hroost/domain/mobile/employee/db"
-	mobileHomepageDb "hroost/domain/mobile/homepage/db"
+	mobileAttendanceDb "hroost/mobile/domain/attendance/db"
+	mobileAuthDb "hroost/mobile/domain/auth/db"
+	mobileAuthMemory "hroost/mobile/domain/auth/memory"
+	mobileEmployeeDb "hroost/mobile/domain/employee/db"
+	mobileHomepageDb "hroost/mobile/domain/homepage/db"
 
-	mobileAttendanceService "hroost/domain/mobile/attendance/service"
-	mobileAuthService "hroost/domain/mobile/auth/service"
-	mobileEmployeeService "hroost/domain/mobile/employee/service"
-	mobileHomepageService "hroost/domain/mobile/homepage/service"
+	mobileAttendanceService "hroost/mobile/domain/attendance/service"
+	mobileAuthService "hroost/mobile/domain/auth/service"
+	mobileEmployeeService "hroost/mobile/domain/employee/service"
+	mobileHomepageService "hroost/mobile/domain/homepage/service"
 
-	tenantAttendanceDb "hroost/domain/tenant/attendance/db"
-	tenantAuthDb "hroost/domain/tenant/auth/db"
-	tenantEmployeeDb "hroost/domain/tenant/employee/db"
+	tenantAttendanceDb "hroost/tenant/domain/attendance/db"
+	tenantAuthDb "hroost/tenant/domain/auth/db"
+	tenantEmployeeDb "hroost/tenant/domain/employee/db"
 
-	tenantAttendanceService "hroost/domain/tenant/attendance/service"
-	tenantAuthService "hroost/domain/tenant/auth/service"
-	tenantEmployeeService "hroost/domain/tenant/employee/service"
+	tenantAttendanceService "hroost/tenant/domain/attendance/service"
+	tenantAuthService "hroost/tenant/domain/auth/service"
+	tenantEmployeeService "hroost/tenant/domain/employee/service"
 )
 
 type SharedServiceProvider struct {
@@ -207,12 +207,22 @@ type TenantServiceProvider struct {
 }
 
 func (s *Server) initTenant() (*TenantServiceProvider, error) {
+	sharedService, err := s.initShared()
+	if err != nil {
+		return nil, err
+	}
+
 	// attendance
 	attendanceDb, err := tenantAttendanceDb.New(&tenantAttendanceDb.Config{PgResolver: s.pgResolver})
 	if err != nil {
 		return nil, err
 	}
-	attendanceService, err := tenantAttendanceService.New(&tenantAttendanceService.Config{Db: attendanceDb})
+	attendanceService, err := tenantAttendanceService.New(&tenantAttendanceService.Config{
+		Db: attendanceDb,
+
+		// shared service
+		UserService: sharedService.userService,
+	})
 	if err != nil {
 		return nil, err
 	}

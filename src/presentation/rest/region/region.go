@@ -2,9 +2,9 @@ package region
 
 import (
 	"fmt"
-	"hroost/module/shared/primitive"
+	"hroost/shared/primitive"
 
-	"hroost/domain/shared/region/service"
+	"hroost/shared/domain/region/service"
 
 	"github.com/gofiber/fiber/v2"
 )

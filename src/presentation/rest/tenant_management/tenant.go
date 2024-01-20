@@ -2,8 +2,8 @@ package tenant_management
 
 import (
 	"fmt"
-	centralService "hroost/domain/central/tenant/service"
-	"hroost/module/shared/primitive"
+	centralService "hroost/central/domain/tenant/service"
+	"hroost/shared/primitive"
 
 	"github.com/gofiber/fiber/v2"
 )

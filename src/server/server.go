@@ -9,6 +9,8 @@ import (
 	redisDb "hroost/infrastructure/store/redis"
 	"hroost/infrastructure/worker"
 	"log"
+	"os"
+	"os/signal"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/hibiken/asynq"
@@ -78,7 +80,10 @@ func (s *Server) Run(ctx context.Context) error {
 		log.Fatal(err)
 	}
 
-	s.start()
+	err = s.init()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// run app
 	g.Go(func() error {
@@ -91,9 +96,40 @@ func (s *Server) Run(ctx context.Context) error {
 		return s.worker.Run(ctx)
 	})
 
+	var sigChan = make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt)
+
+	g.Go(func() error {
+		<-sigChan
+		return s.ShutDown()
+	})
+
 	if err := g.Wait(); err != nil {
+		log.Println("error cuy", err)
 		return err
 	}
+
+	return nil
+}
+
+func (s *Server) ShutDown() error {
+	allConn := s.pgResolver.GetAllConn()
+	if allConn != nil {
+		allConn.Range(func(key, val interface{}) bool {
+			log.Printf("closing %s database connection\n", key)
+			pool := val.(*pgxpool.Pool)
+			pool.Close()
+
+			return true
+		})
+	}
+
+	log.Println("shutdown app")
+	if err := s.app.Shutdown(); err != nil {
+		return err
+	}
+
+	log.Println("application is shutdown properly")
 
 	return nil
 }
@@ -195,10 +231,10 @@ func (s *Server) withTenantDbConn(ctx context.Context) error {
 	// make a connection for each tenant
 	g, ctx := errgroup.WithContext(ctx)
 	for _, each := range tenants {
-		go func(tenant tenantStruct) {
+		func(tenant tenantStruct) {
 			g.Go(func() error {
 				db, err := postgres.NewTenantDb(&postgres.TenantDbConfig{
-					Domain: tenant.domain,
+					Domain: each.domain,
 					// NOTE: karena masih 1 instance db, jadi pakai user master
 					User:     s.cfg.pgMasterUser,
 					Password: s.cfg.pgMasterPassword,

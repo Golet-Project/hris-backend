@@ -2,12 +2,14 @@ package attendance
 
 import (
 	"fmt"
-	"hroost/module/shared/jwt"
-	"hroost/module/shared/primitive"
+	mobileJwt "hroost/mobile/lib/jwt"
+	tenantJwt "hroost/tenant/lib/jwt"
+
+	"hroost/shared/primitive"
 	"strconv"
 
-	mobileService "hroost/domain/mobile/attendance/service"
-	tenantService "hroost/domain/tenant/attendance/service"
+	mobileService "hroost/mobile/domain/attendance/service"
+	tenantService "hroost/tenant/domain/attendance/service"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/utils"
@@ -38,10 +40,10 @@ func (a Attendance) AddAttendance(c *fiber.Ctx) error {
 	var res primitive.BaseResponse
 
 	appId := c.Locals("AppID").(primitive.AppID)
-	claims := c.Locals("user_auth").(jwt.CustomClaims)
 
 	switch appId {
 	case primitive.MobileAppID:
+		claims := c.Locals("user_auth").(mobileJwt.CustomClaims)
 		tzString := utils.CopyString(c.Get("local_tz"))
 		tz, err := strconv.Atoi(tzString)
 		if err != nil {
@@ -83,10 +85,10 @@ func (a Attendance) Checkout(c *fiber.Ctx) error {
 	var res primitive.BaseResponse
 
 	appId := c.Locals("AppID").(primitive.AppID)
-	claims := c.Locals("user_auth").(jwt.CustomClaims)
 
 	switch appId {
 	case primitive.MobileAppID:
+		claims := c.Locals("user_auth").(mobileJwt.CustomClaims)
 		tzString := utils.CopyString(c.Get("local_tz"))
 		tz, err := strconv.Atoi(tzString)
 		if err != nil {
@@ -128,7 +130,7 @@ func (a Attendance) FindAllAttendance(c *fiber.Ctx) error {
 
 	switch appId {
 	case primitive.TenantAppID:
-		claims := c.Locals("user_auth").(jwt.TenantCustomClaims)
+		claims := c.Locals("user_auth").(tenantJwt.CustomClaims)
 
 		serviceOut := a.tenantService.FindAllAttendance(c.Context(), tenantService.FindAllAttendanceIn{
 			Domain: claims.Domain,
@@ -173,7 +175,7 @@ func (a Attendance) GetTodayAttendance(c *fiber.Ctx) error {
 			return c.JSON(res)
 		}
 
-		claims := c.Locals("user_auth").(jwt.CustomClaims)
+		claims := c.Locals("user_auth").(mobileJwt.CustomClaims)
 
 		var req mobileService.GetTodayAttendanceIn
 		req.EmployeeUID = claims.UserUID

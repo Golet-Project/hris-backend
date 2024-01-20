@@ -2,10 +2,11 @@ package homepage
 
 import (
 	"fmt"
-	"hroost/module/shared/jwt"
-	"hroost/module/shared/primitive"
+	"hroost/shared/primitive"
 
-	mobileService "hroost/domain/mobile/homepage/service"
+	mobileJwt "hroost/mobile/lib/jwt"
+
+	mobileService "hroost/mobile/domain/homepage/service"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
@@ -34,10 +35,10 @@ func (h Homepage) HomePage(c *fiber.Ctx) error {
 	var res primitive.BaseResponse
 
 	appId := c.Locals("AppID").(primitive.AppID)
-	claims := c.Locals("user_auth").(jwt.CustomClaims)
 
 	switch appId {
 	case primitive.MobileAppID:
+		claims := c.Locals("user_auth").(mobileJwt.CustomClaims)
 		tzString := utils.CopyString(c.Get("local_tz"))
 		tz, err := strconv.Atoi(tzString)
 		if err != nil {

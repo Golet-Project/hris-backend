@@ -2,10 +2,10 @@ package auth
 
 import (
 	"fmt"
-	centralService "hroost/domain/central/auth/service"
-	mobileService "hroost/domain/mobile/auth/service"
-	tenantService "hroost/domain/tenant/auth/service"
-	"hroost/module/shared/primitive"
+	centralService "hroost/central/domain/auth/service"
+	mobileService "hroost/mobile/domain/auth/service"
+	"hroost/shared/primitive"
+	tenantService "hroost/tenant/domain/auth/service"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/utils"
