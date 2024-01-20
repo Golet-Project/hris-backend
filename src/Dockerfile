@@ -8,7 +8,7 @@ RUN go mod tidy
 
 COPY . .
 
-RUN go build -o hroost-backend .
+RUN go build -o hroost-backend ./cmd
 
 FROM ubuntu:22.04 AS runtime
 
