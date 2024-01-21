@@ -21,7 +21,9 @@ func NewTenantManagement(cfg *Config) (*TenantManagement, error) {
 		return nil, fmt.Errorf("dependency for tenant_management required")
 	}
 
-	return &TenantManagement{}, nil
+	return &TenantManagement{
+		centralService: cfg.CentralService,
+	}, nil
 }
 
 func (t TenantManagement) CreateTenant(c *fiber.Ctx) error {

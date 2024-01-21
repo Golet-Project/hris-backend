@@ -2,7 +2,6 @@ package server
 
 import (
 	"hroost/server/middleware"
-	"log"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -30,7 +29,6 @@ func (s *Server) init() error {
 
 	presentation, err := s.newAppProvider()
 	if err != nil {
-		log.Println("error ges")
 		return err
 	}
 

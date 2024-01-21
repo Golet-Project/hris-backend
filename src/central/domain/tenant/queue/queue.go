@@ -6,6 +6,10 @@ import (
 	"github.com/hibiken/asynq"
 )
 
+const (
+	MigrateTenantDb = "central:migrate_tenant_db"
+)
+
 type Queue struct {
 	client *asynq.Client
 }

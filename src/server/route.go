@@ -41,7 +41,10 @@ func (s *Server) route() {
 
 	// region
 	region := s.app.Group("/region")
-	region.Get("/provinces", rest.region.FindAllProvince)
+	region.Get("/province", rest.region.FindAllProvince)
+	region.Get("/regency", rest.region.FindAllRegencyByProvinceId)
+	region.Get("/district", rest.region.FindAllDistrictByRegencyId)
+	region.Get("/village", rest.region.FindAllVillageByDistrictId)
 
 	// tenant management
 	tenantManagement := s.app.Group("/tenant", middleware.Jwt())

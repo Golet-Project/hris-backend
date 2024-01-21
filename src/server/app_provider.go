@@ -8,7 +8,10 @@ import (
 	"hroost/presentation/rest/region"
 	"hroost/presentation/rest/tenant_management"
 
+	sharedRegionDbDistrict "hroost/shared/domain/region/db/district"
 	sharedRegionDbProvince "hroost/shared/domain/region/db/province"
+	sharedRegionDbRegency "hroost/shared/domain/region/db/regency"
+	sharedRegionDbVillage "hroost/shared/domain/region/db/village"
 	sharedUserDb "hroost/shared/domain/user/db"
 
 	sharedRegionService "hroost/shared/domain/region/service"
@@ -53,7 +56,25 @@ func (s *Server) initShared() (*SharedServiceProvider, error) {
 	if err != nil {
 		return nil, err
 	}
-	regionService, err := sharedRegionService.New(&sharedRegionService.Config{ProvinceDb: regionDbProvince})
+	regionDbRegency, err := sharedRegionDbRegency.New(&sharedRegionDbRegency.Config{PgResolver: s.pgResolver})
+	if err != nil {
+		return nil, err
+	}
+	regionDbDistrict, err := sharedRegionDbDistrict.New(&sharedRegionDbDistrict.Config{PgResolver: s.pgResolver})
+	if err != nil {
+		return nil, err
+	}
+	regionDbVillage, err := sharedRegionDbVillage.New(&sharedRegionDbVillage.Config{PgResolver: s.pgResolver})
+	if err != nil {
+		return nil, err
+	}
+
+	regionService, err := sharedRegionService.New(&sharedRegionService.Config{
+		ProvinceDb: regionDbProvince,
+		RegencyDb:  regionDbRegency,
+		DistrictDb: regionDbDistrict,
+		VillageDb:  regionDbVillage,
+	})
 	if err != nil {
 		return nil, err
 	}

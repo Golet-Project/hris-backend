@@ -54,7 +54,7 @@ func ValidateFindAllEmployeeIn(req FindAllEmployeeIn) *primitive.RequestValidati
 }
 
 // FindAllEmployee find all employee
-func (s *Service) FindAllEmployee(ctx context.Context, req FindAllEmployeeIn) (out FindAllEmployeeOut) {
+func (s Service) FindAllEmployee(ctx context.Context, req FindAllEmployeeIn) (out FindAllEmployeeOut) {
 	// validate the request
 	if err := ValidateFindAllEmployeeIn(req); err != nil {
 		out.SetResponse(http.StatusBadRequest, "request validation failed")

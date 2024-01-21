@@ -28,7 +28,10 @@ func NewEmployee(cfg *Config) (*Employee, error) {
 		return nil, fmt.Errorf("dependecy for employee required")
 	}
 
-	return &Employee{}, nil
+	return &Employee{
+		tenantService: cfg.TenantService,
+		mobileService: cfg.MobileService,
+	}, nil
 }
 
 func (e Employee) CreateEmployee(c *fiber.Ctx) error {

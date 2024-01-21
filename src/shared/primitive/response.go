@@ -60,5 +60,5 @@ type BaseResponse struct {
 // should be returned
 type BaseResponseArray struct {
 	Message string        `json:"message"`
-	Data    []interface{} `json:"data,omitempty"`
+	Data    []interface{} `json:"data"`
 }
