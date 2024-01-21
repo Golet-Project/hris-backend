@@ -4,8 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	centralTenantQueue "hroost/central/domain/tenant/queue"
+
 	redisQueue "hroost/infrastructure/queue/redis"
 	"hroost/infrastructure/store/postgres"
+
 	redisDb "hroost/infrastructure/store/redis"
 	"hroost/infrastructure/worker"
 	"log"
@@ -105,7 +108,6 @@ func (s *Server) Run(ctx context.Context) error {
 	})
 
 	if err := g.Wait(); err != nil {
-		log.Println("error cuy", err)
 		return err
 	}
 
@@ -234,7 +236,7 @@ func (s *Server) withTenantDbConn(ctx context.Context) error {
 		func(tenant tenantStruct) {
 			g.Go(func() error {
 				db, err := postgres.NewTenantDb(&postgres.TenantDbConfig{
-					Domain: each.domain,
+					Domain: tenant.domain,
 					// NOTE: karena masih 1 instance db, jadi pakai user master
 					User:     s.cfg.pgMasterUser,
 					Password: s.cfg.pgMasterPassword,
@@ -287,7 +289,7 @@ func (s *Server) withWorkerDbConn(ctx context.Context) error {
 	}
 
 	err = s.pgResolver.Register(postgres.Database{
-		DomainName: postgres.Domain("worker"),
+		DomainName: postgres.WorkerDomain,
 		Pool:       pgPool,
 	})
 	if err != nil {
@@ -339,6 +341,14 @@ func (s *Server) withWorker(ctx context.Context) error {
 		AsynqRedisMasterPort:     s.cfg.asynqRedisMasterPort,
 		AsynqRedisMasterDb:       s.cfg.asynqRedisMasterDb,
 	})
+
+	workerConn, err := s.pgResolver.Resolve(postgres.WorkerDomain)
+	if err != nil {
+		return err
+	}
+
+	s.worker.RegisterHandler(centralTenantQueue.MigrateTenantDb, centralTenantQueue.NewMigrateTenantDbHandler(workerConn, s.pgResolver))
+
 	if err != nil {
 		return err
 	}

@@ -14,6 +14,7 @@ type Domain string
 
 const (
 	MasterDomain Domain = "master"
+	WorkerDomain Domain = "worker"
 )
 
 type Database struct {

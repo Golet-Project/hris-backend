@@ -47,3 +47,90 @@ func (r Region) FindAllProvince(c *fiber.Ctx) error {
 	c.Status(serviceOut.GetCode())
 	return c.JSON(res)
 }
+
+func (r Region) FindAllRegencyByProvinceId(c *fiber.Ctx) error {
+	var res primitive.BaseResponseArray
+
+	var req service.FindAllRegencyByProvinceIdIn
+	if err := c.QueryParser(&req); err != nil {
+		c.Status(fiber.StatusBadRequest)
+		res.Message = err.Error()
+		return c.JSON(res)
+	}
+
+	serviceOut := r.service.FindAllRegencyByProvinceId(c.Context(), req)
+
+	res.Message = serviceOut.GetMessage()
+
+	if serviceOut.GetCode() >= 200 && serviceOut.GetCode() < 400 {
+		data := make([]interface{}, len(serviceOut.Regency))
+		for i, v := range serviceOut.Regency {
+			data[i] = v
+		}
+
+		res.Data = data
+	} else {
+		res.Data = nil
+	}
+
+	c.Status(serviceOut.GetCode())
+	return c.JSON(res)
+}
+
+func (r Region) FindAllDistrictByRegencyId(c *fiber.Ctx) error {
+	var res primitive.BaseResponseArray
+
+	var req service.FindAllDistrictByRegencyIdIn
+	if err := c.QueryParser(&req); err != nil {
+		c.Status(fiber.StatusBadRequest)
+		res.Message = err.Error()
+		return c.JSON(res)
+	}
+
+	serviceOut := r.service.FindAllDistrictByRegencyId(c.Context(), req)
+
+	res.Message = serviceOut.GetMessage()
+
+	if serviceOut.GetCode() >= 200 && serviceOut.GetCode() < 400 {
+		data := make([]interface{}, len(serviceOut.District))
+		for i, v := range serviceOut.District {
+			data[i] = v
+		}
+
+		res.Data = data
+	} else {
+		res.Data = nil
+	}
+
+	c.Status(serviceOut.GetCode())
+	return c.JSON(res)
+}
+
+func (r Region) FindAllVillageByDistrictId(c *fiber.Ctx) error {
+	var res primitive.BaseResponseArray
+
+	var req service.FindAllVillageByDistrictIdIn
+	if err := c.QueryParser(&req); err != nil {
+		c.Status(fiber.StatusBadRequest)
+		res.Message = err.Error()
+		return c.JSON(res)
+	}
+
+	serviceOut := r.service.FindAllVillageByDistrictId(c.Context(), req)
+
+	res.Message = serviceOut.GetMessage()
+
+	if serviceOut.GetCode() >= 200 && serviceOut.GetCode() < 400 {
+		data := make([]interface{}, len(serviceOut.Village))
+		for i, v := range serviceOut.Village {
+			data[i] = v
+		}
+
+		res.Data = data
+	} else {
+		res.Data = nil
+	}
+
+	c.Status(serviceOut.GetCode())
+	return c.JSON(res)
+}

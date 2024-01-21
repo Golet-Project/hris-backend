@@ -34,16 +34,13 @@ func NewWorker(cfg *Config) (*Worker, error) {
 		cfg.AsynqRedisMasterDb,
 	)
 
-	return &Worker{
+	w := &Worker{
 		redisUri: redisUri,
-	}, nil
-}
+	}
 
-// Run is blocking
-func (w *Worker) Run(ctx context.Context) error {
 	clientOpt, err := asynq.ParseRedisURI(w.redisUri)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	w.server = asynq.NewServer(
@@ -56,10 +53,16 @@ func (w *Worker) Run(ctx context.Context) error {
 
 	w.mux = asynq.NewServeMux()
 
-	// TODO: register task
+	return w, nil
+}
 
+func (w *Worker) RegisterHandler(pattern string, handler asynq.Handler) {
+	w.mux.Handle(pattern, handler)
+}
+
+// Run is blocking
+func (w *Worker) Run(ctx context.Context) error {
 	log.Println("worker is running...")
-
 	return w.server.Run(w.mux)
 }
 
