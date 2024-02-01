@@ -42,23 +42,20 @@ func (e Employee) CreateEmployee(c *fiber.Ctx) error {
 	case primitive.TenantAppID:
 		claims := c.Locals("user_auth").(tenantJwt.CustomClaims)
 
-		var req tenantService.FindAllEmployeeIn
-		req.Domain = claims.Domain
+		var body tenantService.CreateEmployeeIn
+		if err := c.BodyParser(&body); err != nil {
+			c.Status(fiber.StatusBadRequest)
+			res.Message = err.Error()
+			return c.JSON(res)
+		}
+
+		body.Domain = claims.Domain
 
 		// call the services
-		serviceOut := e.tenantService.FindAllEmployee(c.Context(), req)
+		serviceOut := e.tenantService.CreateEmployee(c.Context(), body)
 
 		res.Message = serviceOut.GetMessage()
-
-		if serviceOut.GetCode() >= 400 {
-			res.Data = nil
-		} else {
-			data := make([]interface{}, len(serviceOut.Employee))
-			for i, v := range serviceOut.Employee {
-				data[i] = v
-			}
-			res.Data = data
-		}
+		res.Data = nil
 
 		c.Status(serviceOut.GetCode())
 		return c.JSON(res)
