@@ -41,7 +41,7 @@ func (d *Db) CreateEmployee(ctx context.Context, data CreateEmployeeIn) (err err
 
 	var insertedUid string
 	err = masterTx.QueryRow(ctx, insertToMasterSql,
-		data.Domain, data.Email, data.FirstName, data.LastName, data.BirthDate,
+		data.Domain, data.Email, data.Password, data.FirstName, data.LastName, data.BirthDate,
 	).Scan(&insertedUid)
 	if err != nil {
 		if err2 := masterTx.Rollback(ctx); err2 != nil {
