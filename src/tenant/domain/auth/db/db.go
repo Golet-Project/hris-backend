@@ -1,11 +1,16 @@
 package db
 
 import (
+	"context"
 	"fmt"
 	"hroost/infrastructure/store/postgres"
 
 	redisClient "github.com/redis/go-redis/v9"
 )
+
+type IDbStore interface {
+	GetLoginCredential(ctx context.Context, email string) (out GetLoginCredentialOut, err error)
+}
 
 type Db struct {
 	pgResolver *postgres.Resolver

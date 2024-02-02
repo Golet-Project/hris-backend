@@ -1,6 +1,7 @@
 package queue
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/hibiken/asynq"
@@ -9,6 +10,10 @@ import (
 const (
 	MigrateTenantDb = "central:migrate_tenant_db"
 )
+
+type IQueue interface {
+	MigrateTenantDB(ctx context.Context, in MigrateTenantDBIn) error
+}
 
 type Queue struct {
 	client *asynq.Client

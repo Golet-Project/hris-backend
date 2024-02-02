@@ -8,13 +8,13 @@ import (
 )
 
 type Config struct {
-	Db *db.Db
+	Db db.IDbStore
 
 	UserService *userService.Service
 }
 
 type Service struct {
-	db *db.Db
+	db db.IDbStore
 
 	// other service
 	userService *userService.Service

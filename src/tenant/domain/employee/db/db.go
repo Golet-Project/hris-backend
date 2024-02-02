@@ -1,9 +1,16 @@
 package db
 
 import (
+	"context"
 	"fmt"
 	"hroost/infrastructure/store/postgres"
 )
+
+type IDbStore interface {
+	CreateEmployee(ctx context.Context, data CreateEmployeeIn) (err error)
+
+	FindAllEmployee(ctx context.Context, domain string) (out []FindAllEmployeeOut, err error)
+}
 
 type Config struct {
 	PgResolver *postgres.Resolver

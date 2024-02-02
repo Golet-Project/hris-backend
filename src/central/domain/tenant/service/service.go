@@ -7,13 +7,13 @@ import (
 )
 
 type Config struct {
-	Db    *db.Db
-	Queue *queue.Queue
+	Db    db.IDbStore
+	Queue queue.IQueue
 }
 
 type Service struct {
-	db    *db.Db
-	queue *queue.Queue
+	db    db.IDbStore
+	queue queue.IQueue
 }
 
 func New(cfg *Config) (*Service, error) {

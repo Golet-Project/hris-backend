@@ -6,11 +6,11 @@ import (
 )
 
 type Config struct {
-	Db *db.Db
+	Db db.IDbStore
 }
 
 type Service struct {
-	db *db.Db
+	db db.IDbStore
 }
 
 func New(cfg *Config) (*Service, error) {
