@@ -1,9 +1,14 @@
 package db
 
 import (
+	"context"
 	"fmt"
 	"hroost/infrastructure/store/postgres"
 )
+
+type IDbStore interface {
+	FindHomePage(ctx context.Context, domain string, param FindHomePageIn) (out FindHomePageOut, err error)
+}
 
 type Db struct {
 	pgResolver *postgres.Resolver

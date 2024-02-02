@@ -9,16 +9,16 @@ import (
 )
 
 type Service struct {
-	db     *db.Db
-	memory *memory.Memory
+	db     db.IDbStore
+	memory memory.IMemory
 
 	// other service
 	userService *userService.Service
 }
 
 type Config struct {
-	Db     *db.Db
-	Memory *memory.Memory
+	Db     db.IDbStore
+	Memory memory.IMemory
 
 	// other service
 	UserService *userService.Service

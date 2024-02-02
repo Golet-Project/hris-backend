@@ -7,13 +7,13 @@ import (
 )
 
 type Service struct {
-	db *db.Db
+	db db.IDbStore
 
 	userService *userService.Service
 }
 
 type Config struct {
-	Db *db.Db
+	Db db.IDbStore
 
 	UserService *userService.Service
 }

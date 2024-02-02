@@ -13,13 +13,13 @@ import (
 var oauthState = os.Getenv("OAUTH_STATE")
 
 type Config struct {
-	Db     *db.Db
-	Memory *memory.Memory
+	Db     db.IDbStore
+	Memory memory.IMemory
 }
 
 type Service struct {
-	db     *db.Db
-	memory *memory.Memory
+	db     db.IDbStore
+	memory memory.IMemory
 
 	oauth2Cfg *oauth2.Config
 }
