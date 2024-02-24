@@ -50,3 +50,31 @@ func (r RequestValidationError) Error() string {
 
 	return s.String()
 }
+
+type RepoErrorCode string
+
+const (
+	RepoErrorCodeDataNotFound RepoErrorCode = "data_not_found"
+	RepoErrorCodeServerError  RepoErrorCode = "server_error"
+)
+
+func (r RepoErrorCode) String() string {
+	switch r {
+	case RepoErrorCodeDataNotFound:
+		return "data_not_found"
+	case RepoErrorCodeServerError:
+		return "server_error"
+
+	default:
+		return "UNSPECIFIED"
+	}
+}
+
+type RepoError struct {
+	Issue RepoErrorCode
+	Err   error
+}
+
+func (r RepoError) Error() string {
+	return r.Err.Error()
+}

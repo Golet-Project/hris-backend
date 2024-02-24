@@ -2,22 +2,24 @@ package service_test
 
 import (
 	"errors"
-	"hroost/mobile/domain/auth/service"
+	authService "hroost/mobile/domain/auth/service"
 	"hroost/shared/primitive"
 	"reflect"
 	"testing"
 )
 
 func TestValidateBasicAuthLoginBody(t *testing.T) {
+	service := authService.BasicAuthLogin{}
+
 	type Test struct {
 		name    string
-		payload service.BasicAuthLoginIn
+		payload authService.BasicAuthLoginIn
 		want    *primitive.RequestValidationError
 	}
 	positiveTest := []Test{
 		{
 			name: "payload is valid",
-			payload: service.BasicAuthLoginIn{
+			payload: authService.BasicAuthLoginIn{
 				Email:    "email@email.com",
 				Password: "Password321",
 			},
@@ -25,7 +27,7 @@ func TestValidateBasicAuthLoginBody(t *testing.T) {
 		},
 		{
 			name: "payload is valid",
-			payload: service.BasicAuthLoginIn{
+			payload: authService.BasicAuthLoginIn{
 				Email:    "email@email.com",
 				Password: "Password@321",
 			},
@@ -42,14 +44,14 @@ func TestValidateBasicAuthLoginBody(t *testing.T) {
 		})
 	}
 
-	validPayload := service.BasicAuthLoginIn{
+	validPayload := authService.BasicAuthLoginIn{
 		Email:    "email@email.com",
 		Password: "Password321",
 	}
 	negativeTest := []Test{
 		{
 			name: "email is required",
-			payload: service.BasicAuthLoginIn{
+			payload: authService.BasicAuthLoginIn{
 				Password: validPayload.Password,
 			},
 			want: &primitive.RequestValidationError{
@@ -64,7 +66,7 @@ func TestValidateBasicAuthLoginBody(t *testing.T) {
 		},
 		{
 			name: "email is invalid",
-			payload: service.BasicAuthLoginIn{
+			payload: authService.BasicAuthLoginIn{
 				Email:    "email",
 				Password: validPayload.Password,
 			},
@@ -80,7 +82,7 @@ func TestValidateBasicAuthLoginBody(t *testing.T) {
 		},
 		{
 			name: "password is required",
-			payload: service.BasicAuthLoginIn{
+			payload: authService.BasicAuthLoginIn{
 				Email: validPayload.Email,
 			},
 			want: &primitive.RequestValidationError{
@@ -95,7 +97,7 @@ func TestValidateBasicAuthLoginBody(t *testing.T) {
 		},
 		{
 			name: "password is too short",
-			payload: service.BasicAuthLoginIn{
+			payload: authService.BasicAuthLoginIn{
 				Email:    validPayload.Email,
 				Password: "pass",
 			},
@@ -121,7 +123,7 @@ func TestValidateBasicAuthLoginBody(t *testing.T) {
 		},
 		{
 			name: "password contains no lowercase characters",
-			payload: service.BasicAuthLoginIn{
+			payload: authService.BasicAuthLoginIn{
 				Email:    validPayload.Email,
 				Password: "PASSWORD123",
 			},
@@ -137,7 +139,7 @@ func TestValidateBasicAuthLoginBody(t *testing.T) {
 		},
 		{
 			name: "password contains no uppsercase characters",
-			payload: service.BasicAuthLoginIn{
+			payload: authService.BasicAuthLoginIn{
 				Email:    validPayload.Email,
 				Password: "password321",
 			},
@@ -153,7 +155,7 @@ func TestValidateBasicAuthLoginBody(t *testing.T) {
 		},
 		{
 			name: "password contains no number",
-			payload: service.BasicAuthLoginIn{
+			payload: authService.BasicAuthLoginIn{
 				Email:    validPayload.Email,
 				Password: "Passwords",
 			},

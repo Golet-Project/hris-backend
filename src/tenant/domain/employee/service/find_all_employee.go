@@ -2,20 +2,17 @@ package service
 
 import (
 	"context"
-	"errors"
 	"hroost/shared/primitive"
 	"hroost/shared/utils"
-	"hroost/tenant/domain/employee/db"
+	"hroost/tenant/domain/employee/model"
 	"net/http"
-
-	"github.com/jackc/pgx/v5"
 )
 
 type FindAllEmployeeIn struct {
 	Domain string
 }
 
-type FindAllEmployee struct {
+type Employee struct {
 	UID            string                   `json:"uid"`
 	FullName       string                   `json:"full_name"`
 	Gender         primitive.Gender         `json:"gender"`
@@ -30,10 +27,64 @@ type FindAllEmployee struct {
 type FindAllEmployeeOut struct {
 	primitive.CommonResult
 
-	Employee []FindAllEmployee `json:"employee"`
+	Employee []Employee `json:"employee"`
 }
 
-func ValidateFindAllEmployeeIn(req FindAllEmployeeIn) *primitive.RequestValidationError {
+type FindAllEmployeeDb interface {
+	FindAllEmployee(ctx context.Context, domain string) (out []model.FindAllEmployeeOut, err *primitive.RepoError)
+}
+
+type FindAllEmployee struct {
+	Db FindAllEmployeeDb
+}
+
+// FindAllEmployee find all employee
+func (s *FindAllEmployee) Exec(ctx context.Context, req FindAllEmployeeIn) (out FindAllEmployeeOut) {
+	// validate the request
+	if err := s.ValidateFindAllEmployeeIn(req); err != nil {
+		out.SetResponse(http.StatusBadRequest, "request validation failed")
+		return
+	}
+
+	// find the employee
+	employees, repoError := s.Db.FindAllEmployee(ctx, req.Domain)
+	if repoError != nil {
+		switch repoError.Issue {
+		case primitive.RepoErrorCodeDataNotFound:
+			out.SetResponse(http.StatusOK, "success")
+			return
+		default:
+			out.SetResponse(http.StatusInternalServerError, "internal server error")
+			return
+		}
+	}
+
+	// map the responses
+	s.mapFindAllEmployee(employees, &out)
+
+	out.SetResponse(http.StatusOK, "success")
+	return
+}
+
+// mapFindALlEmployee map the data returned from database into response
+func (s *FindAllEmployee) mapFindAllEmployee(in []model.FindAllEmployeeOut, out *FindAllEmployeeOut) {
+	for _, employee := range in {
+		var o Employee
+		o.UID = employee.UID
+		o.FullName = employee.FullName
+		o.Gender = employee.Gender
+		o.Age = utils.CalculateAge(employee.BirthDate)
+		o.Email = employee.Email
+		o.PhoneNumber = ""
+		o.JoinDate = employee.JoinDate.Format("2006-01-02")
+		o.EndDate = employee.EndDate
+		o.EmployeeStatus = employee.EmployeeStatus
+
+		out.Employee = append(out.Employee, o)
+	}
+}
+
+func (s *FindAllEmployee) ValidateFindAllEmployeeIn(req FindAllEmployeeIn) *primitive.RequestValidationError {
 	var allIssues []primitive.RequestValidationIssue
 
 	if req.Domain == "" {
@@ -51,49 +102,4 @@ func ValidateFindAllEmployeeIn(req FindAllEmployeeIn) *primitive.RequestValidati
 	}
 
 	return nil
-}
-
-// FindAllEmployee find all employee
-func (s Service) FindAllEmployee(ctx context.Context, req FindAllEmployeeIn) (out FindAllEmployeeOut) {
-	// validate the request
-	if err := ValidateFindAllEmployeeIn(req); err != nil {
-		out.SetResponse(http.StatusBadRequest, "request validation failed")
-		return
-	}
-
-	// find the employee
-	employees, err := s.db.FindAllEmployee(ctx, req.Domain)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			out.SetResponse(http.StatusOK, "success")
-			return
-		} else {
-			out.SetResponse(http.StatusInternalServerError, "internal server error")
-			return
-		}
-	}
-
-	// map the responses
-	s.mapFindAllEmployee(employees, &out)
-
-	out.SetResponse(http.StatusOK, "success")
-	return
-}
-
-// mapFindALlEmployee map the data returned from database into response
-func (s *Service) mapFindAllEmployee(in []db.FindAllEmployeeOut, out *FindAllEmployeeOut) {
-	for _, employee := range in {
-		var o FindAllEmployee
-		o.UID = employee.UID
-		o.FullName = employee.FullName
-		o.Gender = employee.Gender
-		o.Age = utils.CalculateAge(employee.BirthDate)
-		o.Email = employee.Email
-		o.PhoneNumber = ""
-		o.JoinDate = employee.JoinDate.Format("2006-01-02")
-		o.EndDate = employee.EndDate
-		o.EmployeeStatus = employee.EmployeeStatus
-
-		out.Employee = append(out.Employee, o)
-	}
 }

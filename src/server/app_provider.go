@@ -7,6 +7,7 @@ import (
 	"hroost/presentation/rest/homepage"
 	"hroost/presentation/rest/region"
 	"hroost/presentation/rest/tenant_management"
+	"os"
 
 	sharedRegionDbDistrict "hroost/shared/domain/region/db/district"
 	sharedRegionDbProvince "hroost/shared/domain/region/db/province"
@@ -22,27 +23,18 @@ import (
 	centralTenantDb "hroost/central/domain/tenant/db"
 	centralTenantQueue "hroost/central/domain/tenant/queue"
 
-	centralAuthService "hroost/central/domain/auth/service"
-	centralTenantService "hroost/central/domain/tenant/service"
-
 	mobileAttendanceDb "hroost/mobile/domain/attendance/db"
 	mobileAuthDb "hroost/mobile/domain/auth/db"
 	mobileAuthMemory "hroost/mobile/domain/auth/memory"
 	mobileEmployeeDb "hroost/mobile/domain/employee/db"
 	mobileHomepageDb "hroost/mobile/domain/homepage/db"
 
-	mobileAttendanceService "hroost/mobile/domain/attendance/service"
-	mobileAuthService "hroost/mobile/domain/auth/service"
-	mobileEmployeeService "hroost/mobile/domain/employee/service"
-	mobileHomepageService "hroost/mobile/domain/homepage/service"
-
 	tenantAttendanceDb "hroost/tenant/domain/attendance/db"
 	tenantAuthDb "hroost/tenant/domain/auth/db"
 	tenantEmployeeDb "hroost/tenant/domain/employee/db"
 
-	tenantAttendanceService "hroost/tenant/domain/attendance/service"
-	tenantAuthService "hroost/tenant/domain/auth/service"
-	tenantEmployeeService "hroost/tenant/domain/employee/service"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/endpoints"
 )
 
 type SharedServiceProvider struct {
@@ -96,8 +88,13 @@ func (s *Server) initShared() (*SharedServiceProvider, error) {
 }
 
 type CentralServiceProvider struct {
-	authService   *centralAuthService.Service
-	tenantSerivce *centralTenantService.Service
+	authDb     *centralAuthDb.Db
+	authMemory *centralAuthMemory.Memory
+
+	tenantDb    *centralTenantDb.Db
+	tenantQueue *centralTenantQueue.Queue
+
+	oauth2Cfg *oauth2.Config
 }
 
 func (s *Server) initCentral() (*CentralServiceProvider, error) {
@@ -113,10 +110,18 @@ func (s *Server) initCentral() (*CentralServiceProvider, error) {
 	if err != nil {
 		return nil, err
 	}
-	authService, err := centralAuthService.New(&centralAuthService.Config{
-		Db:     authDb,
-		Memory: authMemory,
-	})
+
+	// oauthcfg
+	oauth2cfg := &oauth2.Config{
+		ClientID:     os.Getenv("OAUTH_CLIENT_ID"),
+		ClientSecret: os.Getenv("OAUTH_CLIENT_SECRET"),
+		Endpoint:     endpoints.Google,
+		RedirectURL:  os.Getenv("OAUTH_REDIRECT_URL"),
+		Scopes: []string{
+			"https://www.googleapis.com/auth/userinfo.email",
+			"https://www.googleapis.com/auth/userinfo.profile",
+		},
+	}
 
 	// tenant
 	tenantDb, err := centralTenantDb.New(&centralTenantDb.Config{PgResolver: s.pgResolver})
@@ -127,44 +132,32 @@ func (s *Server) initCentral() (*CentralServiceProvider, error) {
 	if err != nil {
 		return nil, err
 	}
-	tenantService, err := centralTenantService.New(&centralTenantService.Config{
-		Db:    tenantDb,
-		Queue: tenantQueue,
-	})
-	if err != nil {
-		return nil, err
-	}
 
 	return &CentralServiceProvider{
-		authService:   authService,
-		tenantSerivce: tenantService,
+		authDb:     authDb,
+		authMemory: authMemory,
+
+		tenantDb:    tenantDb,
+		tenantQueue: tenantQueue,
+
+		oauth2Cfg: oauth2cfg,
 	}, nil
 }
 
 type MobileServiceProvider struct {
-	attendanceService *mobileAttendanceService.Service
-	authService       *mobileAuthService.Service
-	employeeService   *mobileEmployeeService.Service
-	homepageService   *mobileHomepageService.Service
+	authDb     *mobileAuthDb.Db
+	authMemory *mobileAuthMemory.Memory
+
+	attendanceDb *mobileAttendanceDb.Db
+
+	employeeDb *mobileEmployeeDb.Db
+
+	homepageDb *mobileHomepageDb.Db
 }
 
 func (s *Server) initMobile() (*MobileServiceProvider, error) {
-	sharedService, err := s.initShared()
-	if err != nil {
-		return nil, err
-	}
-
 	// attendance
-	attendanceDb, err := mobileAttendanceDb.New(&mobileAttendanceDb.Config{PgResolver: s.pgResolver})
-	if err != nil {
-		return nil, err
-	}
-	attendanceService, err := mobileAttendanceService.New(&mobileAttendanceService.Config{
-		Db: attendanceDb,
-
-		// shared service
-		UserService: sharedService.userService,
-	})
+	attendanceDb, err := mobileAttendanceDb.New(&mobileAttendanceDb.Config{PgResolver: s.pgResolver, Redis: s.redisClient})
 	if err != nil {
 		return nil, err
 	}
@@ -178,72 +171,42 @@ func (s *Server) initMobile() (*MobileServiceProvider, error) {
 	if err != nil {
 		return nil, err
 	}
-	authService, err := mobileAuthService.New(&mobileAuthService.Config{
-		Db:     authDb,
-		Memory: authMemory,
-
-		// shared service
-		UserService: sharedService.userService,
-	})
 
 	// employee
-	employeeDb, err := mobileEmployeeDb.New(&mobileEmployeeDb.Config{PgResolver: s.pgResolver})
-	if err != nil {
-		return nil, err
-	}
-	employeeService, err := mobileEmployeeService.New(&mobileEmployeeService.Config{
-		Db: employeeDb,
-
-		// shared service
-		UserService: sharedService.userService,
-	})
+	employeeDb, err := mobileEmployeeDb.New(&mobileEmployeeDb.Config{PgResolver: s.pgResolver, Redis: s.redisClient})
 	if err != nil {
 		return nil, err
 	}
 
 	// homepage
-	homepageDb, err := mobileHomepageDb.New(&mobileHomepageDb.Config{PgResolver: s.pgResolver})
+	homepageDb, err := mobileHomepageDb.New(&mobileHomepageDb.Config{PgResolver: s.pgResolver, Redis: s.redisClient})
 	if err != nil {
 		return nil, err
 	}
-	homepageService, err := mobileHomepageService.New(&mobileHomepageService.Config{
-		Db: homepageDb,
-
-		// shared service
-		UserService: sharedService.userService,
-	})
 
 	return &MobileServiceProvider{
-		attendanceService: attendanceService,
-		authService:       authService,
-		employeeService:   employeeService,
-		homepageService:   homepageService,
+		authDb:     authDb,
+		authMemory: authMemory,
+
+		attendanceDb: attendanceDb,
+
+		employeeDb: employeeDb,
+
+		homepageDb: homepageDb,
 	}, nil
 }
 
 type TenantServiceProvider struct {
-	attendanceService *tenantAttendanceService.Service
-	authService       *tenantAuthService.Service
-	employeeService   *tenantEmployeeService.Service
+	attendanceDb *tenantAttendanceDb.Db
+
+	authDb *tenantAuthDb.Db
+
+	employeeDb *tenantEmployeeDb.Db
 }
 
 func (s *Server) initTenant() (*TenantServiceProvider, error) {
-	sharedService, err := s.initShared()
-	if err != nil {
-		return nil, err
-	}
-
 	// attendance
 	attendanceDb, err := tenantAttendanceDb.New(&tenantAttendanceDb.Config{PgResolver: s.pgResolver})
-	if err != nil {
-		return nil, err
-	}
-	attendanceService, err := tenantAttendanceService.New(&tenantAttendanceService.Config{
-		Db: attendanceDb,
-
-		// shared service
-		UserService: sharedService.userService,
-	})
 	if err != nil {
 		return nil, err
 	}
@@ -253,25 +216,19 @@ func (s *Server) initTenant() (*TenantServiceProvider, error) {
 	if err != nil {
 		return nil, err
 	}
-	authService, err := tenantAuthService.New(&tenantAuthService.Config{Db: authDb})
-	if err != nil {
-		return nil, err
-	}
 
 	// employee
 	employeeDb, err := tenantEmployeeDb.New(&tenantEmployeeDb.Config{PgResolver: s.pgResolver})
 	if err != nil {
 		return nil, err
 	}
-	employeeService, err := tenantEmployeeService.New(&tenantEmployeeService.Config{Db: employeeDb})
-	if err != nil {
-		return nil, err
-	}
 
 	return &TenantServiceProvider{
-		attendanceService: attendanceService,
-		authService:       authService,
-		employeeService:   employeeService,
+		attendanceDb: attendanceDb,
+
+		authDb: authDb,
+
+		employeeDb: employeeDb,
 	}, nil
 }
 
@@ -279,7 +236,7 @@ type restPresentation struct {
 	attendance       *attendance.Attendance
 	auth             *auth.Auth
 	employee         *employee.Employee
-	homepage         *homepage.Homepage
+	homepage         *homepage.HomePage
 	region           *region.Region
 	tenantManagement *tenant_management.TenantManagement
 }
@@ -311,8 +268,13 @@ func (s *Server) newAppProvider() (*Presentation, error) {
 
 	// attendance
 	attendanceRest, err := attendance.NewAttendance(&attendance.Config{
-		MobileService: mobileServiceProvider.attendanceService,
-		TenantService: tenantServiceProvider.attendanceService,
+		Mobile: &attendance.Mobile{
+			Db: mobileServiceProvider.attendanceDb,
+		},
+
+		Tenant: &attendance.Tenant{
+			Db: tenantServiceProvider.attendanceDb,
+		},
 	})
 	if err != nil {
 		return nil, err
@@ -320,9 +282,15 @@ func (s *Server) newAppProvider() (*Presentation, error) {
 
 	// auth
 	authRest, err := auth.NewAuth(&auth.Config{
-		CentralService: centralServiceProvider.authService,
-		MobileService:  mobileServiceProvider.authService,
-		TenantService:  tenantServiceProvider.authService,
+		Central: &auth.Central{
+			Db:     centralServiceProvider.authDb,
+			Memory: centralServiceProvider.authMemory,
+		},
+
+		Mobile: &auth.Mobile{
+			Db:     mobileServiceProvider.authDb,
+			Memory: mobileServiceProvider.authMemory,
+		},
 	})
 	if err != nil {
 		return nil, err
@@ -330,8 +298,13 @@ func (s *Server) newAppProvider() (*Presentation, error) {
 
 	// employee
 	employeeRest, err := employee.NewEmployee(&employee.Config{
-		TenantService: tenantServiceProvider.employeeService,
-		MobileService: mobileServiceProvider.employeeService,
+		Mobile: &employee.Mobile{
+			Db: mobileServiceProvider.employeeDb,
+		},
+
+		Tenant: &employee.Tenant{
+			Db: tenantServiceProvider.employeeDb,
+		},
 	})
 	if err != nil {
 		return nil, err
@@ -339,7 +312,9 @@ func (s *Server) newAppProvider() (*Presentation, error) {
 
 	// homepage
 	homepageRest, err := homepage.NewHomepage(&homepage.Config{
-		MobileService: mobileServiceProvider.homepageService,
+		Mobile: &homepage.Mobile{
+			Db: mobileServiceProvider.homepageDb,
+		},
 	})
 	if err != nil {
 		return nil, err
@@ -349,11 +324,20 @@ func (s *Server) newAppProvider() (*Presentation, error) {
 	regionRest, err := region.NewRegion(&region.Config{
 		Service: sharedServiceProvider.regionService,
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	// tenantManagement
 	tenantManagementRest, err := tenant_management.NewTenantManagement(&tenant_management.Config{
-		CentralService: centralServiceProvider.tenantSerivce,
+		Central: &tenant_management.Central{
+			Db:    centralServiceProvider.tenantDb,
+			Queue: centralServiceProvider.tenantQueue,
+		},
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	return &Presentation{
 		rest: &restPresentation{

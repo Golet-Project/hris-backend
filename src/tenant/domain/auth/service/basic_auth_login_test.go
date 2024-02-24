@@ -2,14 +2,15 @@ package service_test
 
 import (
 	"errors"
-	"hroost/mobile/domain/auth/service"
+	authService "hroost/mobile/domain/auth/service"
 	"hroost/shared/primitive"
 	"testing"
 )
 
 func TestValidateBasicAuthLoginBody(t *testing.T) {
+	service := authService.BasicAuthLogin{}
 	t.Run("payload is valid (1)", func(t *testing.T) {
-		payload := service.BasicAuthLoginIn{
+		payload := authService.BasicAuthLoginIn{
 			Email:    "email@email.com",
 			Password: "Password321",
 		}
@@ -22,7 +23,7 @@ func TestValidateBasicAuthLoginBody(t *testing.T) {
 	})
 
 	t.Run("payload is valid (2)", func(t *testing.T) {
-		payload := service.BasicAuthLoginIn{
+		payload := authService.BasicAuthLoginIn{
 			Email:    "email@email.com",
 			Password: "Password@321",
 		}
@@ -34,7 +35,7 @@ func TestValidateBasicAuthLoginBody(t *testing.T) {
 		}
 	})
 
-	validPayload := service.BasicAuthLoginIn{
+	validPayload := authService.BasicAuthLoginIn{
 		Email:    "email@email.com",
 		Password: "Password321",
 	}

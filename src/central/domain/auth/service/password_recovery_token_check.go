@@ -2,11 +2,8 @@ package service
 
 import (
 	"context"
-	"errors"
 	"hroost/shared/primitive"
 	"net/http"
-
-	"github.com/redis/go-redis/v9"
 )
 
 type PasswordRecoveryTokenCheckIn struct {
@@ -18,8 +15,47 @@ type PasswordRecoveryTokenCheckOut struct {
 	primitive.CommonResult
 }
 
+type PasswordRecoveryTokenCheckMemory interface {
+	GetPasswordRecoveryToken(ctx context.Context, userId string) (token string, err *primitive.RepoError)
+}
+
+type PasswordRecoveryTokenCheck struct {
+	Memory PasswordRecoveryTokenCheckMemory
+}
+
+// PasswordRecoveryTokenCheck check if the user has the valid password recovery token
+func (s *PasswordRecoveryTokenCheck) Exec(ctx context.Context, in PasswordRecoveryTokenCheckIn) (out PasswordRecoveryTokenCheckOut) {
+	// validate the request
+	if err := s.ValidatePasswordRecoveryTokenCheckIn(in); err != nil {
+		out.SetResponse(http.StatusBadRequest, "request validation failed", err)
+		return
+	}
+
+	// check if the given token has not expired yet
+	existingToken, repoError := s.Memory.GetPasswordRecoveryToken(ctx, in.UID)
+	if repoError != nil {
+		switch repoError.Issue {
+		case primitive.RepoErrorCodeDataNotFound:
+			out.SetResponse(http.StatusBadRequest, "password recovery token has expired")
+			return
+		default:
+			out.SetResponse(http.StatusInternalServerError, "internal server error", repoError)
+			return
+		}
+	}
+
+	// check if the given token is correct
+	if existingToken != in.Token {
+		out.SetResponse(http.StatusBadRequest, "password recovery token has expired")
+		return
+	}
+
+	out.SetResponse(http.StatusNoContent, "OK")
+	return
+}
+
 // ValidatePasswordRecoveryTokenCheckIn validate the request body
-func ValidatePasswordRecoveryTokenCheckIn(in PasswordRecoveryTokenCheckIn) *primitive.RequestValidationError {
+func (s *PasswordRecoveryTokenCheck) ValidatePasswordRecoveryTokenCheckIn(in PasswordRecoveryTokenCheckIn) *primitive.RequestValidationError {
 	var allIssues []primitive.RequestValidationIssue
 
 	// validate token
@@ -47,33 +83,4 @@ func ValidatePasswordRecoveryTokenCheckIn(in PasswordRecoveryTokenCheckIn) *prim
 	}
 
 	return nil
-}
-
-// PasswordRecoveryTokenCheck check if the user has the valid password recovery token
-func (s *Service) PasswordRecoveryTokenCheck(ctx context.Context, in PasswordRecoveryTokenCheckIn) (out PasswordRecoveryTokenCheckOut) {
-	// validate the request
-	if err := ValidatePasswordRecoveryTokenCheckIn(in); err != nil {
-		out.SetResponse(http.StatusBadRequest, "request validation failed", err)
-		return
-	}
-
-	// check if the given token has not expired yet
-	existingToken, err := s.memory.GetPasswordRecoveryToken(ctx, in.UID)
-	if err != nil && !errors.Is(err, redis.Nil) {
-		out.SetResponse(http.StatusInternalServerError, "internal server error", err)
-		return
-	}
-	if errors.Is(err, redis.Nil) || existingToken == "" {
-		out.SetResponse(http.StatusBadRequest, "password recovery token has expired")
-		return
-	}
-
-	// check if the given token is correct
-	if existingToken != in.Token {
-		out.SetResponse(http.StatusBadRequest, "password recovery token has expired")
-		return
-	}
-
-	out.SetResponse(http.StatusNoContent, "OK")
-	return
 }

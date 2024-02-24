@@ -2,35 +2,52 @@ package employee
 
 import (
 	"fmt"
-	mobileJwt "hroost/mobile/lib/jwt"
-	tenantJwt "hroost/tenant/lib/jwt"
 
 	"hroost/shared/primitive"
 
+	mobileDb "hroost/mobile/domain/employee/db"
 	mobileService "hroost/mobile/domain/employee/service"
+	mobileJwt "hroost/mobile/lib/jwt"
+
+	tenantDb "hroost/tenant/domain/employee/db"
 	tenantService "hroost/tenant/domain/employee/service"
+	tenantJwt "hroost/tenant/lib/jwt"
 
 	"github.com/gofiber/fiber/v2"
 )
 
+type Mobile struct {
+	Db *mobileDb.Db
+}
+
+type Tenant struct {
+	Db *tenantDb.Db
+}
+
 type Config struct {
-	TenantService *tenantService.Service
-	MobileService *mobileService.Service
+	Mobile *Mobile
+	Tenant *Tenant
 }
 
 type Employee struct {
-	tenantService *tenantService.Service
-	mobileService *mobileService.Service
+	mobile *Mobile
+	tenant *Tenant
 }
 
 func NewEmployee(cfg *Config) (*Employee, error) {
 	if cfg == nil {
 		return nil, fmt.Errorf("dependecy for employee required")
 	}
+	if cfg.Mobile == nil {
+		return nil, fmt.Errorf("mobile module required")
+	}
+	if cfg.Tenant == nil {
+		return nil, fmt.Errorf("tenant module required")
+	}
 
 	return &Employee{
-		tenantService: cfg.TenantService,
-		mobileService: cfg.MobileService,
+		mobile: cfg.Mobile,
+		tenant: cfg.Tenant,
 	}, nil
 }
 
@@ -51,8 +68,12 @@ func (e Employee) CreateEmployee(c *fiber.Ctx) error {
 
 		body.Domain = claims.Domain
 
+		service := tenantService.CreateEmployee{
+			Db: e.tenant.Db,
+		}
+
 		// call the services
-		serviceOut := e.tenantService.CreateEmployee(c.Context(), body)
+		serviceOut := service.Exec(c.Context(), body)
 
 		res.Message = serviceOut.GetMessage()
 		res.Data = nil
@@ -78,8 +99,12 @@ func (e Employee) FindAllEmployee(c *fiber.Ctx) error {
 		var req tenantService.FindAllEmployeeIn
 		req.Domain = claims.Domain
 
+		service := tenantService.FindAllEmployee{
+			Db: e.tenant.Db,
+		}
+
 		// call the services
-		serviceOut := e.tenantService.FindAllEmployee(c.Context(), req)
+		serviceOut := service.Exec(c.Context(), req)
 
 		res.Message = serviceOut.GetMessage()
 
@@ -112,8 +137,12 @@ func (e Employee) GetProfile(c *fiber.Ctx) error {
 	case primitive.MobileAppID:
 		claims := c.Locals("user_auth").(mobileJwt.CustomClaims)
 
+		service := mobileService.GetProfile{
+			Db: e.mobile.Db,
+		}
+
 		// call the service
-		serviceOut := e.mobileService.GetProfile(c.Context(), mobileService.GetProfileIn{
+		serviceOut := service.Exec(c.Context(), mobileService.GetProfileIn{
 			UID: claims.UserUID,
 		})
 

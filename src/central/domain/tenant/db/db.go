@@ -1,16 +1,9 @@
 package db
 
 import (
-	"context"
 	"fmt"
 	"hroost/infrastructure/store/postgres"
 )
-
-type IDbStore interface {
-	CreateTenant(ctx context.Context, in CreateTenantIn) (out CreateTenantOut, err error)
-
-	CountTenantByDomain(ctx context.Context, domain string) (out CountTenantByDomainOut, err error)
-}
 
 type Db struct {
 	pgResolver *postgres.Resolver

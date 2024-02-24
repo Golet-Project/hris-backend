@@ -2,14 +2,11 @@ package service
 
 import (
 	"context"
-	"errors"
-	"hroost/mobile/domain/attendance/db"
+	"hroost/mobile/domain/attendance/model"
 	"hroost/shared/entities"
 	"hroost/shared/primitive"
 	"net/http"
 	"time"
-
-	"github.com/jackc/pgx/v5"
 )
 
 type GetTodayAttendanceIn struct {
@@ -32,53 +29,43 @@ type GetTodayAttendanceOut struct {
 	Company entities.Company `json:"company"`
 }
 
-func ValidateGetTodayAttendanceIn(req GetTodayAttendanceIn) *primitive.RequestValidationError {
-	var allIssues []primitive.RequestValidationIssue
-
-	// validate timezone
-	if !req.Timezone.Valid() {
-		allIssues = append(allIssues, primitive.RequestValidationIssue{
-			Code:    primitive.RequestValidationCodeInvalidValue,
-			Field:   "timezone",
-			Message: "timezone header invalid",
-		})
-	}
-
-	if len(allIssues) > 0 {
-		return &primitive.RequestValidationError{
-			Issues: allIssues,
-		}
-	}
-
-	return nil
+type GetTodayAttendanceDb interface {
+	GetDomainByUid(ctx context.Context, uid string) (domain string, err *primitive.RepoError)
+	GetTodayAttendance(ctx context.Context, domain string, in model.GetTodayAttendanceIn) (out model.GetTodayAttendanceOut, err *primitive.RepoError)
 }
 
-func (s *Service) GetTodayAttendance(ctx context.Context, req GetTodayAttendanceIn) (out GetTodayAttendanceOut) {
+type GetTodayAttendance struct {
+	Db GetTodayAttendanceDb
+}
+
+func (s *GetTodayAttendance) Exec(ctx context.Context, req GetTodayAttendanceIn) (out GetTodayAttendanceOut) {
 	// get the domain
-	domain, err := s.userService.GetDomainByUid(ctx, req.EmployeeUID)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			out.SetResponse(http.StatusNotFound, "employee not found", err)
+	domain, repoError := s.Db.GetDomainByUid(ctx, req.EmployeeUID)
+	if repoError != nil {
+		switch repoError.Issue {
+		case primitive.RepoErrorCodeDataNotFound:
+			out.SetResponse(http.StatusNotFound, "employee not found", repoError)
 			return
-		} else {
-			out.SetResponse(http.StatusInternalServerError, "internal server error", err)
+		default:
+			out.SetResponse(http.StatusInternalServerError, "internal server error", repoError)
 			return
 		}
 	}
 
 	// validate request
-	if err := ValidateGetTodayAttendanceIn(req); err != nil {
+	if err := s.ValidateGetTodayAttendanceIn(req); err != nil {
 		out.SetResponse(http.StatusBadRequest, "invalid request", err)
 		return
 	}
 
-	todayAttendance, err := s.db.GetTodayAttendance(ctx, domain, db.GetTodayAttendanceIn{
+	todayAttendance, repoError := s.Db.GetTodayAttendance(ctx, domain, model.GetTodayAttendanceIn{
 		EmployeeUID: req.EmployeeUID,
 		Timezone:    req.Timezone,
 	})
-	if err != nil {
-		if !errors.Is(err, pgx.ErrNoRows) {
-			out.SetResponse(http.StatusInternalServerError, "error getting today attendance", err)
+	if repoError != nil {
+		switch repoError.Issue {
+		case primitive.RepoErrorCodeServerError:
+			out.SetResponse(http.StatusInternalServerError, "error getting today attendance", repoError)
 			return
 		}
 	}
@@ -120,4 +107,25 @@ func (s *Service) GetTodayAttendance(ctx context.Context, req GetTodayAttendance
 	out.SetResponse(http.StatusOK, "success")
 
 	return
+}
+
+func (s *GetTodayAttendance) ValidateGetTodayAttendanceIn(req GetTodayAttendanceIn) *primitive.RequestValidationError {
+	var allIssues []primitive.RequestValidationIssue
+
+	// validate timezone
+	if !req.Timezone.Valid() {
+		allIssues = append(allIssues, primitive.RequestValidationIssue{
+			Code:    primitive.RequestValidationCodeInvalidValue,
+			Field:   "timezone",
+			Message: "timezone header invalid",
+		})
+	}
+
+	if len(allIssues) > 0 {
+		return &primitive.RequestValidationError{
+			Issues: allIssues,
+		}
+	}
+
+	return nil
 }

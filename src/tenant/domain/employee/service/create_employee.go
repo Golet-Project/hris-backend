@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 	"hroost/shared/primitive"
-	"hroost/tenant/domain/employee/db"
+	"hroost/tenant/domain/employee/model"
 	"net/http"
 )
 
@@ -27,9 +27,18 @@ type CreateEmployeeOut struct {
 	primitive.CommonResult
 }
 
-func (s *Service) CreateEmployee(ctx context.Context, req CreateEmployeeIn) (out CreateEmployeeOut) {
+type CreateEmployeeDb interface {
+	CreateEmployee(ctx context.Context, data model.CreateEmployeeIn) (err *primitive.RepoError)
+}
+
+type CreateEmployee struct {
+	Db CreateEmployeeDb
+}
+
+func (s *CreateEmployee) Exec(ctx context.Context, req CreateEmployeeIn) (out CreateEmployeeOut) {
 	// TODO: generate initial password and send to user's email
-	err := s.db.CreateEmployee(ctx, db.CreateEmployeeIn{
+	err := s.Db.CreateEmployee(ctx, model.CreateEmployeeIn{
+
 		Domain:         req.Domain,
 		Email:          req.Email,
 		Password:       "todo",

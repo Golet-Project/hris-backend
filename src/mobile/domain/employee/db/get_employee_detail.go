@@ -2,26 +2,20 @@ package db
 
 import (
 	"context"
+	"errors"
 	"hroost/infrastructure/store/postgres"
+	"hroost/mobile/domain/employee/model"
 	"hroost/shared/primitive"
 
 	"github.com/jackc/pgx/v5"
 )
 
-type GetEmployeeDetailOut struct {
-	UID            string
-	FullName       string
-	Email          string
-	Gender         primitive.Gender
-	BirthDate      primitive.Date
-	ProfilePicture primitive.String
-	Address        primitive.String
-	JoinDate       primitive.Date
-}
-
-func (d *Db) GetEmployeeDetail(ctx context.Context, domain, uid string) (out GetEmployeeDetailOut, err error) {
+func (d *Db) GetEmployeeDetail(ctx context.Context, domain, uid string) (out model.GetEmployeeDetailOut, repoError *primitive.RepoError) {
 	if domain == "" || uid == "" {
-		return out, pgx.ErrNoRows
+		return out, &primitive.RepoError{
+			Issue: primitive.RepoErrorCodeDataNotFound,
+			Err:   pgx.ErrNoRows,
+		}
 	}
 
 	var sql = `
@@ -34,13 +28,29 @@ func (d *Db) GetEmployeeDetail(ctx context.Context, domain, uid string) (out Get
 
 	conn, err := d.pgResolver.Resolve(postgres.Domain(domain))
 	if err != nil {
-		return
+		return out, &primitive.RepoError{
+			Issue: primitive.RepoErrorCodeServerError,
+			Err:   err,
+		}
 	}
 
 	err = conn.QueryRow(ctx, sql, uid).Scan(
 		&out.UID, &out.FullName, &out.Email, &out.Gender, &out.BirthDate,
 		&out.ProfilePicture, &out.Address, &out.JoinDate,
 	)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return out, &primitive.RepoError{
+				Issue: primitive.RepoErrorCodeDataNotFound,
+				Err:   err,
+			}
+		}
+
+		return out, &primitive.RepoError{
+			Issue: primitive.RepoErrorCodeServerError,
+			Err:   err,
+		}
+	}
 
 	return
 }

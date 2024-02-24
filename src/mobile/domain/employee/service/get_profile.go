@@ -2,11 +2,9 @@ package service
 
 import (
 	"context"
-	"errors"
+	"hroost/mobile/domain/employee/model"
 	"hroost/shared/primitive"
 	"net/http"
-
-	"github.com/jackc/pgx/v5"
 )
 
 type Employee struct {
@@ -30,26 +28,37 @@ type GetProfileIn struct {
 	UID string
 }
 
-func (s *Service) GetProfile(ctx context.Context, in GetProfileIn) (out GetProfileOut) {
+type GetProfileDb interface {
+	GetDomainByUid(ctx context.Context, uid string) (domain string, err *primitive.RepoError)
+	GetEmployeeDetail(ctx context.Context, domain string, uid string) (employee model.GetEmployeeDetailOut, err *primitive.RepoError)
+}
+
+type GetProfile struct {
+	Db GetProfileDb
+}
+
+func (s *GetProfile) Exec(ctx context.Context, in GetProfileIn) (out GetProfileOut) {
 	// get user domain
-	domain, err := s.userService.GetDomainByUid(ctx, in.UID)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			out.SetResponse(http.StatusNotFound, "user not found", err)
+	domain, repoError := s.Db.GetDomainByUid(ctx, in.UID)
+	if repoError != nil {
+		switch repoError.Issue {
+		case primitive.RepoErrorCodeDataNotFound:
+			out.SetResponse(http.StatusNotFound, "user not found", repoError)
 			return
-		} else {
-			out.SetResponse(http.StatusInternalServerError, "internal server error", err)
+		default:
+			out.SetResponse(http.StatusInternalServerError, "internal server error", repoError)
 			return
 		}
 	}
 
-	employee, err := s.db.GetEmployeeDetail(ctx, domain, in.UID)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			out.SetResponse(http.StatusNotFound, "employee not found")
+	employee, repoError := s.Db.GetEmployeeDetail(ctx, domain, in.UID)
+	if repoError != nil {
+		switch repoError.Issue {
+		case primitive.RepoErrorCodeDataNotFound:
+			out.SetResponse(http.StatusNotFound, "employee not found", repoError)
 			return
-		} else {
-			out.SetResponse(http.StatusInternalServerError, "internal server error", err)
+		default:
+			out.SetResponse(http.StatusInternalServerError, "internal server error", repoError)
 			return
 		}
 	}

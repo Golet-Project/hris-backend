@@ -18,9 +18,19 @@ type CheckoutOut struct {
 	primitive.CommonResult
 }
 
-func (s *Service) Checkout(ctx context.Context, req CheckoutIn) (out CheckoutOut) {
+type CheckoutDb interface {
+	GetDomainByUid(ctx context.Context, uid string) (domain string, err *primitive.RepoError)
+	CheckTodayAttendanceById(ctx context.Context, domain string, uid string, timezone primitive.Timezone) (exists bool, err *primitive.RepoError)
+	Checkout(ctx context.Context, domaing string, uid string) (rowsAffected int64, err *primitive.RepoError)
+}
+
+type Checkout struct {
+	Db CheckoutDb
+}
+
+func (s *Checkout) Exec(ctx context.Context, req CheckoutIn) (out CheckoutOut) {
 	// get the domain
-	domain, err := s.userService.GetDomainByUid(ctx, req.UID)
+	domain, err := s.Db.GetDomainByUid(ctx, req.UID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			out.SetResponse(http.StatusNotFound, "employee not found")
@@ -32,7 +42,7 @@ func (s *Service) Checkout(ctx context.Context, req CheckoutIn) (out CheckoutOut
 	}
 
 	// validate checkin
-	attendanceInExists, err := s.db.CheckTodayAttendanceById(ctx, domain, req.UID, req.Timezone)
+	attendanceInExists, err := s.Db.CheckTodayAttendanceById(ctx, domain, req.UID, req.Timezone)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			out.SetResponse(http.StatusNotFound, "employee not found")
@@ -48,7 +58,7 @@ func (s *Service) Checkout(ctx context.Context, req CheckoutIn) (out CheckoutOut
 	}
 
 	// insert checkout time
-	rowsAffected, err := s.db.Checkout(ctx, domain, req.UID)
+	rowsAffected, err := s.Db.Checkout(ctx, domain, req.UID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			out.SetResponse(http.StatusNotFound, "employee not found")

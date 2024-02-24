@@ -1,19 +1,10 @@
 package memory
 
 import (
-	"context"
 	"fmt"
 
 	redisClient "github.com/redis/go-redis/v9"
 )
-
-type IMemory interface {
-	DeletePasswordRecoveryToken(ctx context.Context, userId string) (err error)
-
-	GetPasswordRecoveryToken(ctx context.Context, userId string) (token string, err error)
-
-	SetPasswordRecoveryToken(ctx context.Context, userId, token string) (err error)
-}
 
 type Config struct {
 	Client *redisClient.Client

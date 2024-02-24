@@ -3,26 +3,19 @@ package db
 import (
 	"context"
 	"hroost/infrastructure/store/postgres"
+	"hroost/mobile/domain/attendance/model"
 	"hroost/shared/primitive"
 	"time"
-
-	"github.com/jackc/pgx/v5"
 )
 
-type AddAttendanceIn struct {
-	EmployeeUID string
-	Timezone    primitive.Timezone
-	Coordinate  primitive.Coordinate
-}
-
-func (d *Db) AddAttendance(ctx context.Context, domain string, in AddAttendanceIn) (err error) {
+func (d *Db) AddAttendance(ctx context.Context, domain string, in model.AddAttendanceIn) (repoError *primitive.RepoError) {
 	if domain == "" || in.EmployeeUID == "" {
-		return pgx.ErrNoRows
+		return &primitive.RepoError{Issue: primitive.RepoErrorCodeDataNotFound}
 	}
 
 	now, err := in.Timezone.Now()
 	if err != nil {
-		return
+		return &primitive.RepoError{Issue: primitive.RepoErrorCodeServerError}
 	}
 
 	var sql = `

@@ -1,21 +1,20 @@
 package db
 
 import (
-	"context"
 	"fmt"
 	"hroost/infrastructure/store/postgres"
-)
 
-type IDbStore interface {
-	FindHomePage(ctx context.Context, domain string, param FindHomePageIn) (out FindHomePageOut, err error)
-}
+	"github.com/redis/go-redis/v9"
+)
 
 type Db struct {
 	pgResolver *postgres.Resolver
+	redis      *redis.Client
 }
 
 type Config struct {
 	PgResolver *postgres.Resolver
+	Redis      *redis.Client
 }
 
 func New(cfg *Config) (*Db, error) {
@@ -25,8 +24,12 @@ func New(cfg *Config) (*Db, error) {
 	if cfg.PgResolver == nil {
 		return nil, fmt.Errorf("pgResolver required")
 	}
+	if cfg.Redis == nil {
+		return nil, fmt.Errorf("redis required")
+	}
 
 	return &Db{
 		pgResolver: cfg.PgResolver,
+		redis:      cfg.Redis,
 	}, nil
 }

@@ -4,34 +4,42 @@ import (
 	"fmt"
 	"hroost/shared/primitive"
 
+	mobileDb "hroost/mobile/domain/homepage/db"
+	mobileService "hroost/mobile/domain/homepage/service"
 	mobileJwt "hroost/mobile/lib/jwt"
 
-	mobileService "hroost/mobile/domain/homepage/service"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/utils"
 )
 
+type Mobile struct {
+	Db *mobileDb.Db
+}
+
 type Config struct {
-	MobileService *mobileService.Service
+	Mobile *Mobile
 }
 
-type Homepage struct {
-	mobileService *mobileService.Service
+type HomePage struct {
+	mobile *Mobile
 }
 
-func NewHomepage(cfg *Config) (*Homepage, error) {
+func NewHomepage(cfg *Config) (*HomePage, error) {
 	if cfg == nil {
 		return nil, fmt.Errorf("dependency for homepage required")
 	}
+	if cfg.Mobile == nil {
+		return nil, fmt.Errorf("mobile module required")
+	}
 
-	return &Homepage{
-		mobileService: cfg.MobileService,
+	return &HomePage{
+		mobile: cfg.Mobile,
 	}, nil
 }
 
-func (h Homepage) HomePage(c *fiber.Ctx) error {
+func (h HomePage) HomePage(c *fiber.Ctx) error {
 	var res primitive.BaseResponse
 
 	appId := c.Locals("AppID").(primitive.AppID)
@@ -51,7 +59,11 @@ func (h Homepage) HomePage(c *fiber.Ctx) error {
 		req.UID = claims.UserUID
 		req.Timezone = primitive.Timezone(tz)
 
-		serviceOut := h.mobileService.HomePage(c.Context(), req)
+		service := mobileService.HomePage{
+			Db: h.mobile.Db,
+		}
+
+		serviceOut := service.Exec(c.Context(), req)
 
 		res.Message = serviceOut.GetMessage()
 

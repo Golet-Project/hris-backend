@@ -2,24 +2,20 @@ package db
 
 import (
 	"context"
+	"errors"
 	"hroost/infrastructure/store/postgres"
 	"hroost/shared/primitive"
+	"hroost/tenant/domain/attendance/model"
 
 	"github.com/jackc/pgx/v5"
 )
 
-type FindAllAttendanceOut struct {
-	UID          string
-	FullName     string
-	CheckinTime  primitive.Time
-	CheckoutTime primitive.Time
-	ApprovedAt   primitive.Time
-	ApprovedBy   primitive.String
-}
-
-func (d *Db) FindAllAttendance(ctx context.Context, domain string) (out []FindAllAttendanceOut, err error) {
+func (d *Db) FindAllAttendance(ctx context.Context, domain string) (out []model.FindAllAttendanceOut, repoError *primitive.RepoError) {
 	if domain == "" {
-		return nil, pgx.ErrNoRows
+		return out, &primitive.RepoError{
+			Issue: primitive.RepoErrorCodeServerError,
+			Err:   pgx.ErrNoRows,
+		}
 	}
 
 	var sql = `
@@ -32,24 +28,41 @@ func (d *Db) FindAllAttendance(ctx context.Context, domain string) (out []FindAl
 
 	conn, err := d.pgResolver.Resolve(postgres.Domain(domain))
 	if err != nil {
-		return
+		return out, &primitive.RepoError{
+			Issue: primitive.RepoErrorCodeServerError,
+			Err:   err,
+		}
 	}
 
 	rows, err := conn.Query(ctx, sql)
 	if err != nil {
-		return
+		if errors.Is(err, pgx.ErrNoRows) {
+			return out, &primitive.RepoError{
+				Issue: primitive.RepoErrorCodeDataNotFound,
+				Err:   err,
+			}
+		}
+
+		return out, &primitive.RepoError{
+			Issue: primitive.RepoErrorCodeServerError,
+			Err:   err,
+		}
 	}
 	defer rows.Close()
 
 	for rows.Next() {
-		var row FindAllAttendanceOut
+		var row model.FindAllAttendanceOut
 
 		err = rows.Scan(
 			&row.UID, &row.FullName, &row.CheckinTime, &row.CheckoutTime, &row.ApprovedAt,
 			&row.ApprovedBy,
 		)
 		if err != nil {
-			return
+			return out, &primitive.RepoError{
+				Issue: primitive.RepoErrorCodeServerError,
+				Err:   err,
+			}
+
 		}
 
 		out = append(out, row)

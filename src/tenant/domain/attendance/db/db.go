@@ -1,14 +1,9 @@
 package db
 
 import (
-	"context"
 	"fmt"
 	"hroost/infrastructure/store/postgres"
 )
-
-type IDbStore interface {
-	FindAllAttendance(ctx context.Context, doamin string) (out []FindAllAttendanceOut, err error)
-}
 
 type Db struct {
 	pgResolver *postgres.Resolver

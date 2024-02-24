@@ -2,13 +2,12 @@ package service
 
 import (
 	"context"
-	"errors"
 	"hroost/shared/primitive"
 	"hroost/shared/utils"
+	"hroost/tenant/domain/auth/model"
 	"hroost/tenant/lib/jwt"
 	"net/http"
 
-	"github.com/jackc/pgx/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -23,7 +22,50 @@ type BasicAuthLoginOut struct {
 	AccessToken string `json:"access_token"`
 }
 
-func ValidateBasicAuthLoginBody(body BasicAuthLoginIn) *primitive.RequestValidationError {
+type BasicAuthLoginDb interface {
+	GetLoginCredential(ctx context.Context, email string) (credential model.GetLoginCredentialOut, err *primitive.RepoError)
+}
+
+type BasicAuthLogin struct {
+	Db BasicAuthLoginDb
+}
+
+func (s *BasicAuthLogin) Exec(ctx context.Context, body BasicAuthLoginIn) (out BasicAuthLoginOut) {
+	// validate request body
+	if err := s.ValidateBasicAuthLoginBody(body); err != nil {
+		out.SetResponse(http.StatusBadRequest, "request validation failed", err)
+		return
+	}
+
+	// get the login credentials
+	adminCredential, repoError := s.Db.GetLoginCredential(ctx, body.Email)
+	if repoError != nil {
+		switch repoError.Issue {
+		case primitive.RepoErrorCodeDataNotFound:
+			out.SetResponse(http.StatusNotFound, "user not found")
+			return
+		default:
+			out.SetResponse(http.StatusInternalServerError, "internal server error", repoError)
+			return
+		}
+	}
+
+	// compare password
+	if err := bcrypt.CompareHashAndPassword([]byte(adminCredential.Password), []byte(body.Password)); err != nil {
+		out.SetResponse(http.StatusUnauthorized, "invalid password")
+		return
+	}
+
+	out.AccessToken = jwt.GenerateAccessToken(jwt.AccessTokenParam{
+		UserUID: adminCredential.UserID,
+		Domain:  adminCredential.Domain,
+	})
+	out.SetResponse(http.StatusOK, "login success")
+
+	return
+}
+
+func (s *BasicAuthLogin) ValidateBasicAuthLoginBody(body BasicAuthLoginIn) *primitive.RequestValidationError {
 	var allIssues []primitive.RequestValidationIssue
 
 	// validate email
@@ -55,38 +97,4 @@ func ValidateBasicAuthLoginBody(body BasicAuthLoginIn) *primitive.RequestValidat
 	}
 
 	return nil
-}
-
-func (s *Service) BasicAuthLogin(ctx context.Context, body BasicAuthLoginIn) (out BasicAuthLoginOut) {
-	// validate request body
-	if err := ValidateBasicAuthLoginBody(body); err != nil {
-		out.SetResponse(http.StatusBadRequest, "request validation failed", err)
-		return
-	}
-
-	// get the login credentials
-	adminCredential, err := s.db.GetLoginCredential(ctx, body.Email)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			out.SetResponse(http.StatusNotFound, "user not found")
-			return
-		} else {
-			out.SetResponse(http.StatusInternalServerError, "internal server error", err)
-			return
-		}
-	}
-
-	// compare password
-	if err := bcrypt.CompareHashAndPassword([]byte(adminCredential.Password), []byte(body.Password)); err != nil {
-		out.SetResponse(http.StatusUnauthorized, "invalid password")
-		return
-	}
-
-	out.AccessToken = jwt.GenerateAccessToken(jwt.AccessTokenParam{
-		UserUID: adminCredential.UserID,
-		Domain:  adminCredential.Domain,
-	})
-	out.SetResponse(http.StatusOK, "login success")
-
-	return
 }

@@ -1,20 +1,11 @@
 package db
 
 import (
-	"context"
 	"fmt"
 	"hroost/infrastructure/store/postgres"
 
 	"github.com/redis/go-redis/v9"
 )
-
-type IDbStore interface {
-	ChangePassword(ctx context.Context, in ChangePasswordIn) (rowsAffected int64, err error)
-
-	GetEmployeeDetail(ctx context.Context, domain, uid string) (out GetEmployeeDetailOut, err error)
-
-	GetLoginCredential(ctx context.Context, email string) (out GetLoginCredentialOut, err error)
-}
 
 type Config struct {
 	PgResolver *postgres.Resolver

@@ -2,27 +2,20 @@ package db
 
 import (
 	"context"
+	"errors"
 	"hroost/infrastructure/store/postgres"
 	"hroost/shared/primitive"
-	"time"
+	"hroost/tenant/domain/employee/model"
 
 	"github.com/jackc/pgx/v5"
 )
 
-type FindAllEmployeeOut struct {
-	UID            string
-	Email          string
-	FullName       string
-	BirthDate      time.Time
-	Gender         primitive.Gender
-	EmployeeStatus primitive.EmployeeStatus
-	JoinDate       time.Time
-	EndDate        primitive.Date
-}
-
-func (d *Db) FindAllEmployee(ctx context.Context, domain string) (out []FindAllEmployeeOut, err error) {
+func (d *Db) FindAllEmployee(ctx context.Context, domain string) (out []model.FindAllEmployeeOut, repoError *primitive.RepoError) {
 	if domain == "" {
-		return nil, pgx.ErrNoRows
+		return out, &primitive.RepoError{
+			Issue: primitive.RepoErrorCodeDataNotFound,
+			Err:   pgx.ErrNoRows,
+		}
 	}
 
 	sql := `
@@ -34,23 +27,39 @@ func (d *Db) FindAllEmployee(ctx context.Context, domain string) (out []FindAllE
 
 	conn, err := d.pgResolver.Resolve(postgres.Domain(domain))
 	if err != nil {
-		return
+		return out, &primitive.RepoError{
+			Issue: primitive.RepoErrorCodeServerError,
+			Err:   err,
+		}
 	}
 
 	rows, err := conn.Query(ctx, sql)
 	if err != nil {
-		return
+		if errors.Is(err, pgx.ErrNoRows) {
+			return out, &primitive.RepoError{
+				Issue: primitive.RepoErrorCodeDataNotFound,
+				Err:   pgx.ErrNoRows,
+			}
+		}
+
+		return out, &primitive.RepoError{
+			Issue: primitive.RepoErrorCodeServerError,
+			Err:   err,
+		}
 	}
 	defer rows.Close()
 
 	for rows.Next() {
-		var row FindAllEmployeeOut
+		var row model.FindAllEmployeeOut
 
 		err = rows.Scan(&row.UID, &row.Email, &row.FullName, &row.BirthDate, &row.Gender, &row.EmployeeStatus,
 			&row.JoinDate, &row.EndDate,
 		)
 		if err != nil {
-			return
+			return out, &primitive.RepoError{
+				Issue: primitive.RepoErrorCodeServerError,
+				Err:   err,
+			}
 		}
 
 		out = append(out, row)

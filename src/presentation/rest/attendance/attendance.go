@@ -8,21 +8,32 @@ import (
 	"hroost/shared/primitive"
 	"strconv"
 
+	mobileDb "hroost/mobile/domain/attendance/db"
 	mobileService "hroost/mobile/domain/attendance/service"
+
+	tenantDb "hroost/tenant/domain/attendance/db"
 	tenantService "hroost/tenant/domain/attendance/service"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/utils"
 )
 
+type Mobile struct {
+	Db *mobileDb.Db
+}
+
+type Tenant struct {
+	Db *tenantDb.Db
+}
+
 type Config struct {
-	MobileService *mobileService.Service
-	TenantService *tenantService.Service
+	Mobile *Mobile
+	Tenant *Tenant
 }
 
 type Attendance struct {
-	mobileService *mobileService.Service
-	tenantService *tenantService.Service
+	mobile *Mobile
+	tenant *Tenant
 }
 
 func NewAttendance(cfg *Config) (*Attendance, error) {
@@ -31,8 +42,8 @@ func NewAttendance(cfg *Config) (*Attendance, error) {
 	}
 
 	return &Attendance{
-		mobileService: cfg.MobileService,
-		tenantService: cfg.TenantService,
+		mobile: cfg.Mobile,
+		tenant: cfg.Tenant,
 	}, nil
 }
 
@@ -61,7 +72,12 @@ func (a Attendance) AddAttendance(c *fiber.Ctx) error {
 
 		body.UID = claims.UserUID
 		body.Timezone = primitive.Timezone(tz)
-		var loginOut = a.mobileService.AddAttendance(c.Context(), body)
+
+		service := mobileService.AddAttendance{
+			Db: a.mobile.Db,
+		}
+
+		var loginOut = service.Exec(c.Context(), body)
 
 		res.Message = loginOut.GetMessage()
 
@@ -102,7 +118,11 @@ func (a Attendance) Checkout(c *fiber.Ctx) error {
 			Timezone: primitive.Timezone(tz),
 		}
 
-		serviceOut := a.mobileService.Checkout(c.Context(), req)
+		service := mobileService.Checkout{
+			Db: a.mobile.Db,
+		}
+
+		serviceOut := service.Exec(c.Context(), req)
 
 		res.Message = serviceOut.GetMessage()
 
@@ -132,7 +152,11 @@ func (a Attendance) FindAllAttendance(c *fiber.Ctx) error {
 	case primitive.TenantAppID:
 		claims := c.Locals("user_auth").(tenantJwt.CustomClaims)
 
-		serviceOut := a.tenantService.FindAllAttendance(c.Context(), tenantService.FindAllAttendanceIn{
+		service := tenantService.FindAllAttendance{
+			Db: a.tenant.Db,
+		}
+
+		serviceOut := service.Exec(c.Context(), tenantService.FindAllAttendanceIn{
 			Domain: claims.Domain,
 		})
 
@@ -181,7 +205,11 @@ func (a Attendance) GetTodayAttendance(c *fiber.Ctx) error {
 		req.EmployeeUID = claims.UserUID
 		req.Timezone = primitive.Timezone(tz)
 
-		serviceOut := a.mobileService.GetTodayAttendance(c.Context(), req)
+		service := mobileService.GetTodayAttendance{
+			Db: a.mobile.Db,
+		}
+
+		serviceOut := service.Exec(c.Context(), req)
 
 		res.Message = serviceOut.GetMessage()
 
