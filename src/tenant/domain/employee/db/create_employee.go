@@ -2,38 +2,31 @@ package db
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"hroost/infrastructure/store/postgres"
 	"hroost/shared/primitive"
+	"hroost/tenant/domain/employee/model"
+
+	"github.com/jackc/pgx/v5"
 )
 
-type CreateEmployeeIn struct {
-	Domain         string
-	Email          string
-	Password       string
-	FirstName      string
-	LastName       string
-	Gender         primitive.Gender
-	BirthDate      string
-	Address        string
-	ProvinceId     string
-	RegencyId      string
-	DistrictId     string
-	VillageId      string
-	JoinDate       string
-	EmployeeStatus primitive.EmployeeStatus
-}
-
-func (d *Db) CreateEmployee(ctx context.Context, data CreateEmployeeIn) (err error) {
+func (d *Db) CreateEmployee(ctx context.Context, data model.CreateEmployeeIn) (repoError *primitive.RepoError) {
 	masterConn, err := d.pgResolver.Resolve(postgres.MasterDomain)
 	if err != nil {
-		return
+		return &primitive.RepoError{
+			Issue: primitive.RepoErrorCodeServerError,
+			Err:   err,
+		}
 	}
 
 	// insert into master
 	masterTx, err := masterConn.Begin(ctx)
 	if err != nil {
-		return
+		return &primitive.RepoError{
+			Issue: primitive.RepoErrorCodeServerError,
+			Err:   err,
+		}
 	}
 	var insertToMasterSql = `
 	INSERT INTO users (domain, email, password, first_name, last_name, birth_date)
@@ -44,11 +37,24 @@ func (d *Db) CreateEmployee(ctx context.Context, data CreateEmployeeIn) (err err
 		data.Domain, data.Email, data.Password, data.FirstName, data.LastName, data.BirthDate,
 	).Scan(&insertedUid)
 	if err != nil {
-		if err2 := masterTx.Rollback(ctx); err2 != nil {
-			return err2
+		if errors.Is(err, pgx.ErrNoRows) {
+			return &primitive.RepoError{
+				Issue: primitive.RepoErrorCodeDataNotFound,
+				Err:   err,
+			}
 		}
 
-		return
+		if err2 := masterTx.Rollback(ctx); err2 != nil {
+			return &primitive.RepoError{
+				Issue: primitive.RepoErrorCodeServerError,
+				Err:   err,
+			}
+		}
+
+		return &primitive.RepoError{
+			Issue: primitive.RepoErrorCodeServerError,
+			Err:   err,
+		}
 	}
 
 	// insert into tenant
@@ -61,10 +67,16 @@ func (d *Db) CreateEmployee(ctx context.Context, data CreateEmployeeIn) (err err
 	tenantConn, err := d.pgResolver.Resolve(postgres.Domain(data.Domain))
 	if err != nil {
 		if err2 := masterTx.Rollback(ctx); err2 != nil {
-			return err2
+			return &primitive.RepoError{
+				Issue: primitive.RepoErrorCodeServerError,
+				Err:   err,
+			}
 		}
 
-		return
+		return &primitive.RepoError{
+			Issue: primitive.RepoErrorCodeServerError,
+			Err:   err,
+		}
 	}
 
 	_, err = tenantConn.Exec(ctx, insertToTenantSql,
@@ -73,15 +85,24 @@ func (d *Db) CreateEmployee(ctx context.Context, data CreateEmployeeIn) (err err
 	)
 	if err != nil {
 		if err2 := masterTx.Rollback(ctx); err2 != nil {
-			return err2
+			return &primitive.RepoError{
+				Issue: primitive.RepoErrorCodeServerError,
+				Err:   err,
+			}
 		}
 
-		return
+		return &primitive.RepoError{
+			Issue: primitive.RepoErrorCodeServerError,
+			Err:   err,
+		}
 	}
 
 	err = masterTx.Commit(ctx)
 	if err != nil {
-		return
+		return &primitive.RepoError{
+			Issue: primitive.RepoErrorCodeServerError,
+			Err:   err,
+		}
 	}
 
 	return

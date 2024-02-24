@@ -5,25 +5,20 @@ import (
 	"errors"
 	"fmt"
 	"hroost/infrastructure/store/postgres"
+	"hroost/mobile/domain/homepage/model"
 	"hroost/shared/primitive"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type FindHomePageIn struct {
-	UID      string
-	Timezone primitive.Timezone
-}
-
-type FindHomePageOut struct {
-	TodayAttendance
-}
-
-func (d *Db) FindHomePage(ctx context.Context, domain string, param FindHomePageIn) (out FindHomePageOut, err error) {
+func (d *Db) FindHomePage(ctx context.Context, domain string, param model.FindHomePageIn) (out model.FindHomePageOut, repoError *primitive.RepoError) {
 	conn, err := d.pgResolver.Resolve(postgres.Domain(domain))
 	if err != nil {
-		return
+		return out, &primitive.RepoError{
+			Issue: primitive.RepoErrorCodeServerError,
+			Err:   err,
+		}
 	}
 
 	// get today attendance
@@ -37,17 +32,10 @@ func (d *Db) FindHomePage(ctx context.Context, domain string, param FindHomePage
 	return
 }
 
-type TodayAttendance struct {
-	Timezone     primitive.Timezone
-	CheckinTime  primitive.Time
-	CheckoutTime primitive.Time
-	ApprovedAt   primitive.Time
-}
-
-func getTodayAttendance(ctx context.Context, conn *pgxpool.Pool, uid string, timezone primitive.Timezone) (out TodayAttendance, err error) {
+func getTodayAttendance(ctx context.Context, conn *pgxpool.Pool, uid string, timezone primitive.Timezone) (out model.TodayAttendance, err error) {
 	now, err := timezone.Now()
 	if err != nil {
-		return TodayAttendance{}, fmt.Errorf("error getting now time: %v", err)
+		return model.TodayAttendance{}, fmt.Errorf("error getting now time: %v", err)
 	}
 
 	todayDate := now.Format("2006-01-02")
@@ -66,9 +54,9 @@ func getTodayAttendance(ctx context.Context, conn *pgxpool.Pool, uid string, tim
 	err = conn.QueryRow(ctx, sql, uid, todayDate).Scan(&tz, &out.CheckinTime, &out.CheckoutTime, &out.ApprovedAt)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return TodayAttendance{}, nil
+			return model.TodayAttendance{}, nil
 		} else {
-			return TodayAttendance{}, err
+			return model.TodayAttendance{}, err
 		}
 	}
 

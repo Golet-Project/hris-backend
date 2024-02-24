@@ -2,20 +2,19 @@ package db
 
 import (
 	"context"
+	"hroost/central/domain/auth/model"
 	"hroost/infrastructure/store/postgres"
+	"hroost/shared/primitive"
 
 	"github.com/jackc/pgx/v5"
 )
 
-type ChangePasswordIn struct {
-	UID      string
-	Password string
-}
-
-func (d *Db) ChangePassword(ctx context.Context, in ChangePasswordIn) (rowsAffected int64, err error) {
+func (d *Db) ChangePassword(ctx context.Context, in model.ChangePasswordIn) (int64, *primitive.RepoError) {
 	masterConn, err := d.pgResolver.Resolve(postgres.MasterDomain)
 	if err != nil {
-		return 0, err
+		return 0, &primitive.RepoError{
+			Issue: primitive.RepoErrorCodeServerError,
+		}
 	}
 
 	sql := `
@@ -29,10 +28,12 @@ func (d *Db) ChangePassword(ctx context.Context, in ChangePasswordIn) (rowsAffec
 		"uid":      in.UID,
 	})
 	if err != nil {
-		return
+		return 0, &primitive.RepoError{
+			Issue: primitive.RepoErrorCodeServerError,
+		}
 	}
 
-	rowsAffected = commandTag.RowsAffected()
+	rowsAffected := commandTag.RowsAffected()
 
-	return
+	return rowsAffected, nil
 }

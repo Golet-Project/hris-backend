@@ -2,39 +2,28 @@ package db
 
 import (
 	"context"
+	"errors"
 	"hroost/infrastructure/store/postgres"
-	"hroost/shared/entities"
+	"hroost/mobile/domain/attendance/model"
 	"hroost/shared/primitive"
 
 	"github.com/jackc/pgx/v5"
 )
 
-type GetTodayAttendanceIn struct {
-	EmployeeUID string
-	Timezone    primitive.Timezone
-}
-
-type GetTodayAttendanceOut struct {
-	Timezone         primitive.Timezone
-	AttendanceRadius primitive.Int64
-	CheckinTime      primitive.Time
-	CheckoutTime     primitive.Time
-	ApprovedAt       primitive.Time
-
-	StartWorkingHour primitive.Time
-	EndWorkingHour   primitive.Time
-
-	Company entities.Company
-}
-
-func (d *Db) GetTodayAttendance(ctx context.Context, domain string, param GetTodayAttendanceIn) (out GetTodayAttendanceOut, err error) {
+func (d *Db) GetTodayAttendance(ctx context.Context, domain string, param model.GetTodayAttendanceIn) (out model.GetTodayAttendanceOut, repoError *primitive.RepoError) {
 	masterConn, err := d.pgResolver.Resolve(postgres.MasterDomain)
 	if err != nil {
-		return
+		return out, &primitive.RepoError{
+			Issue: primitive.RepoErrorCodeServerError,
+			Err:   err,
+		}
 	}
 
 	if domain == "" || !param.Timezone.Valid() || param.EmployeeUID == "" {
-		return GetTodayAttendanceOut{}, pgx.ErrNoRows
+		return out, &primitive.RepoError{
+			Issue: primitive.RepoErrorCodeDataNotFound,
+			Err:   err,
+		}
 	}
 
 	var companySql = `
@@ -47,7 +36,17 @@ func (d *Db) GetTodayAttendance(ctx context.Context, domain string, param GetTod
 
 	err = masterConn.QueryRow(ctx, companySql, domain).Scan(&out.Company.Coordinate.Latitude, &out.Company.Coordinate.Longitude, &out.AttendanceRadius)
 	if err != nil {
-		return
+		if errors.Is(err, pgx.ErrNoRows) {
+			return out, &primitive.RepoError{
+				Issue: primitive.RepoErrorCodeDataNotFound,
+				Err:   err,
+			}
+		}
+
+		return out, &primitive.RepoError{
+			Issue: primitive.RepoErrorCodeServerError,
+			Err:   err,
+		}
 	}
 
 	var sql = `
@@ -62,19 +61,42 @@ func (d *Db) GetTodayAttendance(ctx context.Context, domain string, param GetTod
 
 	conn, err := d.pgResolver.Resolve(postgres.Domain(domain))
 	if err != nil {
-		return
+		if errors.Is(err, pgx.ErrNoRows) {
+			return out, &primitive.RepoError{
+				Issue: primitive.RepoErrorCodeDataNotFound,
+				Err:   err,
+			}
+		}
+
+		return out, &primitive.RepoError{
+			Issue: primitive.RepoErrorCodeServerError,
+			Err:   err,
+		}
 	}
 
 	now, err := param.Timezone.Now()
 	if err != nil {
-		return
+		return out, &primitive.RepoError{
+			Issue: primitive.RepoErrorCodeServerError,
+			Err:   err,
+		}
 	}
 	todayDate := now.Format("2006-01-02")
 
 	var tz int64
 	err = conn.QueryRow(ctx, sql, param.EmployeeUID, todayDate).Scan(&tz, &out.CheckinTime, &out.CheckoutTime, &out.ApprovedAt)
 	if err != nil {
-		return
+		if errors.Is(err, pgx.ErrNoRows) {
+			return out, &primitive.RepoError{
+				Issue: primitive.RepoErrorCodeDataNotFound,
+				Err:   err,
+			}
+		}
+
+		return out, &primitive.RepoError{
+			Issue: primitive.RepoErrorCodeServerError,
+			Err:   err,
+		}
 	}
 
 	out.Timezone = primitive.Timezone(tz)

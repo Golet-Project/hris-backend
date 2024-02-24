@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 	"errors"
-	"hroost/mobile/domain/attendance/db"
+	"hroost/mobile/domain/attendance/model"
 	"hroost/shared/primitive"
 	"net/http"
 
@@ -21,7 +21,90 @@ type AddAttendanceOut struct {
 	primitive.CommonResult
 }
 
-func ValidateAddAttendanceRequest(req AddAttendanceIn) *primitive.RequestValidationError {
+type AddAttendanceDb interface {
+	GetDomainByUid(ctx context.Context, uid string) (domain string, err *primitive.RepoError)
+	// TODO: move into separate struct
+	EmployeeExistsById(ctx context.Context, domain string, uid string) (exists bool, err *primitive.RepoError)
+	CheckTodayAttendanceById(ctx context.Context, domain string, uid string, timezone primitive.Timezone) (exists bool, err *primitive.RepoError)
+
+	AddAttendance(ctx context.Context, domain string, data model.AddAttendanceIn) (err *primitive.RepoError)
+}
+
+type AddAttendance struct {
+	Db AddAttendanceDb
+}
+
+func (s *AddAttendance) Exec(ctx context.Context, req AddAttendanceIn) (out AddAttendanceOut) {
+	// validate request
+	if err := s.ValidateAddAttendanceRequest(req); err != nil {
+		out.SetResponse(http.StatusBadRequest, "request validation failed", err)
+		return
+	}
+
+	// get the domain
+	domain, err := s.Db.GetDomainByUid(ctx, req.UID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			out.SetResponse(http.StatusNotFound, "user not found")
+			return
+		} else {
+			out.SetResponse(http.StatusInternalServerError, "internal server error", err)
+			return
+		}
+	}
+
+	// validate user
+	exist, err := s.Db.EmployeeExistsById(ctx, domain, req.UID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			out.SetResponse(http.StatusNotFound, "employee not found", err)
+			return
+		} else {
+			out.SetResponse(http.StatusInternalServerError, "interal server error", err)
+			return
+		}
+	}
+	if !exist {
+		out.SetResponse(http.StatusNotFound, "employee not found")
+		return
+	}
+
+	// check if attendance already exist
+	exists, err := s.Db.CheckTodayAttendanceById(ctx, domain, req.UID, req.Timezone)
+	if err != nil {
+		out.SetResponse(http.StatusInternalServerError, "interal server error", err)
+		return
+	}
+	if exists {
+		out.SetResponse(http.StatusConflict, "attendance already exist")
+		return
+	}
+
+	// input attendance
+	err = s.Db.AddAttendance(ctx, domain, model.AddAttendanceIn{
+		EmployeeUID: req.UID,
+		Timezone:    req.Timezone,
+		Coordinate: primitive.Coordinate{
+			Latitude:  req.Coordinate.Latitude,
+			Longitude: req.Coordinate.Longitude,
+		},
+	})
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			out.SetResponse(http.StatusNotFound, "employee not found")
+			return
+		} else {
+			out.SetResponse(http.StatusInternalServerError, "internal server error", err)
+			return
+		}
+	}
+
+	out.SetResponse(http.StatusCreated, "success")
+
+	return
+}
+
+func (s *AddAttendance) ValidateAddAttendanceRequest(req AddAttendanceIn) *primitive.RequestValidationError {
 	var allIssues []primitive.RequestValidationIssue
 
 	// validate uid
@@ -93,74 +176,4 @@ func ValidateAddAttendanceRequest(req AddAttendanceIn) *primitive.RequestValidat
 	}
 
 	return nil
-}
-
-func (s *Service) AddAttendance(ctx context.Context, req AddAttendanceIn) (out AddAttendanceOut) {
-	// validate request
-	if err := ValidateAddAttendanceRequest(req); err != nil {
-		out.SetResponse(http.StatusBadRequest, "request validation failed", err)
-		return
-	}
-
-	// get the domain
-	domain, err := s.userService.GetDomainByUid(ctx, req.UID)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			out.SetResponse(http.StatusNotFound, "user not found")
-			return
-		} else {
-			out.SetResponse(http.StatusInternalServerError, "internal server error", err)
-			return
-		}
-	}
-
-	// validate user
-	exist, err := s.db.CheckEmployeeById(ctx, domain, req.UID)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			out.SetResponse(http.StatusNotFound, "employee not found", err)
-			return
-		} else {
-			out.SetResponse(http.StatusInternalServerError, "interal server error", err)
-			return
-		}
-	}
-	if !exist {
-		out.SetResponse(http.StatusNotFound, "employee not found")
-		return
-	}
-
-	// check if attendance already exist
-	exists, err := s.db.CheckTodayAttendanceById(ctx, domain, req.UID, req.Timezone)
-	if err != nil {
-		out.SetResponse(http.StatusInternalServerError, "interal server error", err)
-		return
-	}
-	if exists {
-		out.SetResponse(http.StatusConflict, "attendance already exist")
-		return
-	}
-
-	// input attendance
-	err = s.db.AddAttendance(ctx, domain, db.AddAttendanceIn{
-		EmployeeUID: req.UID,
-		Timezone:    req.Timezone,
-		Coordinate: primitive.Coordinate{
-			Latitude:  req.Coordinate.Latitude,
-			Longitude: req.Coordinate.Longitude,
-		},
-	})
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			out.SetResponse(http.StatusNotFound, "employee not found")
-			return
-		} else {
-			out.SetResponse(http.StatusInternalServerError, "internal server error", err)
-			return
-		}
-	}
-
-	out.SetResponse(http.StatusCreated, "success")
-
-	return
 }

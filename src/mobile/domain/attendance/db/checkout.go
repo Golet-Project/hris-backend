@@ -3,9 +3,10 @@ package db
 import (
 	"context"
 	"hroost/infrastructure/store/postgres"
+	"hroost/shared/primitive"
 )
 
-func (d *Db) Checkout(ctx context.Context, domain, uid string) (rowsAffected int64, err error) {
+func (d *Db) Checkout(ctx context.Context, domain, uid string) (rowsAffected int64, repoError *primitive.RepoError) {
 	var sql = `
 	UPDATE
 		attendance
@@ -18,10 +19,19 @@ func (d *Db) Checkout(ctx context.Context, domain, uid string) (rowsAffected int
 
 	conn, err := d.pgResolver.Resolve(postgres.Domain(domain))
 	if err != nil {
-		return
+		return 0, &primitive.RepoError{
+			Issue: primitive.RepoErrorCodeServerError,
+			Err:   err,
+		}
 	}
 
 	commandTag, err := conn.Exec(ctx, sql, uid)
+	if err != nil {
+		return 0, &primitive.RepoError{
+			Issue: primitive.RepoErrorCodeServerError,
+			Err:   err,
+		}
+	}
 
 	rowsAffected = commandTag.RowsAffected()
 

@@ -2,13 +2,11 @@ package service
 
 import (
 	"context"
-	"errors"
 	"net/http"
 	"time"
 
 	"hroost/shared/primitive"
-
-	"github.com/jackc/pgx/v5"
+	"hroost/tenant/domain/attendance/model"
 )
 
 type FindAllAttendanceIn struct {
@@ -30,14 +28,23 @@ type FindAllAttendanceOut struct {
 	Attendance []Attendance
 }
 
-func (s *Service) FindAllAttendance(ctx context.Context, req FindAllAttendanceIn) (out FindAllAttendanceOut) {
-	attendances, err := s.db.FindAllAttendance(ctx, req.Domain)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
+type FindAllAttendanceDb interface {
+	FindAllAttendance(ctx context.Context, domain string) (out []model.FindAllAttendanceOut, err *primitive.RepoError)
+}
+
+type FindAllAttendance struct {
+	Db FindAllAttendanceDb
+}
+
+func (s *FindAllAttendance) Exec(ctx context.Context, req FindAllAttendanceIn) (out FindAllAttendanceOut) {
+	attendances, repoError := s.Db.FindAllAttendance(ctx, req.Domain)
+	if repoError != nil {
+		switch repoError.Issue {
+		case primitive.RepoErrorCodeDataNotFound:
 			out.SetResponse(http.StatusNotFound, "employee not found")
 			return
-		} else {
-			out.SetResponse(http.StatusInternalServerError, "internal server error", err)
+		default:
+			out.SetResponse(http.StatusInternalServerError, "internal server error", repoError)
 			return
 		}
 	}

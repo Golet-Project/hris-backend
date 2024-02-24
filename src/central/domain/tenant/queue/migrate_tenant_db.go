@@ -3,31 +3,35 @@ package queue
 import (
 	"context"
 	"encoding/json"
+	"hroost/central/domain/tenant/model"
 	"hroost/infrastructure/store/postgres"
 	"hroost/migration/tenant"
+	"hroost/shared/primitive"
 	"log"
 
 	"github.com/hibiken/asynq"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type MigrateTenantDBIn struct {
-	Domain string `json:"domain"`
-}
-
-func (q *Queue) MigrateTenantDB(ctx context.Context, in MigrateTenantDBIn) error {
+func (q *Queue) MigrateTenantDB(ctx context.Context, in model.MigrateTenantDBIn) (repoError *primitive.RepoError) {
 	log.Println("migrating tenant DB")
 
 	json, err := json.Marshal(in)
 	if err != nil {
-		return err
+		return &primitive.RepoError{
+			Issue: primitive.RepoErrorCodeServerError,
+			Err:   err,
+		}
 	}
 
 	createdTask := asynq.NewTask(MigrateTenantDb, json)
 
 	_, err = q.client.Enqueue(createdTask)
 	if err != nil {
-		return err
+		return &primitive.RepoError{
+			Issue: primitive.RepoErrorCodeServerError,
+			Err:   err,
+		}
 	}
 
 	return nil

@@ -2,13 +2,10 @@ package service
 
 import (
 	"context"
-	"errors"
-	"hroost/mobile/domain/homepage/db"
+	"hroost/mobile/domain/homepage/model"
 	"hroost/shared/primitive"
 	"net/http"
 	"time"
-
-	"github.com/jackc/pgx/v5"
 )
 
 type HomePageIn struct {
@@ -29,56 +26,47 @@ type HomePageOut struct {
 	TodayAttendance `json:"today_attendance"`
 }
 
-func ValidateHomePageIn(req HomePageIn) *primitive.RequestValidationError {
-	var allIssues []primitive.RequestValidationIssue
-
-	if !req.Timezone.Valid() {
-		allIssues = append(allIssues, primitive.RequestValidationIssue{
-			Code:    primitive.RequestValidationCodeInvalidValue,
-			Field:   "timezone",
-			Message: "timezone header invalid",
-		})
-	}
-
-	if len(allIssues) > 0 {
-		return &primitive.RequestValidationError{
-			Issues: allIssues,
-		}
-	}
-
-	return nil
+type HomePageDb interface {
+	GetDomainByUid(ctx context.Context, uid string) (domain string, err *primitive.RepoError)
+	FindHomePage(ctx context.Context, domain string, query model.FindHomePageIn) (out model.FindHomePageOut, err *primitive.RepoError)
 }
 
-func (s *Service) HomePage(ctx context.Context, req HomePageIn) (out HomePageOut) {
+type HomePage struct {
+	Db HomePageDb
+}
+
+func (s *HomePage) Exec(ctx context.Context, req HomePageIn) (out HomePageOut) {
 	// validate request
-	if err := ValidateHomePageIn(req); err != nil {
+	if err := s.ValidateHomePageIn(req); err != nil {
 		out.SetResponse(http.StatusBadRequest, "invalid request", err)
 		return
 	}
 
 	// get the domain
-	domain, err := s.userService.GetDomainByUid(ctx, req.UID)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
+	domain, repoError := s.Db.GetDomainByUid(ctx, req.UID)
+	if repoError != nil {
+		switch repoError.Issue {
+		case primitive.RepoErrorCodeDataNotFound:
 			out.SetResponse(http.StatusNotFound, "employee not found")
 			return
-		} else {
-			out.SetResponse(http.StatusInternalServerError, "internal server eror", err)
+		default:
+			out.SetResponse(http.StatusInternalServerError, "internal server eror", repoError)
 			return
 		}
 	}
 
 	// get the homepage data
-	homepageData, err := s.db.FindHomePage(ctx, domain, db.FindHomePageIn{
+	homepageData, repoError := s.Db.FindHomePage(ctx, domain, model.FindHomePageIn{
 		UID:      req.UID,
 		Timezone: req.Timezone,
 	})
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
+	if repoError != nil {
+		switch repoError.Issue {
+		case primitive.RepoErrorCodeDataNotFound:
 			out.SetResponse(http.StatusNotFound, "homepage data not found")
 			return
-		} else {
-			out.SetResponse(http.StatusInternalServerError, "internal server eror", err)
+		default:
+			out.SetResponse(http.StatusInternalServerError, "internal server eror", repoError)
 			return
 		}
 	}
@@ -100,4 +88,24 @@ func (s *Service) HomePage(ctx context.Context, req HomePageIn) (out HomePageOut
 	out.SetResponse(http.StatusOK, "success")
 
 	return
+}
+
+func (s *HomePage) ValidateHomePageIn(req HomePageIn) *primitive.RequestValidationError {
+	var allIssues []primitive.RequestValidationIssue
+
+	if !req.Timezone.Valid() {
+		allIssues = append(allIssues, primitive.RequestValidationIssue{
+			Code:    primitive.RequestValidationCodeInvalidValue,
+			Field:   "timezone",
+			Message: "timezone header invalid",
+		})
+	}
+
+	if len(allIssues) > 0 {
+		return &primitive.RequestValidationError{
+			Issues: allIssues,
+		}
+	}
+
+	return nil
 }

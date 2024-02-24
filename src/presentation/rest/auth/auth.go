@@ -2,25 +2,49 @@ package auth
 
 import (
 	"fmt"
-	centralService "hroost/central/domain/auth/service"
-	mobileService "hroost/mobile/domain/auth/service"
 	"hroost/shared/primitive"
+
+	tenantDb "hroost/tenant/domain/auth/db"
 	tenantService "hroost/tenant/domain/auth/service"
+
+	centralDb "hroost/central/domain/auth/db"
+	centralMemory "hroost/central/domain/auth/memory"
+	centralService "hroost/central/domain/auth/service"
+
+	mobileDb "hroost/mobile/domain/auth/db"
+	mobileMemory "hroost/mobile/domain/auth/memory"
+	mobileService "hroost/mobile/domain/auth/service"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/utils"
+	"golang.org/x/oauth2"
 )
 
+type Central struct {
+	Db           *centralDb.Db
+	Memory       *centralMemory.Memory
+	Oauth2Google *oauth2.Config
+}
+
+type Mobile struct {
+	Db     *mobileDb.Db
+	Memory *mobileMemory.Memory
+}
+
+type Tenant struct {
+	Db *tenantDb.Db
+}
+
 type Config struct {
-	CentralService *centralService.Service
-	MobileService  *mobileService.Service
-	TenantService  *tenantService.Service
+	Central *Central
+	Mobile  *Mobile
+	Tenant  *Tenant
 }
 
 type Auth struct {
-	centralService *centralService.Service
-	mobileService  *mobileService.Service
-	tenantService  *tenantService.Service
+	central *Central
+	mobile  *Mobile
+	tenant  *Tenant
 }
 
 func NewAuth(cfg *Config) (*Auth, error) {
@@ -29,9 +53,9 @@ func NewAuth(cfg *Config) (*Auth, error) {
 	}
 
 	return &Auth{
-		centralService: cfg.CentralService,
-		mobileService:  cfg.MobileService,
-		tenantService:  cfg.TenantService,
+		central: cfg.Central,
+		mobile:  cfg.Mobile,
+		tenant:  cfg.Tenant,
 	}, nil
 }
 
@@ -49,7 +73,11 @@ func (a Auth) BasicAuthLogin(c *fiber.Ctx) error {
 			return c.JSON(res)
 		}
 
-		var loginOut = a.tenantService.BasicAuthLogin(c.Context(), body)
+		service := tenantService.BasicAuthLogin{
+			Db: a.tenant.Db,
+		}
+
+		var loginOut = service.Exec(c.Context(), body)
 
 		res.Message = loginOut.GetMessage()
 
@@ -69,7 +97,11 @@ func (a Auth) BasicAuthLogin(c *fiber.Ctx) error {
 			return c.JSON(res)
 		}
 
-		var loginOut = a.centralService.BasicAuthLogin(c.Context(), body)
+		service := centralService.BasicAuthLogin{
+			Db: a.central.Db,
+		}
+
+		var loginOut = service.Exec(c.Context(), body)
 
 		res.Message = loginOut.GetMessage()
 
@@ -90,7 +122,11 @@ func (a Auth) BasicAuthLogin(c *fiber.Ctx) error {
 			return c.JSON(res)
 		}
 
-		var loginOut = a.mobileService.BasicAuthLogin(c.Context(), body)
+		service := mobileService.BasicAuthLogin{
+			Db: a.mobile.Db,
+		}
+
+		var loginOut = service.Exec(c.Context(), body)
 
 		res.Message = loginOut.GetMessage()
 
@@ -129,7 +165,12 @@ func (a Auth) ChangePassword(c *fiber.Ctx) error {
 
 		body.Token = token
 
-		var serviceOut = a.centralService.ChangePassword(c.Context(), body)
+		service := centralService.ChangePassword{
+			Memory: a.central.Memory,
+			Db:     a.central.Db,
+		}
+
+		var serviceOut = service.Exec(c.Context(), body)
 
 		res.Message = serviceOut.GetMessage()
 
@@ -151,7 +192,12 @@ func (a Auth) ChangePassword(c *fiber.Ctx) error {
 
 		body.Token = token
 
-		var serviceOut = a.mobileService.ChangePassword(c.Context(), body)
+		service := mobileService.ChangePassword{
+			Db:     a.mobile.Db,
+			Memory: a.mobile.Memory,
+		}
+
+		var serviceOut = service.Exec(c.Context(), body)
 
 		res.Message = serviceOut.GetMessage()
 
@@ -188,7 +234,12 @@ func (a Auth) ForgotPassword(c *fiber.Ctx) error {
 
 		body.AppID = appId
 
-		serviceOut := a.centralService.ForgotPassword(c.Context(), body)
+		service := centralService.ForgotPassword{
+			Db:     a.central.Db,
+			Memory: a.central.Memory,
+		}
+
+		serviceOut := service.Exec(c.Context(), body)
 
 		res.Message = serviceOut.GetMessage()
 
@@ -209,7 +260,12 @@ func (a Auth) ForgotPassword(c *fiber.Ctx) error {
 			return c.JSON(res)
 		}
 
-		serviceOut := a.mobileService.ForgotPassword(c.Context(), body)
+		service := mobileService.ForgotPassword{
+			Db:     a.mobile.Db,
+			Memory: a.mobile.Memory,
+		}
+
+		serviceOut := service.Exec(c.Context(), body)
 
 		res.Message = serviceOut.GetMessage()
 
@@ -238,8 +294,12 @@ func (a Auth) OAuthLogin(c *fiber.Ctx) error {
 	case primitive.TenantAppID:
 		fallthrough
 	case primitive.CentralAppID:
+
+		service := centralService.OAuthLogin{
+			OAuth2Google: a.central.Oauth2Google,
+		}
 		// call the service
-		serviceOut := a.centralService.OAuthLogin(c.Context())
+		serviceOut := service.Exec(c.Context())
 		response.Message = serviceOut.GetMessage()
 
 		if serviceOut.GetCode() >= 200 && serviceOut.GetCode() < 400 {
@@ -266,8 +326,13 @@ func (a Auth) OAuthCallback(c *fiber.Ctx) error {
 		var query centralService.OAuthCallbackIn
 		c.QueryParser(&query)
 
+		service := centralService.OAuthCallback{
+			Db:           a.central.Db,
+			Oauth2Google: a.central.Oauth2Google,
+		}
+
 		// call the service
-		serviceOut := a.centralService.OAuthCallback(c.Context(), query)
+		serviceOut := service.Exec(c.Context(), query)
 		response.Message = serviceOut.GetMessage()
 
 		if serviceOut.GetCode() >= 200 && serviceOut.GetCode() < 400 {
@@ -304,7 +369,11 @@ func (a Auth) PasswordRecoveryCheck(c *fiber.Ctx) error {
 
 		body.Token = token
 
-		serviceOut := a.centralService.PasswordRecoveryTokenCheck(c.Context(), body)
+		service := centralService.PasswordRecoveryTokenCheck{
+			Memory: a.central.Memory,
+		}
+
+		serviceOut := service.Exec(c.Context(), body)
 
 		res.Message = serviceOut.GetMessage()
 

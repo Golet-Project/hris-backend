@@ -2,13 +2,9 @@ package service
 
 import (
 	"context"
-	"errors"
-	"hroost/central/domain/tenant/db"
-	"hroost/central/domain/tenant/queue"
+	"hroost/central/domain/tenant/model"
 	"hroost/shared/primitive"
 	"net/http"
-
-	"github.com/jackc/pgx/v5"
 )
 
 type CreateTenantIn struct {
@@ -24,8 +20,70 @@ type CreateTenantOut struct {
 	Domain string `json:"domain"`
 }
 
+type CreateTenantQueue interface {
+	MigrateTenantDB(ctx context.Context, data model.MigrateTenantDBIn) (err *primitive.RepoError)
+}
+
+type CreateTenantDb interface {
+	CountTenantByDomain(ctx context.Context, domain string) (out model.CountTenantByDomainOut, err *primitive.RepoError)
+	CreateTenant(ctx context.Context, data model.CreateTenantIn) (tenant model.CreateTenantOut, err *primitive.RepoError)
+}
+
+type CreateTenant struct {
+	Db    CreateTenantDb
+	Queue CreateTenantQueue
+}
+
+// CreateTenant send event to MQ and run tenant database migration
+func (s *CreateTenant) Exec(ctx context.Context, in CreateTenantIn) (out CreateTenantOut) {
+	// validate request
+	if err := s.ValidateCreateTenantIn(in); err != nil {
+		out.SetResponse(http.StatusBadRequest, "request validation failed", err)
+		return
+	}
+
+	// check if given domain already exists
+	tenantCount, repoError := s.Db.CountTenantByDomain(ctx, in.Domain)
+	if repoError != nil {
+		if repoError.Issue != primitive.RepoErrorCodeDataNotFound {
+			out.SetResponse(http.StatusInternalServerError, "internal server error", repoError)
+			return
+		}
+	}
+	if tenantCount.Count > 0 {
+		out.SetResponse(http.StatusBadRequest, "tenant domain already registered")
+		return
+	}
+
+	// create tenant
+	createdTenant, repoError := s.Db.CreateTenant(ctx, model.CreateTenantIn{
+		Name:   in.Name,
+		Domain: in.Domain,
+	})
+	if repoError != nil {
+		out.SetResponse(http.StatusInternalServerError, "internal server error", repoError)
+		return
+	}
+
+	// send to MQ and run migration
+	repoError = s.Queue.MigrateTenantDB(ctx, model.MigrateTenantDBIn{
+		Domain: in.Domain,
+	})
+	if repoError != nil {
+		out.SetResponse(http.StatusInternalServerError, "internal server error", repoError)
+		return
+	}
+
+	out.ID = createdTenant.UID
+	out.Name = createdTenant.Name
+	out.Domain = createdTenant.Domain
+
+	out.SetResponse(http.StatusCreated, "tenant created")
+	return
+}
+
 // ValidateCreateTenantIn validate the request body
-func ValidateCreateTenantIn(in CreateTenantIn) *primitive.RequestValidationError {
+func (s *CreateTenant) ValidateCreateTenantIn(in CreateTenantIn) *primitive.RequestValidationError {
 	var allIssues []primitive.RequestValidationIssue
 
 	// validate name
@@ -77,50 +135,4 @@ func ValidateCreateTenantIn(in CreateTenantIn) *primitive.RequestValidationError
 	}
 
 	return nil
-}
-
-// CreateTenant send event to MQ and run tenant database migration
-func (s *Service) CreateTenant(ctx context.Context, in CreateTenantIn) (out CreateTenantOut) {
-	// validate request
-	if err := ValidateCreateTenantIn(in); err != nil {
-		out.SetResponse(http.StatusBadRequest, "request validation failed", err)
-		return
-	}
-
-	// check if given domain already exists
-	tenantCount, err := s.db.CountTenantByDomain(ctx, in.Domain)
-	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
-		out.SetResponse(http.StatusInternalServerError, "internal server error", err)
-		return
-	}
-	if tenantCount.Count > 0 {
-		out.SetResponse(http.StatusBadRequest, "tenant domain already registered")
-		return
-	}
-
-	// create tenant
-	createdTenant, err := s.db.CreateTenant(ctx, db.CreateTenantIn{
-		Name:   in.Name,
-		Domain: in.Domain,
-	})
-	if err != nil {
-		out.SetResponse(http.StatusInternalServerError, "internal server error", err)
-		return
-	}
-
-	// send to MQ and run migration
-	err = s.queue.MigrateTenantDB(ctx, queue.MigrateTenantDBIn{
-		Domain: in.Domain,
-	})
-	if err != nil {
-		out.SetResponse(http.StatusInternalServerError, "internal server error", err)
-		return
-	}
-
-	out.ID = createdTenant.UID
-	out.Name = createdTenant.Name
-	out.Domain = createdTenant.Domain
-
-	out.SetResponse(http.StatusCreated, "tenant created")
-	return
 }

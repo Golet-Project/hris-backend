@@ -2,27 +2,39 @@ package tenant_management
 
 import (
 	"fmt"
+
+	centralDb "hroost/central/domain/tenant/db"
+	centralQueue "hroost/central/domain/tenant/queue"
 	centralService "hroost/central/domain/tenant/service"
+
 	"hroost/shared/primitive"
 
 	"github.com/gofiber/fiber/v2"
 )
 
+type Central struct {
+	Db    *centralDb.Db
+	Queue *centralQueue.Queue
+}
+
 type Config struct {
-	CentralService *centralService.Service
+	Central *Central
 }
 
 type TenantManagement struct {
-	centralService *centralService.Service
+	central *Central
 }
 
 func NewTenantManagement(cfg *Config) (*TenantManagement, error) {
 	if cfg == nil {
 		return nil, fmt.Errorf("dependency for tenant_management required")
 	}
+	if cfg.Central == nil {
+		return nil, fmt.Errorf("Central required")
+	}
 
 	return &TenantManagement{
-		centralService: cfg.CentralService,
+		central: cfg.Central,
 	}, nil
 }
 
@@ -39,8 +51,13 @@ func (t TenantManagement) CreateTenant(c *fiber.Ctx) error {
 			return c.JSON(res)
 		}
 
+		service := centralService.CreateTenant{
+			Db:    t.central.Db,
+			Queue: t.central.Queue,
+		}
+
 		// call the service
-		serviceOut := t.centralService.CreateTenant(c.Context(), body)
+		serviceOut := service.Exec(c.Context(), body)
 
 		res.Message = serviceOut.GetMessage()
 
