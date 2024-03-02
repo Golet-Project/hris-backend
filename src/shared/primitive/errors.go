@@ -76,5 +76,9 @@ type RepoError struct {
 }
 
 func (r RepoError) Error() string {
+	if r.Err == nil {
+		return "RepoError: missing actual error"
+	}
+
 	return r.Err.Error()
 }
