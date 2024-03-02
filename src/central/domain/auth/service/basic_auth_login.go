@@ -88,6 +88,14 @@ func (s *BasicAuthLogin) ValidateBasicAuthLoginBody(body BasicAuthLoginIn) *prim
 		allIssues = append(allIssues, issues...)
 	}
 
+	if len(body.Password) > 25 {
+		allIssues = append(allIssues, primitive.RequestValidationIssue{
+			Code:    primitive.RequestValidationCodeTooLong,
+			Field:   "password",
+			Message: "password must be less than 25 characters",
+		})
+	}
+
 	if len(allIssues) > 0 {
 		return &primitive.RequestValidationError{
 			Issues: allIssues,

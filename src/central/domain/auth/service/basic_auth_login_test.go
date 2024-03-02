@@ -2,7 +2,6 @@ package service_test
 
 import (
 	"context"
-	"fmt"
 	"hroost/central/domain/auth/model"
 	authService "hroost/central/domain/auth/service"
 	"hroost/shared/primitive"
@@ -39,7 +38,6 @@ func TestBasicAuthLoginSuite(t *testing.T) {
 }
 
 func (s *BasicAuthLoginTestSuite) SetupSubTest() {
-	fmt.Println("SETUP SUB TEST")
 	db := new(MockBasicAuthLoginDb)
 
 	s.db = db
@@ -195,6 +193,26 @@ func (s *BasicAuthLoginTestSuite) TestValidateBasicAuthLoginBody() {
 
 		s.Assert().NotNil(got)
 		s.Assert().ErrorAs(got, &requestValidationError)
+	})
+
+	s.Run("password must less than 25 characters", func() {
+		mockPayload := validPayload
+		mockPayload.Password = "Password1234567890Password1234567890"
+		var expectError *primitive.RequestValidationError
+
+		err := s.service.ValidateBasicAuthLoginBody(mockPayload)
+
+		s.Assert().NotNil(err)
+		s.Assert().ErrorAs(err, &expectError)
+		s.Len(err.Issues, 1)
+
+		issue := err.Issues[0]
+		expectedIssue := primitive.RequestValidationIssue{
+			Code:    primitive.RequestValidationCodeTooLong,
+			Field:   "password",
+			Message: "password must be less than 25 characters",
+		}
+		s.Assert().Equal(expectedIssue, issue)
 	})
 
 	s.Run("password contains no lowercase characters", func() {
