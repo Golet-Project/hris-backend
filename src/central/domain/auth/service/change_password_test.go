@@ -196,7 +196,7 @@ func (s *ChangePasswordTestSuite) TestExec() {
 		s.db.AssertExpectations(s.T())
 	})
 
-	s.Run("should handle error when invalidating password recovery token", func() {
+	s.Run("should handle error 500 when invalidating password recovery token", func() {
 		// arrange
 		ctx := context.Background()
 		mockHashPassword := "$2a$10$4MX0foX8163XXVEWIpR9munu6UnyGoN61086iRsfJ7qH6rQ.PwsD"
@@ -222,6 +222,38 @@ func (s *ChangePasswordTestSuite) TestExec() {
 
 		// assert
 		s.Assert().Equal(http.StatusInternalServerError, out.GetCode())
+		s.memory.AssertNumberOfCalls(s.T(), "DeletePasswordRecoveryToken", 1)
+		s.memory.AssertCalled(s.T(), "DeletePasswordRecoveryToken", ctx, validPayload.UID)
+		s.memory.AssertExpectations(s.T())
+		s.db.AssertExpectations(s.T())
+	})
+
+	s.Run("should not return an error if the token is not found when invalidating the token", func() {
+		// arrange
+		ctx := context.Background()
+		mockHashPassword := "$2a$10$4MX0foX8163XXVEWIpR9munu6UnyGoN61086iRsfJ7qH6rQ.PwsD"
+
+		// mock
+		s.service.GenerateFromPassword = func(password []byte, cost int) (hash []byte, err error) {
+			return []byte(mockHashPassword), nil
+		}
+		s.memory.
+			On("GetPasswordRecoveryToken", ctx, validPayload.UID).Return(validPayload.Token, nil).
+			On("DeletePasswordRecoveryToken", ctx, validPayload.UID).Return(&primitive.RepoError{
+			Issue: primitive.RepoErrorCodeDataNotFound,
+			Err:   fmt.Errorf("mock not found error"),
+		})
+
+		s.db.On("ChangePassword", ctx, model.ChangePasswordIn{
+			UID:      validPayload.UID,
+			Password: mockHashPassword,
+		}).Return(int64(1), nil)
+
+		// action
+		out := s.service.Exec(ctx, validPayload)
+
+		// assert
+		s.Assert().Equal(http.StatusOK, out.GetCode())
 		s.memory.AssertNumberOfCalls(s.T(), "DeletePasswordRecoveryToken", 1)
 		s.memory.AssertCalled(s.T(), "DeletePasswordRecoveryToken", ctx, validPayload.UID)
 		s.memory.AssertExpectations(s.T())

@@ -94,11 +94,7 @@ func (s *ChangePassword) Exec(ctx context.Context, in ChangePasswordIn) (out Cha
 	// delete delete password recovery link
 	repoError = s.Memory.DeletePasswordRecoveryToken(ctx, in.UID)
 	if repoError != nil {
-		switch repoError.Issue {
-		case primitive.RepoErrorCodeDataNotFound:
-			out.SetResponse(http.StatusNotFound, "data not found")
-			return
-		default:
+		if primitive.RepoErrorCodeDataNotFound != repoError.Issue {
 			out.SetResponse(http.StatusInternalServerError, "internal server error", repoError)
 			return
 		}
