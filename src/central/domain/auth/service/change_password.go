@@ -7,7 +7,7 @@ import (
 	"hroost/shared/utils"
 	"net/http"
 
-	"golang.org/x/crypto/bcrypt"
+	"github.com/google/uuid"
 )
 
 type ChangePasswordIn struct {
@@ -29,9 +29,14 @@ type ChangePasswordDb interface {
 	ChangePassword(ctx context.Context, param model.ChangePasswordIn) (rowsAffected int64, err *primitive.RepoError)
 }
 
+type ChangePasswordBcrypt interface {
+	GenerateFromPassword([]byte, int) ([]byte, error)
+}
+
 type ChangePassword struct {
-	Memory ChangePasswordMemory
-	Db     ChangePasswordDb
+	Memory               ChangePasswordMemory
+	Db                   ChangePasswordDb
+	GenerateFromPassword func(password []byte, cost int) (hash []byte, err error)
 }
 
 func (s *ChangePassword) Exec(ctx context.Context, in ChangePasswordIn) (out ChangePasswordOut) {
@@ -61,7 +66,7 @@ func (s *ChangePassword) Exec(ctx context.Context, in ChangePasswordIn) (out Cha
 	}
 
 	// hash & change password
-	passByte, err := bcrypt.GenerateFromPassword([]byte(in.Password), 10)
+	passByte, err := s.GenerateFromPassword([]byte(in.Password), 10)
 	if err != nil {
 		out.SetResponse(http.StatusInternalServerError, "internal server error", err)
 		return
@@ -110,21 +115,54 @@ func (s *ChangePassword) ValidateChangePasswordRequest(in ChangePasswordIn) *pri
 	// validate token
 	if len(in.Token) == 0 {
 		allIssues = append(allIssues, primitive.RequestValidationIssue{
-			Code:    primitive.RequestValidationCodeTooShort,
+			Code:    primitive.RequestValidationCodeRequired,
 			Field:   "token",
 			Message: "token is required",
 		})
 	}
 
+	// validate uid
+	if len(in.UID) == 0 {
+		allIssues = append(allIssues, primitive.RequestValidationIssue{
+			Code:    primitive.RequestValidationCodeRequired,
+			Field:   "uid",
+			Message: "uid is required",
+		})
+	} else {
+		parsed, err := uuid.Parse(in.UID)
+		if err != nil {
+			allIssues = append(allIssues, primitive.RequestValidationIssue{
+				Code:    primitive.RequestValidationCodeInvalidValue,
+				Field:   "uid",
+				Message: "uid is invalid",
+			})
+		}
+		if parsed.Version() != 4 {
+			allIssues = append(allIssues, primitive.RequestValidationIssue{
+				Code:    primitive.RequestValidationCodeInvalidValue,
+				Field:   "uid",
+				Message: "uid must be a valid uuid v4",
+			})
+		}
+	}
+
 	// validate password
 	if in.Password == "" {
 		allIssues = append(allIssues, primitive.RequestValidationIssue{
-			Code:    primitive.RequestValidationCodeTooShort,
+			Code:    primitive.RequestValidationCodeRequired,
 			Field:   "password",
 			Message: "password is required",
 		})
 	} else if issues := utils.IsPasswordValid(in.Password); len(issues) > 0 {
 		allIssues = append(allIssues, issues...)
+	}
+
+	if len(in.Password) > 25 {
+		allIssues = append(allIssues, primitive.RequestValidationIssue{
+			Code:    primitive.RequestValidationCodeTooLong,
+			Field:   "password",
+			Message: "password must be less than 25 characters",
+		})
 	}
 
 	if len(allIssues) > 0 {

@@ -17,6 +17,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/utils"
+	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/oauth2"
 )
 
@@ -166,8 +167,9 @@ func (a Auth) ChangePassword(c *fiber.Ctx) error {
 		body.Token = token
 
 		service := centralService.ChangePassword{
-			Memory: a.central.Memory,
-			Db:     a.central.Db,
+			Memory:               a.central.Memory,
+			Db:                   a.central.Db,
+			GenerateFromPassword: bcrypt.GenerateFromPassword,
 		}
 
 		var serviceOut = service.Exec(c.Context(), body)
