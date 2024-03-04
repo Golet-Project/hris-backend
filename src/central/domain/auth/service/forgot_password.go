@@ -60,18 +60,14 @@ func (s *ForgotPassword) Exec(ctx context.Context, in ForgotPasswordIn) (out For
 
 	// if password is not set (login using o auth) return fake response immediately
 	if !admin.Password.Valid || admin.Password.String == "" {
-		out.SetResponse(http.StatusOK, "password recovery link has been sent to your email")
+		out.SetResponse(http.StatusOK, "password recovery link has already been sent to your email")
 		return
 	}
 
 	// check token is exists
 	existingToken, repoError := s.Memory.GetPasswordRecoveryToken(ctx, admin.UserUID)
 	if repoError != nil {
-		switch repoError.Issue {
-		case primitive.RepoErrorCodeDataNotFound:
-			out.SetResponse(http.StatusNotFound, "user not found")
-			return
-		default:
+		if repoError.Issue != primitive.RepoErrorCodeDataNotFound {
 			out.SetResponse(http.StatusInternalServerError, "internal server error", repoError)
 			return
 		}
@@ -89,18 +85,13 @@ func (s *ForgotPassword) Exec(ctx context.Context, in ForgotPasswordIn) (out For
 	}
 
 	// store into redis with expire time
-	err = s.Memory.SetPasswordRecoveryToken(ctx, admin.UserUID, token)
+	repoError = s.Memory.SetPasswordRecoveryToken(ctx, admin.UserUID, token)
 	if repoError != nil {
-		switch repoError.Issue {
-		case primitive.RepoErrorCodeDataNotFound:
-			out.SetResponse(http.StatusNotFound, "user not found")
-			return
-		default:
-			out.SetResponse(http.StatusInternalServerError, "internal server error", repoError)
-			return
-		}
+		out.SetResponse(http.StatusInternalServerError, "internal server error", repoError)
+		return
 	}
 
+	// TODO: test
 	// send password recovery link via email
 	emailRecoveryLink := os.Getenv("INTERNAL_WEB_BASE_URL") + "/auth/password-recovery?token=" + token + "&uid=" + admin.UserUID + "&cid=" + in.AppID.String()
 
@@ -126,31 +117,30 @@ func (s *ForgotPassword) ValidateForgotPasswordPayload(body ForgotPasswordIn) *p
 	// validate email
 	if len(body.Email) == 0 {
 		allIssues = append(allIssues, primitive.RequestValidationIssue{
-			Code:    primitive.RequestValidationCodeTooShort,
+			Code:    primitive.RequestValidationCodeRequired,
 			Field:   "email",
 			Message: "email is required",
 		})
-	}
-
-	if len(allIssues) > 0 {
-		return &primitive.RequestValidationError{
-			Issues: allIssues,
+	} else {
+		emailIssues := utils.IsEmailValid(body.Email)
+		if len(emailIssues) > 0 {
+			allIssues = append(allIssues, emailIssues...)
 		}
 	}
 
 	// validate app id
 	if len(body.AppID) == 0 {
 		allIssues = append(allIssues, primitive.RequestValidationIssue{
-			Code:    primitive.RequestValidationCodeTooShort,
+			Code:    primitive.RequestValidationCodeRequired,
 			Field:   "X-App-ID",
-			Message: "x-app-id header is required",
+			Message: "X-App-ID header is required",
 		})
 	} else {
-		if body.AppID != primitive.CentralAppID && body.AppID != primitive.MobileAppID && body.AppID != primitive.TenantAppID {
+		if body.AppID != primitive.CentralAppID {
 			allIssues = append(allIssues, primitive.RequestValidationIssue{
 				Code:    primitive.RequestValidationCodeProhibitedValue,
-				Field:   "x-app-id",
-				Message: "x-app-id header is invalid",
+				Field:   "X-App-ID",
+				Message: "X-App-ID header has a prohibited value",
 			})
 		}
 	}

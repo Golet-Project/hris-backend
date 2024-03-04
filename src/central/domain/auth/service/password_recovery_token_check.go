@@ -4,6 +4,8 @@ import (
 	"context"
 	"hroost/shared/primitive"
 	"net/http"
+
+	"github.com/google/uuid"
 )
 
 type PasswordRecoveryTokenCheckIn struct {
@@ -61,7 +63,7 @@ func (s *PasswordRecoveryTokenCheck) ValidatePasswordRecoveryTokenCheckIn(in Pas
 	// validate token
 	if in.Token == "" {
 		allIssues = append(allIssues, primitive.RequestValidationIssue{
-			Code:    primitive.RequestValidationCodeTooShort,
+			Code:    primitive.RequestValidationCodeRequired,
 			Field:   "token",
 			Message: "token is required",
 		})
@@ -70,10 +72,27 @@ func (s *PasswordRecoveryTokenCheck) ValidatePasswordRecoveryTokenCheckIn(in Pas
 	// validate uid
 	if in.UID == "" {
 		allIssues = append(allIssues, primitive.RequestValidationIssue{
-			Code:    primitive.RequestValidationCodeTooShort,
+			Code:    primitive.RequestValidationCodeRequired,
 			Field:   "uid",
 			Message: "uid is required",
 		})
+	} else {
+		parsed, err := uuid.Parse(in.UID)
+		if err != nil {
+			allIssues = append(allIssues, primitive.RequestValidationIssue{
+				Code:    primitive.RequestValidationCodeInvalidValue,
+				Field:   "uid",
+				Message: "uid is not a valid uuid",
+			})
+		}
+
+		if parsed.Version() != 4 {
+			allIssues = append(allIssues, primitive.RequestValidationIssue{
+				Code:    primitive.RequestValidationCodeInvalidValue,
+				Field:   "uid",
+				Message: "uid is not a valid UUIDV4",
+			})
+		}
 	}
 
 	if len(allIssues) > 0 {
