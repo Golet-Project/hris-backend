@@ -42,28 +42,31 @@ func (s *AddAttendance) Exec(ctx context.Context, req AddAttendanceIn) (out AddA
 	}
 
 	// get the domain
-	domain, err := s.Db.GetDomainByUid(ctx, req.UID)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
+	domain, repoError := s.Db.GetDomainByUid(ctx, req.UID)
+	if repoError != nil {
+		switch repoError.Issue {
+		case primitive.RepoErrorCodeDataNotFound:
 			out.SetResponse(http.StatusNotFound, "user not found")
 			return
-		} else {
-			out.SetResponse(http.StatusInternalServerError, "internal server error", err)
+		default:
+			out.SetResponse(http.StatusInternalServerError, "internal server error", repoError)
 			return
 		}
 	}
 
 	// validate user
-	exist, err := s.Db.EmployeeExistsById(ctx, domain, req.UID)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			out.SetResponse(http.StatusNotFound, "employee not found", err)
+	exist, repoError := s.Db.EmployeeExistsById(ctx, domain, req.UID)
+	if repoError != nil {
+		switch repoError.Issue {
+		case primitive.RepoErrorCodeDataNotFound:
+			out.SetResponse(http.StatusNotFound, "employee not found")
 			return
-		} else {
-			out.SetResponse(http.StatusInternalServerError, "interal server error", err)
+		default:
+			out.SetResponse(http.StatusInternalServerError, "internal server error", repoError)
 			return
 		}
 	}
+
 	if !exist {
 		out.SetResponse(http.StatusNotFound, "employee not found")
 		return
@@ -72,7 +75,7 @@ func (s *AddAttendance) Exec(ctx context.Context, req AddAttendanceIn) (out AddA
 	// check if attendance already exist
 	exists, err := s.Db.CheckTodayAttendanceById(ctx, domain, req.UID, req.Timezone)
 	if err != nil {
-		out.SetResponse(http.StatusInternalServerError, "interal server error", err)
+		out.SetResponse(http.StatusInternalServerError, "internal server error", err)
 		return
 	}
 	if exists {
@@ -110,17 +113,25 @@ func (s *AddAttendance) ValidateAddAttendanceRequest(req AddAttendanceIn) *primi
 	// validate uid
 	if len(req.UID) == 0 {
 		allIssues = append(allIssues, primitive.RequestValidationIssue{
-			Code:    primitive.RequestValidationCodeTooShort,
+			Code:    primitive.RequestValidationCodeRequired,
 			Field:   "uid",
 			Message: "uid is required",
 		})
 	} else {
-		_, err := uuid.Parse(req.UID)
+		parsed, err := uuid.Parse(req.UID)
 		if err != nil {
 			allIssues = append(allIssues, primitive.RequestValidationIssue{
 				Code:    primitive.RequestValidationCodeInvalidValue,
 				Field:   "uid",
-				Message: "uid is not a valid uuid",
+				Message: "uid is not a valid UUID",
+			})
+		}
+
+		if parsed.Version() != 4 {
+			allIssues = append(allIssues, primitive.RequestValidationIssue{
+				Code:    primitive.RequestValidationCodeInvalidValue,
+				Field:   "uid",
+				Message: "uid is not a valid UUIDV4",
 			})
 		}
 	}
@@ -130,14 +141,14 @@ func (s *AddAttendance) ValidateAddAttendanceRequest(req AddAttendanceIn) *primi
 		allIssues = append(allIssues, primitive.RequestValidationIssue{
 			Code:    primitive.RequestValidationCodeRequired,
 			Field:   "timezone",
-			Message: "timezone is required",
+			Message: "timezone header is required",
 		})
 	} else {
 		if !req.Timezone.Valid() {
 			allIssues = append(allIssues, primitive.RequestValidationIssue{
 				Code:    primitive.RequestValidationCodeInvalidValue,
 				Field:   "timezone",
-				Message: "timezone is not valid",
+				Message: "timezone header has an invalid value",
 			})
 		}
 	}
@@ -147,14 +158,14 @@ func (s *AddAttendance) ValidateAddAttendanceRequest(req AddAttendanceIn) *primi
 		allIssues = append(allIssues, primitive.RequestValidationIssue{
 			Code:    primitive.RequestValidationCodeRequired,
 			Field:   "coordinate",
-			Message: "coordinate is required",
+			Message: "must not empty",
 		})
 	} else {
 		// validate coordinate.latitude
 		if req.Coordinate.Latitude < -90 || req.Coordinate.Latitude > 90 {
 			allIssues = append(allIssues, primitive.RequestValidationIssue{
 				Code:    primitive.RequestValidationCodeInvalidValue,
-				Field:   "recipient.latitude",
+				Field:   "coordinate.latitude",
 				Message: "must be between -90 and 90",
 			})
 		}
@@ -163,7 +174,7 @@ func (s *AddAttendance) ValidateAddAttendanceRequest(req AddAttendanceIn) *primi
 		if req.Coordinate.Longitude < -180 || req.Coordinate.Longitude > 180 {
 			allIssues = append(allIssues, primitive.RequestValidationIssue{
 				Code:    primitive.RequestValidationCodeInvalidValue,
-				Field:   "recipient.longitude",
+				Field:   "coordinate.longitude",
 				Message: "must be between -180 and 180",
 			})
 		}
