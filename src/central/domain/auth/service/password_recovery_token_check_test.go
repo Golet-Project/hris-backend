@@ -153,7 +153,7 @@ func (t *PasswordRecoveryTokenCheckTestSuite) TestExec_GetRecoveryToken() {
 }
 
 func (t *PasswordRecoveryTokenCheckTestSuite) TestValidatePasswordRecoveryTokenCheckIn_ValidPayload() {
-	t.Run("can get password recovery token", func() {
+	t.Run("should return no error", func() {
 		// action
 		err := t.service.ValidatePasswordRecoveryTokenCheckIn(t.validPayload)
 
