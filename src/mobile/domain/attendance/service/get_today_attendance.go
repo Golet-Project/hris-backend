@@ -7,6 +7,8 @@ import (
 	"hroost/shared/primitive"
 	"net/http"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type GetTodayAttendanceIn struct {
@@ -35,10 +37,17 @@ type GetTodayAttendanceDb interface {
 }
 
 type GetTodayAttendance struct {
-	Db GetTodayAttendanceDb
+	Db     GetTodayAttendanceDb
+	GetNow func() time.Time
 }
 
 func (s *GetTodayAttendance) Exec(ctx context.Context, req GetTodayAttendanceIn) (out GetTodayAttendanceOut) {
+	// validate request
+	if err := s.ValidateGetTodayAttendanceIn(req); err != nil {
+		out.SetResponse(http.StatusBadRequest, "request validation failed", err)
+		return
+	}
+
 	// get the domain
 	domain, repoError := s.Db.GetDomainByUid(ctx, req.EmployeeUID)
 	if repoError != nil {
@@ -52,12 +61,6 @@ func (s *GetTodayAttendance) Exec(ctx context.Context, req GetTodayAttendanceIn)
 		}
 	}
 
-	// validate request
-	if err := s.ValidateGetTodayAttendanceIn(req); err != nil {
-		out.SetResponse(http.StatusBadRequest, "invalid request", err)
-		return
-	}
-
 	todayAttendance, repoError := s.Db.GetTodayAttendance(ctx, domain, model.GetTodayAttendanceIn{
 		EmployeeUID: req.EmployeeUID,
 		Timezone:    req.Timezone,
@@ -65,14 +68,14 @@ func (s *GetTodayAttendance) Exec(ctx context.Context, req GetTodayAttendanceIn)
 	if repoError != nil {
 		switch repoError.Issue {
 		case primitive.RepoErrorCodeServerError:
-			out.SetResponse(http.StatusInternalServerError, "error getting today attendance", repoError)
+			out.SetResponse(http.StatusInternalServerError, "internal server error", repoError)
 			return
 		}
 	}
 
 	// build response
 	out.Timezone = todayAttendance.Timezone
-	out.CurrentTime = time.Now().UTC().Format(primitive.UtcRFC3339)
+	out.CurrentTime = s.GetNow().UTC().Format(primitive.UtcRFC3339)
 	if todayAttendance.CheckinTime.Valid {
 		out.CheckinTime = todayAttendance.CheckinTime.Time.UTC().Format(primitive.UtcRFC3339)
 	}
@@ -112,13 +115,46 @@ func (s *GetTodayAttendance) Exec(ctx context.Context, req GetTodayAttendanceIn)
 func (s *GetTodayAttendance) ValidateGetTodayAttendanceIn(req GetTodayAttendanceIn) *primitive.RequestValidationError {
 	var allIssues []primitive.RequestValidationIssue
 
-	// validate timezone
-	if !req.Timezone.Valid() {
+	if req.EmployeeUID == "" {
 		allIssues = append(allIssues, primitive.RequestValidationIssue{
-			Code:    primitive.RequestValidationCodeInvalidValue,
-			Field:   "timezone",
-			Message: "timezone header invalid",
+			Code:    primitive.RequestValidationCodeRequired,
+			Field:   "employee_uid",
+			Message: "must not be empty",
 		})
+	} else {
+		parsed, err := uuid.Parse(req.EmployeeUID)
+		if err != nil {
+			allIssues = append(allIssues, primitive.RequestValidationIssue{
+				Code:    primitive.RequestValidationCodeInvalidValue,
+				Field:   "employee_uid",
+				Message: "must be a valid UUID",
+			})
+		}
+
+		if parsed.Version() != 4 {
+			allIssues = append(allIssues, primitive.RequestValidationIssue{
+				Code:    primitive.RequestValidationCodeInvalidValue,
+				Field:   "employee_uid",
+				Message: "must be a valid UUIDV4",
+			})
+		}
+	}
+
+	// validate timezone
+	if req.Timezone == 0 {
+		allIssues = append(allIssues, primitive.RequestValidationIssue{
+			Code:    primitive.RequestValidationCodeRequired,
+			Field:   "timezone",
+			Message: "must not be empty",
+		})
+	} else {
+		if !req.Timezone.Valid() {
+			allIssues = append(allIssues, primitive.RequestValidationIssue{
+				Code:    primitive.RequestValidationCodeInvalidValue,
+				Field:   "timezone",
+				Message: "must be a valid timezone header",
+			})
+		}
 	}
 
 	if len(allIssues) > 0 {

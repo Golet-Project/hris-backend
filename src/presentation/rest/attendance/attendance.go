@@ -4,6 +4,7 @@ import (
 	"fmt"
 	mobileJwt "hroost/mobile/lib/jwt"
 	tenantJwt "hroost/tenant/lib/jwt"
+	"time"
 
 	"hroost/shared/primitive"
 	"strconv"
@@ -206,7 +207,8 @@ func (a Attendance) GetTodayAttendance(c *fiber.Ctx) error {
 		req.Timezone = primitive.Timezone(tz)
 
 		service := mobileService.GetTodayAttendance{
-			Db: a.mobile.Db,
+			Db:     a.mobile.Db,
+			GetNow: time.Now,
 		}
 
 		serviceOut := service.Exec(c.Context(), req)
