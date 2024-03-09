@@ -2,14 +2,10 @@ package service
 
 import (
 	"context"
-	"errors"
 	"hroost/mobile/lib/jwt"
 	"hroost/shared/primitive"
 	"hroost/shared/utils"
 	"net/http"
-
-	"github.com/jackc/pgx/v5"
-	"golang.org/x/crypto/bcrypt"
 
 	"hroost/mobile/domain/auth/model"
 )
@@ -36,13 +32,18 @@ type BasicAuthLoginOut struct {
 	Employee    employee `json:"employee"`
 }
 
+type BasicAuthLoginBcrypt interface {
+	CompareHashAndPassword(hashedPassword []byte, password []byte) error
+}
+
 type BasicAuthLoginDb interface {
 	GetLoginCredential(ctx context.Context, email string) (credential model.GetLoginCredentialOut, err *primitive.RepoError)
 	GetEmployeeDetail(ctx context.Context, domain string, userId string) (employee model.GetEmployeeDetailOut, err *primitive.RepoError)
 }
 
 type BasicAuthLogin struct {
-	Db BasicAuthLoginDb
+	Db     BasicAuthLoginDb
+	Bcrypt BasicAuthLoginBcrypt
 }
 
 func (s *BasicAuthLogin) Exec(ctx context.Context, body BasicAuthLoginIn) (out BasicAuthLoginOut) {
@@ -53,35 +54,38 @@ func (s *BasicAuthLogin) Exec(ctx context.Context, body BasicAuthLoginIn) (out B
 	}
 
 	// get the credentials
-	loginCredential, err := s.Db.GetLoginCredential(ctx, body.Email)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
+	loginCredential, repoError := s.Db.GetLoginCredential(ctx, body.Email)
+	if repoError != nil {
+		switch repoError.Issue {
+		case primitive.RepoErrorCodeDataNotFound:
 			out.SetResponse(http.StatusNotFound, "user not found")
 			return
-		} else {
-			out.SetResponse(http.StatusInternalServerError, "internal server error", err)
+		default:
+			out.SetResponse(http.StatusInternalServerError, "internal server error", repoError)
 			return
 		}
 	}
 
 	// compare password
-	if err := bcrypt.CompareHashAndPassword([]byte(loginCredential.Password.String), []byte(body.Password)); err != nil {
+	if err := s.Bcrypt.CompareHashAndPassword([]byte(loginCredential.Password.String), []byte(body.Password)); err != nil {
 		out.SetResponse(http.StatusUnauthorized, "invalid password")
 		return
 	}
 
 	// if success, get the user detail at the domain
-	userDetail, err := s.Db.GetEmployeeDetail(ctx, loginCredential.Domain, loginCredential.UserUID)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
+	userDetail, repoError := s.Db.GetEmployeeDetail(ctx, loginCredential.Domain, loginCredential.UserUID)
+	if repoError != nil {
+		switch repoError.Issue {
+		case primitive.RepoErrorCodeDataNotFound:
 			out.SetResponse(http.StatusNotFound, "employee not found")
 			return
-		} else {
-			out.SetResponse(http.StatusInternalServerError, "internal server error", err)
+		default:
+			out.SetResponse(http.StatusInternalServerError, "internal server error", repoError)
 			return
 		}
 	}
 
+	// TODO: testing
 	// generate jwt token
 	out.AccessToken = jwt.GenerateAccessToken(loginCredential.UserUID)
 	out.Employee = employee{
