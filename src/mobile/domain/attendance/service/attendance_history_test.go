@@ -249,6 +249,19 @@ func (t *AttendanceHistoryTestSuite) TestExec_FindAttendanceHistory() {
 					Longitude: 110.36707035197001,
 				},
 			},
+			{
+				ID:           "mock_id_3",
+				Date:         primitive.Date{String: "2024-03-03", Valid: true},
+				CheckinTime:  primitive.Time{Time: time.Date(2024, 3, 3, 9, 0, 0, 0, time.UTC), Valid: true},
+				CheckoutTime: primitive.Time{Time: time.Date(2024, 3, 3, 17, 0, 0, 0, time.UTC), Valid: true},
+				ApprovedAt:   primitive.Time{Time: time.Date(2024, 3, 3, 10, 0, 0, 0, time.UTC), Valid: true},
+				Radius:       100,
+
+				Coordinate: primitive.Coordinate{
+					Latitude:  -7.782870711329031,
+					Longitude: 110.36707035197001,
+				},
+			},
 		}, nil)
 
 		// action
@@ -281,6 +294,14 @@ func (t *AttendanceHistoryTestSuite) TestExec_FindAttendanceHistory() {
 					CheckinTime:      time.Date(2024, 3, 2, 9, 0, 0, 0, time.UTC).Format(primitive.UtcRFC3339),
 					CheckoutTime:     time.Date(2024, 3, 2, 17, 0, 0, 0, time.UTC).Format(primitive.UtcRFC3339),
 					ApprovedAt:       "",
+					AttendanceRadius: 100,
+				},
+				{
+					ID:               "mock_id_3",
+					Date:             "2024-03-03",
+					CheckinTime:      time.Date(2024, 3, 3, 9, 0, 0, 0, time.UTC).Format(primitive.UtcRFC3339),
+					CheckoutTime:     time.Date(2024, 3, 3, 17, 0, 0, 0, time.UTC).Format(primitive.UtcRFC3339),
+					ApprovedAt:       time.Date(2024, 3, 3, 10, 0, 0, 0, time.UTC).Format(primitive.UtcRFC3339),
 					AttendanceRadius: 100,
 				},
 			},
@@ -337,6 +358,19 @@ func (t *AttendanceHistoryTestSuite) TestExec_FindAttendanceHistory() {
 					Longitude: 110.36707035197001,
 				},
 			},
+			{
+				ID:           "mock_id_3",
+				Date:         primitive.Date{String: "2024-03-03", Valid: true},
+				CheckinTime:  primitive.Time{Time: time.Date(2024, 3, 3, 9, 0, 0, 0, time.UTC), Valid: true},
+				CheckoutTime: primitive.Time{Time: time.Date(2024, 3, 3, 17, 0, 0, 0, time.UTC), Valid: true},
+				ApprovedAt:   primitive.Time{Time: time.Date(2024, 3, 3, 10, 0, 0, 0, time.UTC), Valid: true},
+				Radius:       100,
+
+				Coordinate: primitive.Coordinate{
+					Latitude:  -7.782870711329031,
+					Longitude: 110.36707035197001,
+				},
+			},
 		}, nil)
 
 		// action
@@ -369,6 +403,14 @@ func (t *AttendanceHistoryTestSuite) TestExec_FindAttendanceHistory() {
 					CheckinTime:      time.Date(2024, 3, 2, 9, 0, 0, 0, time.UTC).Format(primitive.UtcRFC3339),
 					CheckoutTime:     time.Date(2024, 3, 2, 17, 0, 0, 0, time.UTC).Format(primitive.UtcRFC3339),
 					ApprovedAt:       "",
+					AttendanceRadius: 100,
+				},
+				{
+					ID:               "mock_id_3",
+					Date:             "2024-03-03",
+					CheckinTime:      time.Date(2024, 3, 3, 9, 0, 0, 0, time.UTC).Format(primitive.UtcRFC3339),
+					CheckoutTime:     time.Date(2024, 3, 3, 17, 0, 0, 0, time.UTC).Format(primitive.UtcRFC3339),
+					ApprovedAt:       time.Date(2024, 3, 3, 10, 0, 0, 0, time.UTC).Format(primitive.UtcRFC3339),
 					AttendanceRadius: 100,
 				},
 			},
