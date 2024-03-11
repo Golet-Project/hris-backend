@@ -65,7 +65,7 @@ func (t *AttendanceHistoryTestSuite) SetupSubTest() {
 	t.db = db
 	t.validPayload = service.AttendanceHistoryIn{
 		EmployeeId: "a84c2c59-748c-48d0-b628-4a73b1c3a8d7",
-		StartDate:  "2024-03-01",
+		StartDate:  "2024-01-01",
 		EndDate:    "2024-03-31",
 	}
 
@@ -265,7 +265,7 @@ func (t *AttendanceHistoryTestSuite) TestExec_FindAttendanceHistory() {
 		}, nil)
 
 		// action
-		out := t.service.Exec(ctx, t.validPayload)
+		out := t.service.Exec(ctx, mockPayload)
 
 		// assert
 		type Attendance struct {

@@ -63,6 +63,12 @@ func (s *AttendanceHistory) Exec(ctx context.Context, req AttendanceHistoryIn) (
 		}
 	}
 
+	if req.StartDate == "" && req.EndDate == "" {
+		now := s.GetNow()
+		req.StartDate = now.AddDate(0, 0, -now.Day()+1).Format("2006-01-02")
+		req.EndDate = now.AddDate(0, 1, -now.Day()).Format("2006-01-02")
+	}
+
 	attendanceHistoryCount, attendanceHistories, repoError := s.Db.FindAttendanceHistory(ctx, domain, model.FindAttendanceHistoryIn{
 		StartDate: req.StartDate,
 		EndDate:   req.EndDate,
