@@ -28,3 +28,19 @@ type GetTodayAttendanceOut struct {
 
 	Company entities.Company
 }
+
+type FindAttendanceHistoryIn struct {
+	StartDate string
+	EndDate   string
+}
+
+type FindAttendanceHistoryOut struct {
+	ID           string
+	Date         primitive.Date
+	CheckinTime  primitive.Time
+	CheckoutTime primitive.Time
+	ApprovedAt   primitive.Time
+	Radius       int64
+
+	Coordinate primitive.Coordinate
+}
