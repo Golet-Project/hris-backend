@@ -83,7 +83,7 @@ func (s *AttendanceHistory) Exec(ctx context.Context, req AttendanceHistoryIn) (
 
 	for i, attendanceHistory := range attendanceHistories {
 		a := Attendance{
-			// ID:               attendanceHistory.ID,
+			ID:               attendanceHistory.ID,
 			AttendanceRadius: attendanceHistory.Radius,
 		}
 		if attendanceHistory.Date.Valid {
