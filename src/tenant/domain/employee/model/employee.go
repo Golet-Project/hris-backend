@@ -23,7 +23,7 @@ type CreateEmployeeIn struct {
 }
 
 type FindAllEmployeeOut struct {
-	UID            string
+	Id             string
 	Email          string
 	FullName       string
 	BirthDate      time.Time

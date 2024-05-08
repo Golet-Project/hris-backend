@@ -3,6 +3,7 @@ package auth
 import (
 	"fmt"
 	"hroost/shared/primitive"
+	"time"
 
 	tenantDb "hroost/tenant/domain/auth/db"
 	tenantService "hroost/tenant/domain/auth/service"
@@ -78,7 +79,7 @@ func (a Auth) BasicAuthLogin(c *fiber.Ctx) error {
 			Db: a.tenant.Db,
 		}
 
-		var loginOut = service.Exec(c.Context(), body)
+		loginOut := service.Exec(c.Context(), body)
 
 		res.Message = loginOut.GetMessage()
 
@@ -88,6 +89,14 @@ func (a Auth) BasicAuthLogin(c *fiber.Ctx) error {
 			res.Error = loginOut.GetError()
 		}
 
+		// NOTE: currently we only set access token in the header for tenant
+		cookie := new(fiber.Cookie)
+		cookie.Name = "token"
+		cookie.Value = loginOut.AccessToken
+		cookie.Expires = time.Now().Add(24 * time.Hour)
+		cookie.HTTPOnly = true
+
+		c.Cookie(cookie)
 		c.Status(loginOut.GetCode())
 		return c.JSON(res)
 	case primitive.CentralAppID:
@@ -102,7 +111,7 @@ func (a Auth) BasicAuthLogin(c *fiber.Ctx) error {
 			Db: a.central.Db,
 		}
 
-		var loginOut = service.Exec(c.Context(), body)
+		loginOut := service.Exec(c.Context(), body)
 
 		res.Message = loginOut.GetMessage()
 
@@ -127,7 +136,7 @@ func (a Auth) BasicAuthLogin(c *fiber.Ctx) error {
 			Db: a.mobile.Db,
 		}
 
-		var loginOut = service.Exec(c.Context(), body)
+		loginOut := service.Exec(c.Context(), body)
 
 		res.Message = loginOut.GetMessage()
 
@@ -172,7 +181,7 @@ func (a Auth) ChangePassword(c *fiber.Ctx) error {
 			GenerateFromPassword: bcrypt.GenerateFromPassword,
 		}
 
-		var serviceOut = service.Exec(c.Context(), body)
+		serviceOut := service.Exec(c.Context(), body)
 
 		res.Message = serviceOut.GetMessage()
 
@@ -199,7 +208,7 @@ func (a Auth) ChangePassword(c *fiber.Ctx) error {
 			Memory: a.mobile.Memory,
 		}
 
-		var serviceOut = service.Exec(c.Context(), body)
+		serviceOut := service.Exec(c.Context(), body)
 
 		res.Message = serviceOut.GetMessage()
 
@@ -215,7 +224,6 @@ func (a Auth) ChangePassword(c *fiber.Ctx) error {
 		c.Status(fiber.StatusBadRequest)
 		return c.JSON(res)
 	}
-
 }
 
 func (a Auth) ForgotPassword(c *fiber.Ctx) error {

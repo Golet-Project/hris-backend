@@ -2,7 +2,6 @@ package employee
 
 import (
 	"fmt"
-
 	"hroost/shared/primitive"
 
 	mobileDb "hroost/mobile/domain/employee/db"

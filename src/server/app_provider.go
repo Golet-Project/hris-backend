@@ -291,6 +291,10 @@ func (s *Server) newAppProvider() (*Presentation, error) {
 			Db:     mobileServiceProvider.authDb,
 			Memory: mobileServiceProvider.authMemory,
 		},
+
+		Tenant: &auth.Tenant{
+			Db: tenantServiceProvider.authDb,
+		},
 	})
 	if err != nil {
 		return nil, err

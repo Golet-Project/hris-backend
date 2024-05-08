@@ -15,12 +15,10 @@ func (s *Server) init() error {
 
 	s.app.Use(logger.New())
 	s.app.Use(cors.New(cors.Config{
-		AllowOrigins: "*",
-		// AllowOrigins: "http://localhost:3000,https://google.com",
-		// AllowHeaders: "Origin, Content-Type, Accept",
-		AllowOriginsFunc: func(origin string) bool {
-			return true
-		},
+		// TODO: adjust AllowOrigin using config
+		AllowOrigins:     "http://localhost,http://localhost:3000,https://google.com",
+		AllowHeaders:     "Content-Type,Accept,Origin,X-App-ID,X-Domain",
+		AllowCredentials: true,
 	}))
 
 	// check where the request is coming from, then translate it into an application ID
