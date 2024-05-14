@@ -16,7 +16,6 @@ func TestValidateBasicAuthLoginBody(t *testing.T) {
 		}
 
 		err := service.ValidateBasicAuthLoginBody(payload)
-
 		if err != nil {
 			t.Errorf("Expect: nil\nGot: %T", err)
 		}
@@ -29,7 +28,6 @@ func TestValidateBasicAuthLoginBody(t *testing.T) {
 		}
 
 		err := service.ValidateBasicAuthLoginBody(payload)
-
 		if err != nil {
 			t.Errorf("Expect: nil\nGot: %T", err)
 		}
@@ -86,7 +84,6 @@ func TestValidateBasicAuthLoginBody(t *testing.T) {
 		if !errors.As(got, &requestValidationError) {
 			t.Errorf("Expect: %T\nGot: %T", got, requestValidationError)
 		}
-
 	})
 
 	t.Run("password is too short", func(t *testing.T) {

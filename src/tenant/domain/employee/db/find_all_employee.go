@@ -52,7 +52,7 @@ func (d *Db) FindAllEmployee(ctx context.Context, domain string) (out []model.Fi
 	for rows.Next() {
 		var row model.FindAllEmployeeOut
 
-		err = rows.Scan(&row.UID, &row.Email, &row.FullName, &row.BirthDate, &row.Gender, &row.EmployeeStatus,
+		err = rows.Scan(&row.Id, &row.Email, &row.FullName, &row.BirthDate, &row.Gender, &row.EmployeeStatus,
 			&row.JoinDate, &row.EndDate,
 		)
 		if err != nil {

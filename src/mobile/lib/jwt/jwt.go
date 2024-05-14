@@ -21,8 +21,8 @@ type CustomClaims struct {
 }
 
 func GenerateAccessToken(userUID string) string {
-	var ACCESS_TOKEN_EXPIRE_TIME, _ = strconv.ParseInt(os.Getenv("ACCESS_TOKEN_EXPIRE_TIME"), 10, 64)
-	var ACCESS_TOKEN_SECRET = os.Getenv("ACCESS_TOKEN_SECRET")
+	ACCESS_TOKEN_EXPIRE_TIME, _ := strconv.ParseInt(os.Getenv("ACCESS_TOKEN_EXPIRE_TIME"), 10, 64)
+	ACCESS_TOKEN_SECRET := os.Getenv("ACCESS_TOKEN_SECRET")
 
 	now := time.Now()
 	ttl := time.Duration(ACCESS_TOKEN_EXPIRE_TIME) * time.Second
@@ -46,7 +46,7 @@ func GenerateAccessToken(userUID string) string {
 
 // DecodeAccessToken decode the given token string into the token claims.
 func DecodeAccessToken(accessToken string) (CustomClaims, error) {
-	var ACCESS_TOKEN_SECRET = os.Getenv("ACCESS_TOKEN_SECRET")
+	ACCESS_TOKEN_SECRET := os.Getenv("ACCESS_TOKEN_SECRET")
 	token, err := jwt.ParseWithClaims(accessToken, &CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(ACCESS_TOKEN_SECRET), nil
 	})

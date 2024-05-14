@@ -13,8 +13,9 @@ type FindAllEmployeeIn struct {
 }
 
 type Employee struct {
-	UID            string                   `json:"uid"`
+	Id             string                   `json:"id"`
 	FullName       string                   `json:"full_name"`
+	BirthDate      string                   `json:"birth_date"`
 	Gender         primitive.Gender         `json:"gender"`
 	Age            int                      `json:"age"`
 	Email          string                   `json:"email"`
@@ -70,8 +71,9 @@ func (s *FindAllEmployee) Exec(ctx context.Context, req FindAllEmployeeIn) (out 
 func (s *FindAllEmployee) mapFindAllEmployee(in []model.FindAllEmployeeOut, out *FindAllEmployeeOut) {
 	for _, employee := range in {
 		var o Employee
-		o.UID = employee.UID
+		o.Id = employee.Id
 		o.FullName = employee.FullName
+		o.BirthDate = employee.BirthDate.Format("2006-01-02")
 		o.Gender = employee.Gender
 		o.Age = utils.CalculateAge(employee.BirthDate)
 		o.Email = employee.Email

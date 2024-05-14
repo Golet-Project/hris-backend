@@ -19,6 +19,8 @@ type BasicAuthLoginIn struct {
 type BasicAuthLoginOut struct {
 	primitive.CommonResult
 
+	RefreshToken string `json:"-"`
+
 	AccessToken string `json:"access_token"`
 }
 
@@ -56,10 +58,18 @@ func (s *BasicAuthLogin) Exec(ctx context.Context, body BasicAuthLoginIn) (out B
 		return
 	}
 
+	// generate access token
 	out.AccessToken = jwt.GenerateAccessToken(jwt.AccessTokenParam{
-		UserUID: adminCredential.UserID,
-		Domain:  adminCredential.Domain,
+		UserID: adminCredential.UserID,
+		Domain: adminCredential.Domain,
 	})
+
+	// generate refresh token
+	out.RefreshToken = jwt.GenerateRefreshToken(jwt.RefreshTokenParam{
+		UserID: adminCredential.UserID,
+		Domain: adminCredential.Domain,
+	})
+
 	out.SetResponse(http.StatusOK, "login success")
 
 	return

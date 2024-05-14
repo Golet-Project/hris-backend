@@ -16,26 +16,31 @@ var ErrAccessTokenMalformed = fmt.Errorf("inavlid access token")
 var ErrAccessTokenExpired = fmt.Errorf("inactive or expired token")
 
 type AccessTokenParam struct {
-	UserUID string `json:"user_uid"`
-	Domain  string `json:"domain"`
+	UserID string `json:"user_id"`
+	Domain string `json:"domain"`
+}
+
+type RefreshTokenParam struct {
+	UserID string `json:"user_id"`
+	Domain string `json:"domain"`
 }
 
 type CustomClaims struct {
-	UserUID string `json:"user_uid"`
-	Domain  string `json:"domain"`
+	UserID string `json:"user_id"`
+	Domain string `json:"domain"`
 	jwt.RegisteredClaims
 }
 
 func GenerateAccessToken(param AccessTokenParam) string {
-	var ACCESS_TOKEN_EXPIRE_TIME, _ = strconv.ParseInt(os.Getenv("ACCESS_TOKEN_EXPIRE_TIME"), 10, 64)
-	var ACCESS_TOKEN_SECRET = os.Getenv("ACCESS_TOKEN_SECRET")
+	ACCESS_TOKEN_EXPIRE_TIME, _ := strconv.ParseInt(os.Getenv("ACCESS_TOKEN_EXPIRE_TIME"), 10, 64)
+	ACCESS_TOKEN_SECRET := os.Getenv("ACCESS_TOKEN_SECRET")
 
 	now := time.Now()
 	ttl := time.Duration(ACCESS_TOKEN_EXPIRE_TIME) * time.Second
 
 	claims := CustomClaims{
-		UserUID: param.UserUID,
-		Domain:  param.Domain,
+		UserID: param.UserID,
+		Domain: param.Domain,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: &jwt.NumericDate{
 				Time: now.Add(ttl),
@@ -52,7 +57,7 @@ func GenerateAccessToken(param AccessTokenParam) string {
 }
 
 func DecodeAccessToken(accessToken string) (CustomClaims, error) {
-	var ACCESS_TOKEN_SECRET = os.Getenv("ACCESS_TOKEN_SECRET")
+	ACCESS_TOKEN_SECRET := os.Getenv("ACCESS_TOKEN_SECRET")
 	token, err := jwt.ParseWithClaims(accessToken, &CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(ACCESS_TOKEN_SECRET), nil
 	})
@@ -78,4 +83,29 @@ func DecodeAccessToken(accessToken string) (CustomClaims, error) {
 		return *claims, nil
 	}
 	return CustomClaims{}, fmt.Errorf("error when parsing into claims")
+}
+
+func GenerateRefreshToken(param RefreshTokenParam) string {
+	REFRESH_TOKEN_EXPIRE_TIME, _ := strconv.ParseInt(os.Getenv("REFRESH_TOKEN_EXPIRE_TIME"), 10, 64)
+	REFRESH_TOKEN_SECRET := os.Getenv("REFRESH_TOKEN_SECRET")
+
+	now := time.Now()
+	ttl := time.Duration(REFRESH_TOKEN_EXPIRE_TIME) * time.Second
+
+	claims := CustomClaims{
+		UserID: param.UserID,
+		Domain: param.Domain,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: &jwt.NumericDate{
+				Time: now.Add(ttl),
+			},
+			IssuedAt: &jwt.NumericDate{
+				Time: now,
+			},
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	ss, _ := token.SignedString([]byte(REFRESH_TOKEN_SECRET))
+	return ss
 }
