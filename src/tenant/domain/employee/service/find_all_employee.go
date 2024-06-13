@@ -17,12 +17,12 @@ type Employee struct {
 	FullName       string                   `json:"full_name"`
 	BirthDate      string                   `json:"birth_date"`
 	Gender         primitive.Gender         `json:"gender"`
-	Age            int                      `json:"age"`
 	Email          string                   `json:"email"`
 	PhoneNumber    string                   `json:"phone_number"`
 	JoinDate       string                   `json:"join_date"`
-	EndDate        primitive.Date           `json:"end_date"`
 	EmployeeStatus primitive.EmployeeStatus `json:"employee_status"`
+	EndDate        primitive.Date           `json:"end_date"`
+	Age            int                      `json:"age"`
 }
 
 type FindAllEmployeeOut struct {

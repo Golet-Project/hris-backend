@@ -162,3 +162,39 @@ func (e Employee) GetProfile(c *fiber.Ctx) error {
 		return c.JSON(res)
 	}
 }
+
+func (e Employee) GetById(c *fiber.Ctx) error {
+	var res primitive.BaseResponse
+
+	appId := c.Locals("AppID").(primitive.AppID)
+
+	switch appId {
+	case primitive.TenantAppID:
+
+		var req tenantService.GetByIdIn
+		if err := c.ParamsParser(&req); err != nil {
+			c.Status(fiber.StatusBadRequest)
+			res.Message = err.Error()
+			return c.JSON(res)
+		}
+
+		service := tenantService.GetById{
+			Db: e.tenant.Db,
+		}
+
+		serviceOut := service.Exec(c.Context(), req)
+		if serviceOut.GetCode() >= 400 && serviceOut.GetCode() <= 500 {
+			res.Data = nil
+		} else {
+			res.Data = serviceOut
+		}
+
+		c.Status(serviceOut.GetCode())
+		return c.JSON(res)
+
+	default:
+		res.Message = "invalid app id"
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(res)
+	}
+}

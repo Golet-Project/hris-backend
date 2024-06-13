@@ -32,3 +32,24 @@ type FindAllEmployeeOut struct {
 	JoinDate       time.Time
 	EndDate        primitive.Date
 }
+
+type GetByIdOut struct {
+	Address struct {
+		Detail       string
+		ProvinceId   string
+		ProvinceName string
+		RegencyId    string
+		RegencyName  string
+		DistrictId   string
+		DistrictName string
+		VillageId    string
+		VillageName  string
+	}
+	Id             string
+	Email          string
+	FullName       string
+	Gender         string
+	EmployeeStatus primitive.EmployeeStatus
+	BirthDate      primitive.Date
+	JoinDate       primitive.Date
+}

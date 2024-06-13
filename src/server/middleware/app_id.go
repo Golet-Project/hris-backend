@@ -40,6 +40,8 @@ func AppId(c *fiber.Ctx) error {
 		fallthrough
 	case useragent.Edge:
 		fallthrough
+	case "node": // for FE server side function
+		fallthrough
 	case useragent.Vivaldi:
 		appId := utils.CopyString(c.Get("X-App-ID"))
 		domain := utils.CopyString(c.Get("X-Domain"))

@@ -4,5 +4,5 @@ type EmployeeStatus string
 
 const (
 	EmployeeStatusIntern   EmployeeStatus = "intern"
-	EmployeeStatusFullTime EmployeeStatus = "full_time"
+	EmployeeStatusFullTime EmployeeStatus = "fulltime"
 )
