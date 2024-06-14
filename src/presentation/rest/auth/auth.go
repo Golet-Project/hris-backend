@@ -3,7 +3,6 @@ package auth
 import (
 	"fmt"
 	"hroost/shared/primitive"
-	"time"
 
 	tenantDb "hroost/tenant/domain/auth/db"
 	tenantService "hroost/tenant/domain/auth/service"
@@ -93,7 +92,7 @@ func (a Auth) BasicAuthLogin(c *fiber.Ctx) error {
 		cookie := new(fiber.Cookie)
 		cookie.Name = "token"
 		cookie.Value = loginOut.AccessToken
-		cookie.Expires = time.Now().Add(24 * time.Hour)
+		cookie.MaxAge = 24 * 3600
 		cookie.HTTPOnly = true
 
 		c.Cookie(cookie)

@@ -30,6 +30,7 @@ func (s *Server) route() {
 	employee := s.app.Group("/employee", middleware.Jwt())
 	employee.Get("/", rest.employee.FindAllEmployee)
 	employee.Post("/", rest.employee.CreateEmployee)
+	employee.Get("/:id", rest.employee.GetById)
 
 	// profile
 	profile := s.app.Group("/profile", middleware.Jwt())

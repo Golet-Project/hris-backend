@@ -3,9 +3,8 @@ package middleware
 import (
 	centralJwt "hroost/central/lib/jwt"
 	mobileJwt "hroost/mobile/lib/jwt"
-	tenantJwt "hroost/tenant/lib/jwt"
-
 	"hroost/shared/primitive"
+	tenantJwt "hroost/tenant/lib/jwt"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -38,6 +37,7 @@ func Jwt() fiber.Handler {
 		splitted := strings.Split(headers.Authorization, " ")
 		token := splitted[len(splitted)-1]
 
+		// TODO: handle panic if is not a valid jwt token
 		switch appId {
 		case primitive.TenantAppID:
 			// verify the token

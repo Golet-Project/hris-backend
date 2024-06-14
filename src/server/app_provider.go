@@ -218,7 +218,7 @@ func (s *Server) initTenant() (*TenantServiceProvider, error) {
 	}
 
 	// employee
-	employeeDb, err := tenantEmployeeDb.New(&tenantEmployeeDb.Config{PgResolver: s.pgResolver})
+	employeeDb, err := tenantEmployeeDb.New(&tenantEmployeeDb.Config{PgResolver: s.pgResolver, Redis: s.redisClient})
 	if err != nil {
 		return nil, err
 	}
