@@ -79,15 +79,15 @@ func (s *GetById) Exec(ctx context.Context, req GetByIdIn) (out GetByIdOut) {
 	out.EmployeeStatus = employee.EmployeeStatus
 	out.BirthDate = employee.BirthDate
 	out.JoinDate = employee.JoinDate
-	out.Address.Detail = employee.Address.Detail
-	out.Address.ProvinceId = employee.Address.ProvinceId
-	out.Address.ProvinceName = employee.Address.ProvinceName
-	out.Address.RegencyId = employee.Address.RegencyId
-	out.Address.RegencyName = employee.Address.RegencyName
-	out.Address.DistrictId = employee.Address.DistrictId
-	out.Address.DistrictName = employee.Address.DistrictName
-	out.Address.VillageId = employee.Address.VillageId
-	out.Address.VillageName = employee.Address.VillageName
+	out.Address.Detail = employee.Address.Detail.String
+	out.Address.ProvinceId = employee.Address.ProvinceId.String
+	out.Address.ProvinceName = employee.Address.ProvinceName.String
+	out.Address.RegencyId = employee.Address.RegencyId.String
+	out.Address.RegencyName = employee.Address.RegencyName.String
+	out.Address.DistrictId = employee.Address.DistrictId.String
+	out.Address.DistrictName = employee.Address.DistrictName.String
+	out.Address.VillageId = employee.Address.VillageId.String
+	out.Address.VillageName = employee.Address.VillageName.String
 
 	out.SetResponse(http.StatusOK, "success")
 

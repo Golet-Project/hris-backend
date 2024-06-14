@@ -2,11 +2,10 @@ package service
 
 import (
 	"context"
-	"net/http"
-	"time"
-
 	"hroost/shared/primitive"
 	"hroost/tenant/domain/attendance/model"
+	"net/http"
+	"time"
 )
 
 type FindAllAttendanceIn struct {
@@ -14,8 +13,10 @@ type FindAllAttendanceIn struct {
 }
 
 type Attendance struct {
-	UID          string `json:"uid"`
-	FullName     string `json:"full_name"`
+	UID      string `json:"uid"`
+	Employee struct {
+		FullName string `json:"full_name"`
+	} `json:"employee"`
 	CheckinTime  string `json:"checkin_time"`
 	CheckoutTime string `json:"checkout_time"`
 	ApprovedAt   string `json:"approved_at"`
@@ -53,7 +54,7 @@ func (s *FindAllAttendance) Exec(ctx context.Context, req FindAllAttendanceIn) (
 		var a Attendance
 
 		a.UID = attendance.UID
-		a.FullName = attendance.FullName
+		a.Employee.FullName = attendance.FullName
 		if attendance.CheckinTime.Valid {
 			a.CheckinTime = attendance.CheckinTime.Time.UTC().Format(time.RFC3339)
 		}

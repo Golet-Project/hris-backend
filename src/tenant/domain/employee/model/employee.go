@@ -35,15 +35,15 @@ type FindAllEmployeeOut struct {
 
 type GetByIdOut struct {
 	Address struct {
-		Detail       string
-		ProvinceId   string
-		ProvinceName string
-		RegencyId    string
-		RegencyName  string
-		DistrictId   string
-		DistrictName string
-		VillageId    string
-		VillageName  string
+		Detail       primitive.String
+		ProvinceId   primitive.String
+		ProvinceName primitive.String
+		RegencyId    primitive.String
+		RegencyName  primitive.String
+		DistrictId   primitive.String
+		DistrictName primitive.String
+		VillageId    primitive.String
+		VillageName  primitive.String
 	}
 	Id             string
 	Email          string

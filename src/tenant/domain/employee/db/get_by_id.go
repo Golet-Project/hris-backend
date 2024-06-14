@@ -38,10 +38,10 @@ func (d *Db) GetById(ctx context.Context, domain, id string) (out model.GetByIdO
     e.district_id, d.name AS district_name, e.village_id, v.name AS village_name
   FROM
     employee AS e
-  INNER JOIN province AS p ON p.id = e.province_id
-  INNER JOIN regency AS r ON r.id = e.regency_id
-  INNER JOIN district AS d ON d.id = e.district_id
-  INNER JOIN village AS v ON v.id = e.village_id
+  LEFT JOIN province AS p ON p.id = e.province_id
+  LEFT JOIN regency AS r ON r.id = e.regency_id
+  LEFT JOIN district AS d ON d.id = e.district_id
+  LEFT JOIN village AS v ON v.id = e.village_id
   WHERE
     e.uid = $1`
 
